@@ -34,12 +34,28 @@ Projekt jest tworzony w **Laravel 12.\*** z użyciem:
    - Przenosi na stronę płatności
 
 ## Wymagania techniczne
-- Laravel 12.\*
+- Laravel 12.20+
 - Tailwind CSS — pełne użycie klas utility-first
 - Alpine.js — interakcje UI
 - Livewire — dynamiczne zmiany danych (np. cena, wizualizacja, wybory użytkownika)
 - Responsywność: skalowanie i układ dostosowany zarówno do desktopa, jak i telefonu
 - Kod w pełni zgodny z PSR-12 i zasadami czystego kodu w Laravel
+
+## Motyw kolorystyczny
+- **Główna paleta**: odcienie pomarańczowe, ciepłe, nowoczesne  
+  - Główny kolor akcentu: `#FF7A00` (pomarańczowy intensywny)
+  - Jaśniejszy akcent: `#FFA94D`
+  - Ciemniejszy akcent: `#CC5E00`
+- **Kolory tła**:
+  - Jasne sekcje: `#FFF7F0` (bardzo jasny odcień pomarańczowego, pastelowy)
+  - Ciemniejsze akcenty UI: `#332B25` (brązowo-pomarańczowy odcień dla kontrastu)
+- Tekst:
+  - Główny tekst: odcienie ciemnoszare (`#333333`)
+  - Tekst na przyciskach akcentowych: zawsze biały (`#FFFFFF`)
+- Styl przycisków:
+  - Duże, wyraźne, zaokrąglone rogi (`rounded-xl`)
+  - Hover: delikatne rozjaśnienie (`hover:bg-orange-400`) lub przyciemnienie w zależności od kontekstu
+- Motyw powinien być spójny w całej aplikacji (przyciski, nagłówki, ikony, interaktywne elementy)
 
 ## Zasady generowania kodu
 - Używaj komponentów Blade + Livewire
