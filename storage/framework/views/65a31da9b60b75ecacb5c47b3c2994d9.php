@@ -55,36 +55,43 @@
             </div>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                @foreach($shapes as $shape)
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $shapes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $shape): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <label class="relative cursor-pointer group">
-                        <input type="radio" wire:model.live="selectedShape" value="{{ $shape->id }}" class="sr-only">
+                        <input type="radio" wire:model.live="selectedShape" value="<?php echo e($shape->id); ?>" class="sr-only">
                         <div class="border-2 rounded-xl p-8 text-center transition-all duration-200 group-hover:shadow-xl group-hover:scale-105"
-                             :class="$wire.selectedShape == {{ $shape->id }} ? 'border-blue-500 bg-blue-50 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300'">
+                             :class="$wire.selectedShape == <?php echo e($shape->id); ?> ? 'border-blue-500 bg-blue-50 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300'">
                             
-                            @if($shape->icon_path)
-                                <img src="{{ asset('storage/' . $shape->icon_path) }}" alt="{{ $shape->name }}" class="w-16 h-16 mx-auto mb-4">
-                            @else
+                            <!--[if BLOCK]><![endif]--><?php if($shape->icon_path): ?>
+                                <img src="<?php echo e(asset('storage/' . $shape->icon_path)); ?>" alt="<?php echo e($shape->name); ?>" class="w-16 h-16 mx-auto mb-4">
+                            <?php else: ?>
                                 <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                                    <span class="text-gray-500 text-xl font-bold">{{ substr($shape->name, 0, 1) }}</span>
+                                    <span class="text-gray-500 text-xl font-bold"><?php echo e(substr($shape->name, 0, 1)); ?></span>
                                 </div>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             
-                            <h4 class="font-semibold text-gray-900 mb-2">{{ $shape->name }}</h4>
-                            @if($shape->description)
-                                <p class="text-sm text-gray-500 leading-relaxed">{{ $shape->description }}</p>
-                            @endif
+                            <h4 class="font-semibold text-gray-900 mb-2"><?php echo e($shape->name); ?></h4>
+                            <!--[if BLOCK]><![endif]--><?php if($shape->description): ?>
+                                <p class="text-sm text-gray-500 leading-relaxed"><?php echo e($shape->description); ?></p>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </label>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
             </div>
             
-            @error('selectedShape')
-                <p class="text-red-600 text-sm mt-2 text-center">{{ $message }}</p>
-            @enderror
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['selectedShape'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                <p class="text-red-600 text-sm mt-2 text-center"><?php echo e($message); ?></p>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
 
         <!-- Remaining steps continue similarly with enhanced styling... -->
-        {{-- The rest of the steps would follow the same pattern with enhanced styling --}}
+        
 
         <!-- Navigation Buttons -->
         <div class="flex justify-between items-center pt-8 border-t border-gray-200">
@@ -119,4 +126,4 @@
             </div>
         </div>
     </form>
-</div>
+</div><?php /**PATH C:\dev\custom-label\resources\views/livewire/label-creator.blade.php ENDPATH**/ ?>

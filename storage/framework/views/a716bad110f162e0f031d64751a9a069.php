@@ -1,21 +1,22 @@
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    <title>{{ $title ?? config('app.name', 'Custom Label Creator') }}</title>
+    <title><?php echo e($title ?? config('app.name', 'Custom Label Creator')); ?></title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
     <!-- Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
-    @stack('styles')
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
+
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body class="font-sans antialiased bg-gray-50 min-h-screen">
     <!-- Navigation -->
@@ -24,7 +25,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center space-x-3" wire:navigate>
+                    <a href="<?php echo e(route('home')); ?>" class="flex items-center space-x-3" wire:navigate>
                         <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
@@ -38,8 +39,8 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ route('home') }}" 
-                       class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('home') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
+                    <a href="<?php echo e(route('home')); ?>" 
+                       class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors <?php echo e(request()->routeIs('home') ? 'text-blue-600 border-b-2 border-blue-600' : ''); ?>">
                         Kreator
                     </a>
                     <a href="#" 
@@ -58,27 +59,28 @@
                 
                 <!-- User Menu -->
                 <div class="flex items-center space-x-4">
-                    @guest
-                        <a href="{{ route('login') }}" 
+                    <?php if(auth()->guard()->guest()): ?>
+                        <a href="<?php echo e(route('login')); ?>" 
                            class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
                             Zaloguj się
                         </a>
-                        <a href="{{ route('register') }}" 
+                        <a href="<?php echo e(route('register')); ?>" 
                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                             Zarejestruj się
                         </a>
-                    @endguest
+                    <?php endif; ?>
                     
-                    @auth
+                    <?php if(auth()->guard()->check()): ?>
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" 
                                     class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
                                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                     <span class="text-blue-600 font-semibold text-xs">
-                                        {{ substr(auth()->user()->name, 0, 2) }}
+                                        <?php echo e(substr(auth()->user()->name, 0, 2)); ?>
+
                                     </span>
                                 </div>
-                                <span class="hidden sm:block">{{ auth()->user()->name }}</span>
+                                <span class="hidden sm:block"><?php echo e(auth()->user()->name); ?></span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -93,15 +95,15 @@
                                  x-transition:leave-end="opacity-0 scale-95"
                                  class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                                 
-                                <a href="{{ route('dashboard') }}" 
+                                <a href="<?php echo e(route('dashboard')); ?>" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" wire:navigate>
                                     Panel użytkownika
                                 </a>
                                 
                                 <hr class="my-1">
                                 
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
+                                <form method="POST" action="<?php echo e(route('logout')); ?>">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" 
                                             class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
                                         Wyloguj się
@@ -109,7 +111,7 @@
                                 </form>
                             </div>
                         </div>
-                    @endauth
+                    <?php endif; ?>
 
                     <!-- Mobile menu button -->
                     <button x-data @click="$store.mobileMenu.toggle()" 
@@ -132,8 +134,8 @@
              x-transition:leave-end="opacity-0 -translate-y-1"
              class="md:hidden border-t border-gray-200 bg-white">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="{{ route('home') }}" 
-                   class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg {{ request()->routeIs('home') ? 'text-blue-600 bg-blue-50' : '' }}">
+                <a href="<?php echo e(route('home')); ?>" 
+                   class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg <?php echo e(request()->routeIs('home') ? 'text-blue-600 bg-blue-50' : ''); ?>">
                     Kreator
                 </a>
                 <a href="#" 
@@ -153,8 +155,9 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="{{ $containerClass ?? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' }}">
-        {{ $slot }}
+    <main class="<?php echo e($containerClass ?? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'); ?>">
+        <?php echo e($slot); ?>
+
     </main>
 
     <!-- Footer -->
@@ -198,7 +201,7 @@
                 <div>
                     <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Szybkie linki</h4>
                     <ul class="space-y-3 text-sm">
-                        <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-gray-900">Kreator etykiet</a></li>
+                        <li><a href="<?php echo e(route('home')); ?>" class="text-gray-600 hover:text-gray-900">Kreator etykiet</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-gray-900">Galeria projektów</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-gray-900">Cennik</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-gray-900">FAQ</a></li>
@@ -219,7 +222,7 @@
             
             <div class="border-t border-gray-200 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
                 <p class="text-gray-500 text-sm">
-                    © {{ date('Y') }} Custom Labels. Wszystkie prawa zastrzeżone.
+                    © <?php echo e(date('Y')); ?> Custom Labels. Wszystkie prawa zastrzeżone.
                 </p>
                 <div class="mt-4 sm:mt-0 flex space-x-6">
                     <span class="text-gray-500 text-sm">Akceptujemy:</span>
@@ -233,7 +236,8 @@
         </div>
     </footer>
 
-    @livewireScripts
+    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+
     
     <!-- Alpine.js with store for mobile menu -->
     <script>
@@ -251,6 +255,6 @@
     </script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html>
+</html><?php /**PATH C:\dev\custom-label\resources\views/components/layouts/app.blade.php ENDPATH**/ ?>
