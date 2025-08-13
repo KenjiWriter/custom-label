@@ -1,10 +1,19 @@
-<x-layouts.app title="Podgląd 3D etykiety - {{ $project->uuid }}">
+<?php if (isset($component)) { $__componentOriginal5863877a5171c196453bfa0bd807e410 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5863877a5171c196453bfa0bd807e410 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layouts.app','data' => ['title' => 'Podgląd 3D etykiety - '.e($project->uuid).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layouts.app'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Podgląd 3D etykiety - '.e($project->uuid).'']); ?>
     
     <div class="py-8">
         <!-- Header -->
         <div class="mb-8">
             <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-                <a href="{{ route('home') }}" class="hover:text-gray-700" wire:navigate>Kreator</a>
+                <a href="<?php echo e(route('home')); ?>" class="hover:text-gray-700" wire:navigate>Kreator</a>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -58,20 +67,20 @@
                                 <!-- 2D Fallback Preview -->
                                 <div class="bg-white border-2 border-dashed border-orange-300 rounded-xl p-8 max-w-md mx-auto">
                                     <div class="text-center">
-                                        @php $dimensions = $project->getActualDimensions(); @endphp
+                                        <?php $dimensions = $project->getActualDimensions(); ?>
                                         
                                         <!-- Shape representation -->
-                                        @if($project->labelShape->slug === 'circle')
+                                        <?php if($project->labelShape->slug === 'circle'): ?>
                                             <div class="w-32 h-32 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full mx-auto flex items-center justify-center border-2 border-orange-400">
-                                        @elseif($project->labelShape->slug === 'square')
+                                        <?php elseif($project->labelShape->slug === 'square'): ?>
                                             <div class="w-32 h-32 bg-gradient-to-br from-orange-100 to-orange-200 mx-auto flex items-center justify-center border-2 border-orange-400 rounded-lg">
-                                        @else
+                                        <?php else: ?>
                                             <div class="w-40 h-24 bg-gradient-to-br from-orange-100 to-orange-200 mx-auto flex items-center justify-center border-2 border-orange-400 rounded-lg">
-                                        @endif
+                                        <?php endif; ?>
                                             <div class="text-center">
-                                                <div class="text-lg font-bold text-orange-800">{{ $project->labelShape->name }}</div>
-                                                <div class="text-sm text-orange-600">{{ $dimensions['width_mm'] }}×{{ $dimensions['height_mm'] }}mm</div>
-                                                <div class="text-xs text-orange-500 mt-1">{{ $project->labelMaterial->name }}</div>
+                                                <div class="text-lg font-bold text-orange-800"><?php echo e($project->labelShape->name); ?></div>
+                                                <div class="text-sm text-orange-600"><?php echo e($dimensions['width_mm']); ?>×<?php echo e($dimensions['height_mm']); ?>mm</div>
+                                                <div class="text-xs text-orange-500 mt-1"><?php echo e($project->labelMaterial->name); ?></div>
                                             </div>
                                         </div>
                                     </div>
@@ -98,7 +107,7 @@
                 </div>
 
                 <!-- Material Preview -->
-                @if($project->labelMaterial->texture_image_path)
+                <?php if($project->labelMaterial->texture_image_path): ?>
                 <div class="mt-6 bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         Podgląd materiału
@@ -106,24 +115,24 @@
                     <div class="grid grid-cols-3 gap-4">
                         <div class="text-center">
                             <div class="w-20 h-20 mx-auto mb-2 rounded-lg overflow-hidden">
-                                <img src="{{ asset('storage/' . $project->labelMaterial->texture_image_path) }}" 
-                                     alt="{{ $project->labelMaterial->name }}" 
+                                <img src="<?php echo e(asset('storage/' . $project->labelMaterial->texture_image_path)); ?>" 
+                                     alt="<?php echo e($project->labelMaterial->name); ?>" 
                                      class="w-full h-full object-cover">
                             </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $project->labelMaterial->name }}</p>
+                            <p class="text-sm font-medium text-gray-900"><?php echo e($project->labelMaterial->name); ?></p>
                         </div>
                         
-                        @if($project->laminateOption)
+                        <?php if($project->laminateOption): ?>
                         <div class="text-center">
                             <div class="w-20 h-20 mx-auto mb-2 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                <span class="text-gray-600 text-sm font-medium">{{ strtoupper(substr($project->laminateOption->finish_type ?? 'L', 0, 1)) }}</span>
+                                <span class="text-gray-600 text-sm font-medium"><?php echo e(strtoupper(substr($project->laminateOption->finish_type ?? 'L', 0, 1))); ?></span>
                             </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $project->laminateOption->name }}</p>
+                            <p class="text-sm font-medium text-gray-900"><?php echo e($project->laminateOption->name); ?></p>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
 
             <!-- Order Summary -->
@@ -137,45 +146,46 @@
                     <div class="space-y-4">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Kształt:</span>
-                            <span class="font-medium">{{ $project->labelShape->name }}</span>
+                            <span class="font-medium"><?php echo e($project->labelShape->name); ?></span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">Materiał:</span>
-                            <span class="font-medium">{{ $project->labelMaterial->name }}</span>
+                            <span class="font-medium"><?php echo e($project->labelMaterial->name); ?></span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">Laminat:</span>
                             <span class="font-medium">
-                                {{ $project->laminateOption ? $project->laminateOption->name : 'Bez laminatu' }}
+                                <?php echo e($project->laminateOption ? $project->laminateOption->name : 'Bez laminatu'); ?>
+
                             </span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">Rozmiar:</span>
                             <span class="font-medium">
-                                @php $dimensions = $project->getActualDimensions(); @endphp
-                                {{ $dimensions['width_mm'] }}mm × {{ $dimensions['height_mm'] }}mm
+                                <?php $dimensions = $project->getActualDimensions(); ?>
+                                <?php echo e($dimensions['width_mm']); ?>mm × <?php echo e($dimensions['height_mm']); ?>mm
                             </span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">Powierzchnia:</span>
-                            <span class="font-medium">{{ number_format($project->getAreaCm2(), 1) }} cm²</span>
+                            <span class="font-medium"><?php echo e(number_format($project->getAreaCm2(), 1)); ?> cm²</span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">Ilość:</span>
-                            <span class="font-medium">{{ $project->quantity }} szt.</span>
+                            <span class="font-medium"><?php echo e($project->quantity); ?> szt.</span>
                         </div>
                         
-                        @if($project->artwork_file_path)
+                        <?php if($project->artwork_file_path): ?>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Grafika:</span>
                             <span class="font-medium text-green-600">✓ Przesłana</span>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -188,29 +198,29 @@
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Cena za sztukę:</span>
-                            <span>{{ number_format($project->calculated_price / $project->quantity, 2) }} PLN</span>
+                            <span><?php echo e(number_format($project->calculated_price / $project->quantity, 2)); ?> PLN</span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">Ilość:</span>
-                            <span>{{ $project->quantity }} szt.</span>
+                            <span><?php echo e($project->quantity); ?> szt.</span>
                         </div>
                         
                         <div class="flex justify-between font-medium border-t border-orange-200 pt-3">
                             <span>Suma netto:</span>
-                            <span>{{ number_format($project->calculated_price / 1.23, 2) }} PLN</span>
+                            <span><?php echo e(number_format($project->calculated_price / 1.23, 2)); ?> PLN</span>
                         </div>
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">VAT (23%):</span>
-                            <span>{{ number_format($project->calculated_price - ($project->calculated_price / 1.23), 2) }} PLN</span>
+                            <span><?php echo e(number_format($project->calculated_price - ($project->calculated_price / 1.23), 2)); ?> PLN</span>
                         </div>
                     </div>
                     
                     <div class="border-t border-orange-200 mt-4 pt-4">
                         <div class="flex justify-between items-center text-xl font-bold text-orange-900">
                             <span>Razem:</span>
-                            <span>{{ number_format($project->calculated_price, 2) }} PLN</span>
+                            <span><?php echo e(number_format($project->calculated_price, 2)); ?> PLN</span>
                         </div>
                     </div>
                 </div>
@@ -222,7 +232,7 @@
                         Przejdź do płatności
                     </button>
                     
-                    <a href="{{ route('home') }}" 
+                    <a href="<?php echo e(route('home')); ?>" 
                        class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors" wire:navigate>
                         Wróć do kreatora
                     </a>
@@ -246,7 +256,7 @@
         </div>
     </div>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
     <script>
         let scene, camera, renderer, controls, labelMesh;
         let isAnimating = false;
@@ -254,14 +264,15 @@
 
         // Project configuration from backend
         const projectConfig = {
-            shape: '{{ $project->labelShape->slug }}',
-            material: '{{ $project->labelMaterial->slug }}',
+            shape: '<?php echo e($project->labelShape->slug); ?>',
+            material: '<?php echo e($project->labelMaterial->slug); ?>',
             dimensions: {
-                width: {{ $dimensions['width_mm'] ?? 100 }},
-                height: {{ $dimensions['height_mm'] ?? 60 }}
+                width: <?php echo e($dimensions['width_mm'] ?? 100); ?>,
+                height: <?php echo e($dimensions['height_mm'] ?? 60); ?>
+
             },
-            textureUrl: '{{ $project->labelMaterial->texture_image_path ? asset("storage/" . $project->labelMaterial->texture_image_path) : "" }}',
-            artworkUrl: '{{ $project->artwork_file_path ? asset("storage/" . $project->artwork_file_path) : "" }}'
+            textureUrl: '<?php echo e($project->labelMaterial->texture_image_path ? asset("storage/" . $project->labelMaterial->texture_image_path) : ""); ?>',
+            artworkUrl: '<?php echo e($project->artwork_file_path ? asset("storage/" . $project->artwork_file_path) : ""); ?>'
         };
 
         // Try to load 3D libraries
@@ -549,5 +560,14 @@
             }, 1000);
         });
     </script>
-    @endpush
-</x-layouts.app>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5863877a5171c196453bfa0bd807e410)): ?>
+<?php $attributes = $__attributesOriginal5863877a5171c196453bfa0bd807e410; ?>
+<?php unset($__attributesOriginal5863877a5171c196453bfa0bd807e410); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5863877a5171c196453bfa0bd807e410)): ?>
+<?php $component = $__componentOriginal5863877a5171c196453bfa0bd807e410; ?>
+<?php unset($__componentOriginal5863877a5171c196453bfa0bd807e410); ?>
+<?php endif; ?><?php /**PATH C:\dev\custom-label\resources\views/label/preview.blade.php ENDPATH**/ ?>

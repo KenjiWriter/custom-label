@@ -33,11 +33,12 @@ class LabelCreator extends Component
     protected $rules = [
         'selectedShape' => 'required|exists:label_shapes,id',
         'selectedMaterial' => 'required|exists:label_materials,id',
-        'selectedSize' => 'required_unless:useCustomSize,true|exists:predefined_sizes,id',
-        'customWidth' => 'required_if:useCustomSize,true|numeric|min:10|max:500',
-        'customHeight' => 'required_if:useCustomSize,true|numeric|min:10|max:500',
+        'selectedLaminate' => 'nullable',
+        'selectedSize' => 'required_unless:useCustomSize,true|nullable|exists:predefined_sizes,id',
+        'customWidth' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
+        'customHeight' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
         'quantity' => 'required|integer|min:1|max:10000',
-        'artworkFile' => 'nullable|file|mimes:jpg,jpeg,png,svg,pdf|max:10240', // 10MB
+        'artworkFile' => 'nullable|file|mimes:jpg,jpeg,png,svg,pdf|max:10240',
     ];
 
     protected $messages = [
@@ -125,9 +126,17 @@ class LabelCreator extends Component
                    $this->quantity > 0;
 
         if ($this->useCustomSize) {
-            $isValid = $isValid && $this->customWidth && $this->customHeight;
+            $isValid = $isValid && $this->customWidth > 0 && $this->customHeight > 0;
         } else {
-            $isValid = $isValid && $this->selectedSize;
+            // Dla standardowych rozmiarów - sprawdź czy są dostępne rozmiary dla wybranego kształtu
+            $hasAvailableSizes = $this->availableSizes->count() > 0;
+            if ($hasAvailableSizes) {
+                $isValid = $isValid && $this->selectedSize;
+            } else {
+                // Jeśli brak standardowych rozmiarów, wymusz custom size
+                $this->useCustomSize = true;
+                $isValid = $isValid && $this->customWidth > 0 && $this->customHeight > 0;
+            }
         }
 
         $this->isConfigurationValid = $isValid;
@@ -147,30 +156,69 @@ class LabelCreator extends Component
 
     public function saveProject()
     {
-        $this->validate();
+        try {
+            // Sprawdź konfigurację przed walidacją
+            $this->checkConfiguration();
+            
+            if (!$this->isConfigurationValid) {
+                session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
+                return;
+            }
 
-        // Create label project
-        $project = LabelProject::create([
-            'uuid' => Str::uuid(),
-            'label_shape_id' => $this->selectedShape,
-            'label_material_id' => $this->selectedMaterial,
-            'laminate_option_id' => $this->selectedLaminate ?: null,
-            'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
-            'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
-            'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
-            'quantity' => $this->quantity,
-            'calculated_price' => $this->calculatedPrice,
-            'status' => 'draft',
-        ]);
+            // Walidacja z dostosowanymi regułami
+            $validatedData = $this->validate();
 
-        // Handle file upload if present
-        if ($this->artworkFile) {
-            $path = $this->artworkFile->store('artwork', 'public');
-            $project->update(['artwork_file_path' => $path]);
+            // Debug info
+            logger('Saving project with data:', [
+                'selectedShape' => $this->selectedShape,
+                'selectedMaterial' => $this->selectedMaterial,
+                'useCustomSize' => $this->useCustomSize,
+                'customWidth' => $this->customWidth,
+                'customHeight' => $this->customHeight,
+                'selectedSize' => $this->selectedSize,
+                'quantity' => $this->quantity,
+                'calculatedPrice' => $this->calculatedPrice,
+            ]);
+
+            // Prepare data for project creation
+            $projectData = [
+                'uuid' => Str::uuid(),
+                'label_shape_id' => $this->selectedShape,
+                'label_material_id' => $this->selectedMaterial,
+                'laminate_option_id' => $this->selectedLaminate ?: null,
+                'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
+                'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
+                'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
+                'quantity' => $this->quantity,
+                'calculated_price' => $this->calculatedPrice,
+                'status' => 'draft',
+            ];
+
+            // Set user_id or session_id for guest users
+            if (auth()->check()) {
+                $projectData['user_id'] = auth()->id();
+            } else {
+                $projectData['session_id'] = session()->getId();
+            }
+
+            // Create label project
+            $project = LabelProject::create($projectData);
+
+            // Handle file upload if present
+            if ($this->artworkFile) {
+                $path = $this->artworkFile->store('artwork', 'public');
+                $project->update(['artwork_file_path' => $path]);
+            }
+
+            logger('Project created successfully:', ['uuid' => $project->uuid]);
+
+            // Redirect to preview
+            return redirect()->route('label.preview', $project->uuid);
+
+        } catch (\Exception $e) {
+            logger('Error saving project: ' . $e->getMessage());
+            session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
         }
-
-        // Redirect to preview
-        return redirect()->route('label.preview', $project->uuid);
     }
 
     public function render()

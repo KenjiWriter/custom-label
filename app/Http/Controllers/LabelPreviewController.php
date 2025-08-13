@@ -11,25 +11,29 @@ class LabelPreviewController extends Controller
     /**
      * Show 3D preview of the label
      */
-    public function show(string $uuid)
+    public function show($uuid)
     {
-        $guestService = new GuestSessionService();
-        $userIdentifier = $guestService->getUserIdentifier();
-
         $project = LabelProject::where('uuid', $uuid)
-            ->when($userIdentifier['user_id'], function ($query, $userId) {
-                return $query->where('user_id', $userId);
-            })
-            ->when($userIdentifier['session_id'], function ($query, $sessionId) {
-                return $query->where('session_id', $sessionId);
-            })
             ->with(['labelShape', 'labelMaterial', 'laminateOption', 'predefinedSize'])
-            ->firstOrFail();
+            ->first();
 
-        if (!$project->isReadyForPreview()) {
-            return redirect()->route('home')->with('error', 'Projekt nie jest gotowy do podglądu.');
+        if (!$project) {
+            abort(404, 'Projekt nie został znaleziony.');
         }
 
-        return view('label.preview', compact('project'));
+        // Check if user has access to this project
+        if (auth()->check()) {
+            if ($project->user_id !== auth()->id()) {
+                abort(403, 'Nie masz uprawnień do tego projektu.');
+            }
+        } else {
+            if ($project->session_id !== session()->getId()) {
+                abort(403, 'Nie masz uprawnień do tego projektu.');
+            }
+        }
+
+        $dimensions = $project->getActualDimensions();
+
+        return view('label.preview', compact('project', 'dimensions'));
     }
 }
