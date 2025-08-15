@@ -2,32 +2,50 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class LabelProject extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'uuid',
-        'user_id',
-        'session_id', 
         'label_shape_id',
         'label_material_id',
-        'laminate_option_id',
         'predefined_size_id',
+        'laminate_option_id',
         'custom_width_mm',
         'custom_height_mm',
         'quantity',
-        'calculated_price',
         'artwork_file_path',
+        'calculated_price',
         'status',
+        'user_id',
+        'session_id'
     ];
 
     protected $casts = [
         'calculated_price' => 'decimal:2',
+        'custom_width_mm' => 'integer',
+        'custom_height_mm' => 'integer',
+        'quantity' => 'integer'
     ];
 
-    // Relations
+    // WAŻNE: UUID generation
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    // Relationships
     public function labelShape()
     {
         return $this->belongsTo(LabelShape::class);
@@ -38,67 +56,79 @@ class LabelProject extends Model
         return $this->belongsTo(LabelMaterial::class);
     }
 
-    public function laminateOption()
-    {
-        return $this->belongsTo(LaminateOption::class);
-    }
-
     public function predefinedSize()
     {
         return $this->belongsTo(PredefinedSize::class);
     }
 
-    // Helper methods
+    public function laminateOption()
+    {
+        return $this->belongsTo(LaminateOption::class);
+    }
+
     public function getActualDimensions()
     {
-        if ($this->custom_width_mm && $this->custom_height_mm) {
-            return [
-                'width_mm' => $this->custom_width_mm,
-                'height_mm' => $this->custom_height_mm,
-            ];
-        }
+        try {
+            // Custom dimensions
+            if ($this->custom_width_mm > 0 && $this->custom_height_mm > 0) {
+                return [
+                    'width' => (int) $this->custom_width_mm,
+                    'height' => (int) $this->custom_height_mm
+                ];
+            }
 
-        if ($this->predefinedSize) {
-            return [
-                'width_mm' => $this->predefinedSize->width_mm,
-                'height_mm' => $this->predefinedSize->height_mm,
-            ];
-        }
+            // Predefined size
+            if ($this->predefinedSize && $this->predefinedSize->width_mm > 0 && $this->predefinedSize->height_mm > 0) {
+                return [
+                    'width' => (int) $this->predefinedSize->width_mm,
+                    'height' => (int) $this->predefinedSize->height_mm
+                ];
+            }
 
-        return [
-            'width_mm' => 100,
-            'height_mm' => 60,
-        ];
+            // Fallback based on shape
+            if ($this->labelShape && $this->labelShape->slug) {
+                switch ($this->labelShape->slug) {
+                    case 'circle':
+                        return ['width' => 50, 'height' => 50];
+                    case 'square':
+                        return ['width' => 50, 'height' => 50];
+                    case 'rectangle':
+                        return ['width' => 60, 'height' => 40];
+                    case 'oval':
+                        return ['width' => 60, 'height' => 40];
+                    case 'star':
+                        return ['width' => 50, 'height' => 50];
+                    default:
+                        return ['width' => 50, 'height' => 50];
+                }
+            }
+
+            return ['width' => 50, 'height' => 50];
+
+        } catch (\Exception $e) {
+            \Log::error('Error in getActualDimensions', [
+                'project_id' => $this->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return ['width' => 50, 'height' => 50];
+        }
     }
 
-    public function getAreaCm2()
+
+    // Calculate area in cm²
+    public function getAreaInCm2()
     {
         $dimensions = $this->getActualDimensions();
-        return ($dimensions['width_mm'] * $dimensions['height_mm']) / 100;
+        return ($dimensions['width'] * $dimensions['height']) / 100;
     }
 
-    public function isReadyForPreview()
+    // Check if project is valid for preview
+    public function isValidForPreview()
     {
-        return $this->label_shape_id && 
-               $this->label_material_id && 
+        return $this->labelShape &&
+               $this->labelMaterial &&
+               ($this->predefinedSize || ($this->custom_width_mm && $this->custom_height_mm)) &&
                $this->quantity > 0;
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($project) {
-            if (empty($project->uuid)) {
-                $project->uuid = Str::uuid();
-            }
-            
-            // Set user_id or session_id for guest users
-            if (auth()->check()) {
-                $project->user_id = auth()->id();
-            } else {
-                $project->session_id = session()->getId();
-            }
-        });
     }
 }

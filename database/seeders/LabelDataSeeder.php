@@ -5,163 +5,150 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\LabelShape;
 use App\Models\LabelMaterial;
-use App\Models\LaminateOption;
 use App\Models\PredefinedSize;
+use App\Models\LaminateOption;
 
 class LabelDataSeeder extends Seeder
 {
-    /**
-     * Run the database seeder.
-     */
-    public function run(): void
+    public function run()
     {
-        // Kształty etykiet
-        $shapes = [
-            [
-                'name' => 'Prostokątna',
-                'slug' => 'rectangle',
-                'description' => 'Klasyczny kształt prostokątny, idealny do większości zastosowań',
-                'base_price_multiplier' => 1.00,
-                'sort_order' => 1,
-            ],
-            [
-                'name' => 'Kwadratowa',
-                'slug' => 'square',
-                'description' => 'Równoboczny kształt kwadratowy, doskonały do logo',
-                'base_price_multiplier' => 1.10,
-                'sort_order' => 2,
-            ],
-            [
-                'name' => 'Okrągła',
-                'slug' => 'circle',
-                'description' => 'Elegancki kształt okrągły, wyróżniający się na produktach',
-                'base_price_multiplier' => 1.20,
-                'sort_order' => 3,
-            ],
-            [
-                'name' => 'Owalna',
-                'slug' => 'oval',
-                'description' => 'Miękki kształt owalny, doskonały do produktów kosmetycznych',
-                'base_price_multiplier' => 1.25,
-                'sort_order' => 4,
-            ],
-            [
-                'name' => 'Gwiazda',
-                'slug' => 'star',
-                'description' => 'Nietypowy kształt gwiazdy dla wyjątkowych produktów',
-                'base_price_multiplier' => 1.50,
-                'sort_order' => 5,
-            ],
-        ];
+        // Kształty etykiet z obrazkami
+$shapes = [
+    [
+        'name' => 'Prostokątna',
+        'slug' => 'rectangle',
+        'description' => 'Klasyczny kształt prostokątny, idealny do większości zastosowań',
+        'icon_path' => 'images/shapes/rectangle.png',
+        'sort_order' => 1,
+    ],
+    [
+        'name' => 'Kwadratowa',
+        'slug' => 'square',
+        'description' => 'Równoboczny kształt kwadratowy, doskonały do logo',
+        'icon_path' => 'images/shapes/square.png',
+        'sort_order' => 2,
+    ],
+    [
+        'name' => 'Okrągła',
+        'slug' => 'circle',
+        'description' => 'Elegancki kształt okrągły, wyróżniający się na produktach',
+        'icon_path' => 'images/shapes/circle.png',
+        'sort_order' => 3,
+    ],
+    [
+        'name' => 'Owalna',
+        'slug' => 'oval',
+        'description' => 'Miękki kształt owalny, doskonały do produktów kosmetycznych',
+        'icon_path' => 'images/shapes/oval.png',
+        'sort_order' => 4,
+    ],
+    [
+        'name' => 'Gwiazda',
+        'slug' => 'star',
+        'description' => 'Nietypowy kształt gwiazdy dla wyjątkowych produktów',
+        'icon_path' => 'images/shapes/star.png',
+        'sort_order' => 5,
+    ],
+];
 
-        foreach ($shapes as $shape) {
-            LabelShape::updateOrCreate(
-                ['slug' => $shape['slug']], // Znajdź po slug
-                $shape // Utwórz lub zaktualizuj z tymi danymi
-            );
-        }
+// Materiały etykiet z obrazkami
+$materials = [
+    [
+        'name' => 'Papier biały matowy',
+        'slug' => 'paper-white-matte',
+        'description' => 'Standardowy papier biały z matowym wykończeniem',
+        'price_per_cm2' => 0.15,
+        'texture_image_path' => 'images/materials/paper-white-matte.jpg',
+        'sort_order' => 1,
+    ],
+    [
+        'name' => 'Papier biały błyszczący',
+        'slug' => 'paper-white-glossy',
+        'description' => 'Papier biały z błyszczącym wykończeniem',
+        'price_per_cm2' => 0.18,
+        'texture_image_path' => 'images/materials/paper-white-glossy.jpg',
+        'sort_order' => 2,
+    ],
+    [
+        'name' => 'Papier kraft',
+        'slug' => 'paper-kraft',
+        'description' => 'Ekologiczny papier kraft w naturalnym kolorze',
+        'price_per_cm2' => 0.20,
+        'texture_image_path' => 'images/materials/paper-kraft.jpg',
+        'sort_order' => 3,
+    ],
+    [
+        'name' => 'Folia przezroczysta',
+        'slug' => 'foil-transparent',
+        'description' => 'Przezroczysta folia winylowa, wodoodporna',
+        'price_per_cm2' => 0.35,
+        'texture_image_path' => 'images/materials/foil-transparent.jpg',
+        'sort_order' => 4,
+    ],
+    [
+        'name' => 'Folia biała',
+        'slug' => 'foil-white',
+        'description' => 'Biała folia winylowa, odporna na warunki zewnętrzne',
+        'price_per_cm2' => 0.32,
+        'texture_image_path' => 'images/materials/foil-white.jpg',
+        'sort_order' => 5,
+    ],
+    [
+        'name' => 'Folia srebrna',
+        'slug' => 'foil-silver',
+        'description' => 'Srebrna folia metaliczna z połyskiem',
+        'price_per_cm2' => 0.45,
+        'texture_image_path' => 'images/materials/foil-silver.jpg',
+        'sort_order' => 6,
+    ],
+    [
+        'name' => 'Folia złota',
+        'slug' => 'foil-gold',
+        'description' => 'Złota folia metaliczna, premium',
+        'price_per_cm2' => 0.50,
+        'texture_image_path' => 'images/materials/foil-gold.jpg',
+        'sort_order' => 7,
+    ],
+    [
+        'name' => 'Papier wodoodporny',
+        'slug' => 'paper-waterproof',
+        'description' => 'Wodoodporny papier syntetyczny',
+        'price_per_cm2' => 0.28,
+        'texture_image_path' => 'images/materials/paper-waterproof.jpg',
+        'sort_order' => 8,
+    ],
+];
 
-        // Materiały etykiet
-        $materials = [
-            [
-                'name' => 'Papier biały matowy',
-                'slug' => 'paper-white-matte',
-                'description' => 'Standardowy papier biały z matowym wykończeniem',
-                'price_per_cm2' => 0.15,
-                'sort_order' => 1,
-            ],
-            [
-                'name' => 'Papier biały błyszczący',
-                'slug' => 'paper-white-glossy',
-                'description' => 'Papier biały z błyszczącym wykończeniem',
-                'price_per_cm2' => 0.18,
-                'sort_order' => 2,
-            ],
-            [
-                'name' => 'Papier kraft',
-                'slug' => 'paper-kraft',
-                'description' => 'Ekologiczny papier kraft w naturalnym kolorze',
-                'price_per_cm2' => 0.20,
-                'sort_order' => 3,
-            ],
-            [
-                'name' => 'Folia przezroczysta',
-                'slug' => 'foil-transparent',
-                'description' => 'Przezroczysta folia winylowa, wodoodporna',
-                'price_per_cm2' => 0.35,
-                'sort_order' => 4,
-            ],
-            [
-                'name' => 'Folia biała',
-                'slug' => 'foil-white',
-                'description' => 'Biała folia winylowa, odporna na warunki zewnętrzne',
-                'price_per_cm2' => 0.32,
-                'sort_order' => 5,
-            ],
-            [
-                'name' => 'Folia srebrna',
-                'slug' => 'foil-silver',
-                'description' => 'Srebrna folia metaliczna z efektem lustrzanym',
-                'price_per_cm2' => 0.45,
-                'sort_order' => 6,
-            ],
-            [
-                'name' => 'Folia złota',
-                'slug' => 'foil-gold',
-                'description' => 'Złota folia metaliczna Premium',
-                'price_per_cm2' => 0.55,
-                'sort_order' => 7,
-            ],
-            [
-                'name' => 'Papier wodoodporny',
-                'slug' => 'paper-waterproof',
-                'description' => 'Specjalny papier odporny na wilgoć i wodę',
-                'price_per_cm2' => 0.28,
-                'sort_order' => 8,
-            ],
-        ];
-
-        foreach ($materials as $material) {
-            LabelMaterial::updateOrCreate(
-                ['slug' => $material['slug']],
-                $material
-            );
-        }
-
-        // Opcje laminowania
-        $laminates = [
-            [
-                'name' => 'Laminat matowy',
-                'slug' => 'laminate-matte',
-                'description' => 'Matowy laminat chroniący przed zarysowaniem',
-                'finish_type' => 'matte',
-                'price_multiplier' => 1.30,
-                'sort_order' => 1,
-            ],
-            [
-                'name' => 'Laminat błyszczący',
-                'slug' => 'laminate-glossy',
-                'description' => 'Błyszczący laminat zwiększający intensywność kolorów',
-                'finish_type' => 'glossy',
-                'price_multiplier' => 1.35,
-                'sort_order' => 2,
-            ],
-            [
-                'name' => 'Laminat soft-touch',
-                'slug' => 'laminate-soft-touch',
-                'description' => 'Premium laminat z miękką fakturą',
-                'finish_type' => 'soft_touch',
-                'price_multiplier' => 1.50,
-                'sort_order' => 3,
-            ],
-        ];
-
-        foreach ($laminates as $laminate) {
-            LaminateOption::updateOrCreate(
-                ['slug' => $laminate['slug']],
-                $laminate
-            );
-        }
+// Opcje laminowania z obrazkami
+$laminates = [
+    [
+        'name' => 'Laminat matowy',
+        'slug' => 'laminate-matte',
+        'description' => 'Matowy laminat chroniący przed zarysowaniem',
+        'finish_type' => 'matte',
+        'price_multiplier' => 1.30,
+        'texture_image_path' => 'images/laminates/laminate-matte.jpg',
+        'sort_order' => 1,
+    ],
+    [
+        'name' => 'Laminat błyszczący',
+        'slug' => 'laminate-glossy',
+        'description' => 'Błyszczący laminat zwiększający intensywność kolorów',
+        'finish_type' => 'glossy',
+        'price_multiplier' => 1.35,
+        'texture_image_path' => 'images/laminates/laminate-glossy.jpg',
+        'sort_order' => 2,
+    ],
+    [
+        'name' => 'Laminat soft-touch',
+        'slug' => 'laminate-soft-touch',
+        'description' => 'Premium laminat z miękką fakturą',
+        'finish_type' => 'soft_touch',
+        'price_multiplier' => 1.50,
+        'texture_image_path' => 'images/laminates/laminate-soft-touch.jpg',
+        'sort_order' => 3,
+    ],
+];
 
         // Predefiniowane rozmiary dla każdego kształtu
         $rectangleShape = LabelShape::where('slug', 'rectangle')->first();

@@ -2,20 +2,20 @@
 
 namespace App\Livewire;
 
-use App\Models\LabelShape;
-use App\Models\LabelMaterial;
-use App\Models\LaminateOption;
-use App\Models\PredefinedSize;
-use App\Models\LabelProject;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
+use App\Models\LabelShape;
+use App\Models\LabelMaterial;
+use App\Models\PredefinedSize;
+use App\Models\LaminateOption;
+use App\Models\LabelProject;
+use Illuminate\Support\Facades\Storage;
 
 class LabelCreator extends Component
 {
     use WithFileUploads;
 
-    // Public properties for form data
+    // Public properties for form data - DOKŁADNIE JAK MIAŁEŚ
     public $selectedShape = null;
     public $selectedMaterial = null;
     public $selectedLaminate = '';
@@ -26,7 +26,7 @@ class LabelCreator extends Component
     public $quantity = 100;
     public $artworkFile = null;
 
-    // Computed properties
+    // Computed properties - DOKŁADNIE JAK MIAŁEŚ
     public $calculatedPrice = 0;
     public $isConfigurationValid = false;
 
@@ -63,6 +63,7 @@ class LabelCreator extends Component
         $this->calculatePrice();
     }
 
+    // TWOJA ORYGINALNA METODA updated() - PRZYWRÓCONA
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
@@ -70,6 +71,57 @@ class LabelCreator extends Component
         $this->checkConfiguration();
     }
 
+    public function updatedUseCustomSize($value)
+{
+    // Konwertuj string na boolean
+    $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+
+    // Resetuj odpowiednie pola przy zmianie typu rozmiaru
+    if ($value) {
+        // Przełączenie na custom size - resetuj selected size
+        $this->selectedSize = null;
+    } else {
+        // Przełączenie na standardowe rozmiary - resetuj custom dimensions
+        $this->customWidth = null;
+        $this->customHeight = null;
+    }
+
+    $this->calculatePrice();
+    $this->checkConfiguration();
+}
+
+public function setCustomSize($isCustom)
+{
+    $this->useCustomSize = $isCustom;
+
+    if ($isCustom) {
+        // Przełączenie na custom size - resetuj selected size
+        $this->selectedSize = null;
+    } else {
+        // Przełączenie na standardowe rozmiary - resetuj custom dimensions
+        $this->customWidth = null;
+        $this->customHeight = null;
+        $this->selectedSize = null; // Reset aby użytkownik mógł wybrać ponownie
+    }
+
+    $this->calculatePrice();
+    $this->checkConfiguration();
+}
+
+public function updatedSelectedSize($value)
+{
+    // Gdy wybierasz standardowy rozmiar, upewnij się że custom size jest wyłączony
+    if ($value && $this->useCustomSize) {
+        $this->useCustomSize = false;
+        $this->customWidth = null;
+        $this->customHeight = null;
+    }
+
+    $this->calculatePrice();
+    $this->checkConfiguration();
+}
+
+    // TWOJA ORYGINALNA METODA calculatePrice() - PRZYWRÓCONA
     public function calculatePrice()
     {
         if (!$this->selectedShape || !$this->selectedMaterial || !$this->quantity) {
@@ -79,7 +131,7 @@ class LabelCreator extends Component
 
         $shape = LabelShape::find($this->selectedShape);
         $material = LabelMaterial::find($this->selectedMaterial);
-        
+
         if (!$shape || !$material) {
             $this->calculatedPrice = 0;
             return;
@@ -119,17 +171,20 @@ class LabelCreator extends Component
         $this->calculatedPrice = $totalPrice * 1.23;
     }
 
+    // POPRAWIONA METODA checkConfiguration() - bezpieczne sprawdzenie availableSizes
     public function checkConfiguration()
     {
-        $isValid = $this->selectedShape && 
-                   $this->selectedMaterial && 
+        $isValid = $this->selectedShape &&
+                   $this->selectedMaterial &&
                    $this->quantity > 0;
 
         if ($this->useCustomSize) {
             $isValid = $isValid && $this->customWidth > 0 && $this->customHeight > 0;
         } else {
-            // Dla standardowych rozmiarów - sprawdź czy są dostępne rozmiary dla wybranego kształtu
-            $hasAvailableSizes = $this->availableSizes->count() > 0;
+            // POPRAWKA - bezpieczne sprawdzenie dostępnych rozmiarów
+            $availableSizes = $this->getAvailableSizesProperty();
+            $hasAvailableSizes = $availableSizes && $availableSizes->count() > 0;
+
             if ($hasAvailableSizes) {
                 $isValid = $isValid && $this->selectedSize;
             } else {
@@ -142,6 +197,7 @@ class LabelCreator extends Component
         $this->isConfigurationValid = $isValid;
     }
 
+    // TWOJA ORYGINALNA METODA getAvailableSizesProperty() - PRZYWRÓCONA
     public function getAvailableSizesProperty()
     {
         if (!$this->selectedShape) {
@@ -154,12 +210,13 @@ class LabelCreator extends Component
             ->get();
     }
 
+    // POPRAWIONA METODA saveProject() - Z TWOIMI DANYMI + MOJE POPRAWKI
     public function saveProject()
     {
         try {
             // Sprawdź konfigurację przed walidacją
             $this->checkConfiguration();
-            
+
             if (!$this->isConfigurationValid) {
                 session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
                 return;
@@ -176,25 +233,26 @@ class LabelCreator extends Component
                 'customWidth' => $this->customWidth,
                 'customHeight' => $this->customHeight,
                 'selectedSize' => $this->selectedSize,
+                'selectedLaminate' => $this->selectedLaminate,
                 'quantity' => $this->quantity,
-                'calculatedPrice' => $this->calculatedPrice,
+                'calculatedPrice' => $this->calculatedPrice
             ]);
 
-            // Prepare data for project creation
+            // Prepare project data - TWOJA STRUKTURA DANYCH
             $projectData = [
-                'uuid' => Str::uuid(),
+                'uuid' => (string) \Illuminate\Support\Str::uuid(),
                 'label_shape_id' => $this->selectedShape,
                 'label_material_id' => $this->selectedMaterial,
+                'quantity' => $this->quantity,
+                'calculated_price' => $this->calculatedPrice,
+                'status' => 'preview',
                 'laminate_option_id' => $this->selectedLaminate ?: null,
                 'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
                 'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
                 'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
-                'quantity' => $this->quantity,
-                'calculated_price' => $this->calculatedPrice,
-                'status' => 'draft',
             ];
 
-            // Set user_id or session_id for guest users
+            // MOJA POPRAWKA - sprawdź czy user jest zalogowany czy to gość
             if (auth()->check()) {
                 $projectData['user_id'] = auth()->id();
             } else {
@@ -212,15 +270,18 @@ class LabelCreator extends Component
 
             logger('Project created successfully:', ['uuid' => $project->uuid]);
 
-            // Redirect to preview
-            return redirect()->route('label.preview', $project->uuid);
+          // Redirect to preview
+return redirect()->route('label.preview', ['uuid' => $project->uuid]);
 
-        } catch (\Exception $e) {
-            logger('Error saving project: ' . $e->getMessage());
-            session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
-        }
+        $this->dispatch('redirect-to-preview', url: $previewUrl);
+
+    } catch (\Exception $e) {
+        logger('Error saving project: ' . $e->getMessage());
+        session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
     }
+}
 
+    // TWOJA ORYGINALNA METODA render() - PRZYWRÓCONA
     public function render()
     {
         return view('livewire.label-creator', [

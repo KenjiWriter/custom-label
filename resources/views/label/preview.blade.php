@@ -1,5 +1,5 @@
 <x-layouts.app title="Podgląd 3D etykiety - {{ $project->uuid }}">
-    
+
     <div class="py-8">
         <!-- Header -->
         <div class="mb-8">
@@ -10,7 +10,7 @@
                 </svg>
                 <span>Podgląd 3D</span>
             </nav>
-            
+
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
                 Podgląd Twojej etykiety
             </h1>
@@ -31,11 +31,11 @@
                             Użyj myszki aby obracać etykietę. Kółko myszy do powiększania/pomniejszania.
                         </p>
                     </div>
-                    
+
                     <!-- 3D Canvas Container -->
                     <div class="relative bg-gradient-to-br from-gray-50 to-gray-100" style="height: 500px;">
                         <div id="label-3d-preview" class="w-full h-full"></div>
-                        
+
                         <!-- Loading State -->
                         <div id="preview-loading" class="absolute inset-0 flex items-center justify-center">
                             <div class="text-center">
@@ -43,186 +43,262 @@
                                 <p class="text-gray-600">Ładowanie podglądu 3D...</p>
                             </div>
                         </div>
-                        
-                        <!-- Error State (initially hidden) -->
-                        <div id="preview-error" class="absolute inset-0 flex items-center justify-center hidden">
+
+                        <!-- 2D FALLBACK - ZAWSZE GOTOWY -->
+                        <div id="preview-error" class="absolute inset-0 items-center justify-center hidden">
                             <div class="text-center p-8">
-                                <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Podgląd 3D tymczasowo niedostępny</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Podgląd 3D niedostępny</h3>
                                 <p class="text-gray-600 mb-4">Wyświetlamy podgląd 2D Twojej etykiety</p>
-                                
+
                                 <!-- 2D Fallback Preview -->
                                 <div class="bg-white border-2 border-dashed border-orange-300 rounded-xl p-8 max-w-md mx-auto">
                                     <div class="text-center">
-                                        @php $dimensions = $project->getActualDimensions(); @endphp
-                                        
-                                        <!-- Shape representation -->
-                                        @if($project->labelShape->slug === 'circle')
-                                            <div class="w-32 h-32 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full mx-auto flex items-center justify-center border-2 border-orange-400">
-                                        @elseif($project->labelShape->slug === 'square')
-                                            <div class="w-32 h-32 bg-gradient-to-br from-orange-100 to-orange-200 mx-auto flex items-center justify-center border-2 border-orange-400 rounded-lg">
-                                        @else
-                                            <div class="w-40 h-24 bg-gradient-to-br from-orange-100 to-orange-200 mx-auto flex items-center justify-center border-2 border-orange-400 rounded-lg">
-                                        @endif
-                                            <div class="text-center">
-                                                <div class="text-lg font-bold text-orange-800">{{ $project->labelShape->name }}</div>
-                                                <div class="text-sm text-orange-600">{{ $dimensions['width_mm'] }}×{{ $dimensions['height_mm'] }}mm</div>
-                                                <div class="text-xs text-orange-500 mt-1">{{ $project->labelMaterial->name }}</div>
+                                        @php
+                                            $dimensions = $project->getActualDimensions();
+
+                                            // WIĘKSZY ROZMIAR PREVIEW
+                                            $baseSize = 200; // ZWIĘKSZONE z 150 do 200px
+                                            $ratio = $dimensions['width'] / $dimensions['height'];
+
+                                            if ($ratio > 1) {
+                                                // Szerszy niż wyższy
+                                                $previewWidth = min($baseSize * 2.5, 350);
+                                                $previewHeight = $previewWidth / $ratio;
+                                            } else {
+                                                // Wyższy niż szerszy lub kwadrat
+                                                $previewHeight = min($baseSize * 2, 280);
+                                                $previewWidth = $previewHeight * $ratio;
+                                            }
+
+                                            // Jeszcze więcej zwiększamy dla dużych wymiarów
+                                            if ($dimensions['width'] > 100 || $dimensions['height'] > 100) {
+                                                $previewWidth *= 1.5;
+                                                $previewHeight *= 1.5;
+                                            }
+
+                                            // NAPRAWIONE KOLORY MATERIAŁÓW - DOPASOWANE DO SLUG
+                                            $materialColors = [
+                                                'paper-white-matte' => 'from-white to-gray-50 border-gray-300',
+                                                'paper-white-glossy' => 'from-white to-blue-50 border-blue-300',
+                                                'paper-cream' => 'from-amber-50 to-amber-100 border-amber-400',
+                                                'foil-silver' => 'from-gray-300 to-gray-500 border-gray-600',
+                                                'foil-gold' => 'from-yellow-400 to-yellow-600 border-yellow-700', // ZŁOTA FOLIA!
+                                                'paper-waterproof' => 'from-blue-50 to-blue-100 border-blue-400',
+                                                // Fallbacks dla starych slug-ów
+                                                'folia-zlota' => 'from-yellow-400 to-yellow-600 border-yellow-700',
+                                                'folia-srebrna' => 'from-gray-300 to-gray-500 border-gray-600',
+                                            ];
+
+                                            $materialSlug = $project->labelMaterial->slug ?? 'paper-white-matte';
+                                            $materialColor = $materialColors[$materialSlug] ?? 'from-gray-100 to-gray-200 border-gray-300';
+
+                                            // MOCNIEJSZE efekty dla różnych materiałów
+                                            $materialEffects = 'shadow-2xl';
+                                            if (str_contains($materialSlug, 'glossy') || str_contains($materialSlug, 'foil')) {
+                                                $materialEffects .= ' transform hover:scale-110 transition-all duration-500';
+                                            }
+                                            if (str_contains($materialSlug, 'gold') || str_contains($materialSlug, 'zlota')) {
+                                                $materialEffects .= ' animate-pulse';
+                                            }
+
+                                            // Border radius dla kształtów
+                                            $shapeClass = '';
+                                            $shape = $project->labelShape->slug ?? 'rectangle';
+
+                                            switch($shape) {
+                                                case 'circle':
+                                                    $shapeClass = 'rounded-full';
+                                                    $size = max($previewWidth, $previewHeight);
+                                                    $previewWidth = $size;
+                                                    $previewHeight = $size;
+                                                    break;
+                                                case 'oval':
+                                                    $shapeClass = 'rounded-full';
+                                                    break;
+                                                case 'square':
+                                                    $shapeClass = 'rounded-2xl';
+                                                    $size = max($previewWidth, $previewHeight);
+                                                    $previewWidth = $size;
+                                                    $previewHeight = $size;
+                                                    break;
+                                                case 'rectangle':
+                                                    $shapeClass = 'rounded-2xl';
+                                                    break;
+                                                case 'star':
+                                                    $shapeClass = 'rounded-2xl relative overflow-hidden';
+                                                    break;
+                                                default:
+                                                    $shapeClass = 'rounded-2xl';
+                                            }
+                                        @endphp
+
+                                        <!-- DUŻA ZŁOTA OWALNA ETYKIETA -->
+                                        <div class="relative mx-auto {{ $materialEffects }}"
+                                             style="width: {{ $previewWidth }}px; height: {{ $previewHeight }}px;">
+
+                                            <!-- Główna etykieta -->
+                                            <div class="w-full h-full bg-gradient-to-br {{ $materialColor }} border-8 {{ $shapeClass }} flex items-center justify-center relative overflow-hidden"
+                                                 style="box-shadow: 0 30px 60px rgba(0,0,0,0.3);">
+
+                                                <!-- MOCNY efekt błyszczący dla folii -->
+                                                @if(str_contains($materialSlug, 'foil') || str_contains($materialSlug, 'glossy') || str_contains($materialSlug, 'folia'))
+                                                    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-50 transform -skew-x-12"></div>
+                                                    <div class="absolute top-6 left-6 w-16 h-16 bg-white rounded-full opacity-70 blur-lg"></div>
+                                                    <div class="absolute bottom-8 right-8 w-10 h-10 bg-white rounded-full opacity-50 blur-md"></div>
+                                                @endif
+
+                                                <!-- MOCNY efekt metaliczny dla złotej/srebrnej folii -->
+                                                @if(str_contains($materialSlug, 'gold') || str_contains($materialSlug, 'silver') || str_contains($materialSlug, 'zlota') || str_contains($materialSlug, 'srebrna'))
+                                                    <div class="absolute inset-0 bg-gradient-to-br from-white to-transparent opacity-40"></div>
+                                                    <div class="absolute top-8 right-8 w-12 h-12 bg-white rounded-full opacity-60 blur-xl"></div>
+                                                    <div class="absolute bottom-6 left-6 w-8 h-8 bg-white rounded-full opacity-50 blur-lg"></div>
+                                                    <!-- DODATKOWE ZŁOTE REFLEKSY -->
+                                                    <div class="absolute top-1/3 left-1/4 w-6 h-6 bg-yellow-200 rounded-full opacity-40 blur-md"></div>
+                                                    <div class="absolute bottom-1/3 right-1/4 w-4 h-4 bg-yellow-300 rounded-full opacity-30 blur-sm"></div>
+                                                @endif
+
+                                                <!-- Gwiazda SVG dla kształtu gwiazdy -->
+                                                @if($shape === 'star')
+                                                    <svg class="absolute inset-0 w-full h-full text-current opacity-25" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                    </svg>
+                                                @endif
+
+                                                <!-- WIĘKSZY tekst -->
+                                                <div class="text-center z-10 p-6">
+                                                    <div class="text-xl font-bold text-gray-800 opacity-90 mb-3">
+                                                        {{ $project->labelMaterial->name }}
+                                                    </div>
+                                                    <div class="text-lg text-gray-700 opacity-70">
+                                                        {{ $project->labelShape->name }}
+                                                    </div>
+                                                    <div class="text-md text-gray-600 opacity-70 mt-2">
+                                                        {{ $dimensions['width'] }}×{{ $dimensions['height'] }}mm
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tekstura dla papieru -->
+                                                @if(str_contains($materialSlug, 'paper'))
+                                                    <div class="absolute inset-0 opacity-20">
+                                                        <div class="w-full h-full" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%228%22 viewBox=%220 0 8 8%22><path fill=%22%23000%22 fill-opacity=%22.4%22 d=%22M1 7h1v1H1V7zm4-4h1v1H5V3z%22></path></svg>');"></div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- MOCNIEJSZY efekt laminatu -->
+                                            @if($project->laminateOption)
+                                                <div class="absolute inset-0 {{ $shapeClass }} border-6 border-blue-500 bg-gradient-to-br from-blue-200 to-transparent opacity-60 pointer-events-none">
+                                                    <!-- WIĘKSZE refleksy laminatu -->
+                                                    <div class="absolute top-6 left-6 w-16 h-16 bg-white rounded-full opacity-80 blur-xl"></div>
+                                                    <div class="absolute bottom-8 right-8 w-12 h-12 bg-white rounded-full opacity-60 blur-lg"></div>
+                                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full opacity-50 blur-md"></div>
+                                                </div>
+
+                                                <!-- WIĘKSZA etykieta laminatu -->
+                                                <div class="absolute -top-6 -right-6 bg-blue-600 text-white text-lg px-6 py-3 rounded-full font-bold shadow-2xl z-20">
+                                                    LAMINAT
+                                                </div>
+                                            @endif
+
+                                            <!-- WIĘKSZA ikona materiału -->
+                                            <div class="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-black bg-opacity-30 flex items-center justify-center text-2xl">
+                                                @if(str_contains($materialSlug, 'paper'))
+                                                    📄
+                                                @elseif(str_contains($materialSlug, 'foil') || str_contains($materialSlug, 'folia'))
+                                                    ✨
+                                                @else
+                                                    📋
+                                                @endif
+                                            </div>
+
+                                            <!-- WIĘKSZA informacja o ilości -->
+                                            <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-lg px-6 py-3 rounded-full whitespace-nowrap shadow-xl">
+                                                {{ number_format($project->quantity) }} szt.
+                                            </div>
+                                        </div>
+
+                                        <!-- WIĘKSZE informacje dodatkowe -->
+                                        <div class="mt-20 text-lg text-gray-600 space-y-4">
+                                            <div class="font-bold text-gray-900 text-3xl">{{ $project->labelShape->name }}</div>
+                                            <div class="flex flex-wrap justify-center gap-4 mt-8">
+                                                <span class="bg-gray-100 px-6 py-3 rounded-full text-lg font-medium">
+                                                    📐 {{ $dimensions['width'] }}×{{ $dimensions['height'] }}mm
+                                                </span>
+                                                <span class="bg-yellow-100 px-6 py-3 rounded-full text-lg font-medium">
+                                                    🎨 {{ $project->labelMaterial->name }}
+                                                </span>
+                                                @if($project->laminateOption)
+                                                    <span class="bg-blue-100 px-6 py-3 rounded-full text-lg font-medium">
+                                                        🛡️ {{ $project->laminateOption->name }}
+                                                    </span>
+                                                @endif
+                                                <span class="bg-orange-100 px-6 py-3 rounded-full text-lg font-medium">
+                                                    📦 {{ number_format($project->quantity) }} szt.
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Controls -->
-                        <div class="absolute bottom-4 left-4 flex space-x-2" id="preview-controls" style="display: none;">
-                            <button id="reset-camera" 
-                                    class="bg-white/80 hover:bg-white text-gray-700 p-2 rounded-lg shadow-sm backdrop-blur-sm transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                            </button>
-                            <button id="toggle-animation" 
-                                    class="bg-white/80 hover:bg-white text-gray-700 p-2 rounded-lg shadow-sm backdrop-blur-sm transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1M9 16v-2a2 2 0 012-2h2a2 2 0 012 2v2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </button>
-                        </div>
                     </div>
                 </div>
-
-                <!-- Material Preview -->
-                @if($project->labelMaterial->texture_image_path)
-                <div class="mt-6 bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        Podgląd materiału
-                    </h3>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="text-center">
-                            <div class="w-20 h-20 mx-auto mb-2 rounded-lg overflow-hidden">
-                                <img src="{{ asset('storage/' . $project->labelMaterial->texture_image_path) }}" 
-                                     alt="{{ $project->labelMaterial->name }}" 
-                                     class="w-full h-full object-cover">
-                            </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $project->labelMaterial->name }}</p>
-                        </div>
-                        
-                        @if($project->laminateOption)
-                        <div class="text-center">
-                            <div class="w-20 h-20 mx-auto mb-2 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                <span class="text-gray-600 text-sm font-medium">{{ strtoupper(substr($project->laminateOption->finish_type ?? 'L', 0, 1)) }}</span>
-                            </div>
-                            <p class="text-sm font-medium text-gray-900">{{ $project->laminateOption->name }}</p>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                @endif
             </div>
 
-            <!-- Order Summary -->
+            <!-- Project Details -->
             <div class="space-y-6">
-                <!-- Configuration Summary -->
+                <!-- Configuration -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">
-                        Podsumowanie konfiguracji
-                    </h3>
-                    
-                    <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Konfiguracja</h3>
+
+                    <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Kształt:</span>
                             <span class="font-medium">{{ $project->labelShape->name }}</span>
                         </div>
-                        
                         <div class="flex justify-between">
                             <span class="text-gray-600">Materiał:</span>
                             <span class="font-medium">{{ $project->labelMaterial->name }}</span>
                         </div>
-                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Wymiary:</span>
+                            <span class="font-medium">{{ $project->getActualDimensions()['width'] }}×{{ $project->getActualDimensions()['height'] }}mm</span>
+                        </div>
+                        @if($project->laminateOption)
                         <div class="flex justify-between">
                             <span class="text-gray-600">Laminat:</span>
-                            <span class="font-medium">
-                                {{ $project->laminateOption ? $project->laminateOption->name : 'Bez laminatu' }}
-                            </span>
-                        </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Rozmiar:</span>
-                            <span class="font-medium">
-                                @php $dimensions = $project->getActualDimensions(); @endphp
-                                {{ $dimensions['width_mm'] }}mm × {{ $dimensions['height_mm'] }}mm
-                            </span>
-                        </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Powierzchnia:</span>
-                            <span class="font-medium">{{ number_format($project->getAreaCm2(), 1) }} cm²</span>
-                        </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Ilość:</span>
-                            <span class="font-medium">{{ $project->quantity }} szt.</span>
-                        </div>
-                        
-                        @if($project->artwork_file_path)
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Grafika:</span>
-                            <span class="font-medium text-green-600">✓ Przesłana</span>
+                            <span class="font-medium">{{ $project->laminateOption->name }}</span>
                         </div>
                         @endif
-                    </div>
-                </div>
-
-                <!-- Price Summary -->
-                <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-200">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                        Cena zamówienia
-                    </h3>
-                    
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Cena za sztukę:</span>
-                            <span>{{ number_format($project->calculated_price / $project->quantity, 2) }} PLN</span>
-                        </div>
-                        
                         <div class="flex justify-between">
                             <span class="text-gray-600">Ilość:</span>
-                            <span>{{ $project->quantity }} szt.</span>
-                        </div>
-                        
-                        <div class="flex justify-between font-medium border-t border-orange-200 pt-3">
-                            <span>Suma netto:</span>
-                            <span>{{ number_format($project->calculated_price / 1.23, 2) }} PLN</span>
-                        </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">VAT (23%):</span>
-                            <span>{{ number_format($project->calculated_price - ($project->calculated_price / 1.23), 2) }} PLN</span>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-orange-200 mt-4 pt-4">
-                        <div class="flex justify-between items-center text-xl font-bold text-orange-900">
-                            <span>Razem:</span>
-                            <span>{{ number_format($project->calculated_price, 2) }} PLN</span>
+                            <span class="font-medium">{{ number_format($project->quantity) }} szt.</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="space-y-4">
-                    <button onclick="proceedToPayment()" 
+                <!-- Price -->
+                <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl shadow-lg p-6 border border-orange-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Cena</h3>
+                    <div class="text-3xl font-bold text-orange-600">
+                        {{ number_format($project->calculated_price, 2) }} zł
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">z VAT</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="space-y-3">
+                    <button onclick="proceedToPayment()"
                             class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105">
                         Przejdź do płatności
                     </button>
-                    
-                    <a href="{{ route('home') }}" 
+
+                    <a href="{{ route('home') }}"
                        class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors" wire:navigate>
                         Wróć do kreatora
                     </a>
@@ -257,261 +333,301 @@
             shape: '{{ $project->labelShape->slug }}',
             material: '{{ $project->labelMaterial->slug }}',
             dimensions: {
-                width: {{ $dimensions['width_mm'] ?? 100 }},
-                height: {{ $dimensions['height_mm'] ?? 60 }}
+                width: {{ $project->getActualDimensions()['width'] ?? 100 }},
+                height: {{ $project->getActualDimensions()['height'] ?? 60 }}
             },
             textureUrl: '{{ $project->labelMaterial->texture_image_path ? asset("storage/" . $project->labelMaterial->texture_image_path) : "" }}',
-            artworkUrl: '{{ $project->artwork_file_path ? asset("storage/" . $project->artwork_file_path) : "" }}'
+            artworkUrl: '{{ $project->artwork_file_path ? Storage::url($project->artwork_file_path) : "" }}',
+            hasLaminate: {{ $project->laminateOption ? 'true' : 'false' }}
         };
+
+        // AUTOMATYCZNIE POKAZUJ 2D FALLBACK PO 2 SEKUNDACH
+        setTimeout(function() {
+            if (document.getElementById('preview-loading').style.display !== 'none') {
+                show2DFallback();
+            }
+        }, 2000);
 
         // Try to load 3D libraries
         function load3DLibraries() {
-            return new Promise((resolve, reject) => {
-                // Check if THREE is already loaded
-                if (typeof THREE !== 'undefined') {
-                    libraries3DLoaded = true;
-                    resolve();
-                    return;
-                }
-
-                // Load Three.js
-                const threeScript = document.createElement('script');
-                threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-                threeScript.onload = function() {
-                    console.log('Three.js loaded successfully');
-                    
-                    // Load OrbitControls
-                    const controlsScript = document.createElement('script');
-                    controlsScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
-                    controlsScript.onload = function() {
-                        console.log('OrbitControls loaded successfully');
-                        libraries3DLoaded = true;
-                        resolve();
-                    };
-                    controlsScript.onerror = function() {
-                        console.warn('Failed to load OrbitControls, trying alternative');
-                        // Try alternative CDN
-                        const altControlsScript = document.createElement('script');
-                        altControlsScript.src = 'https://threejs.org/examples/js/controls/OrbitControls.js';
-                        altControlsScript.onload = () => {
-                            console.log('OrbitControls loaded from alternative CDN');
-                            libraries3DLoaded = true;
-                            resolve();
-                        };
-                        altControlsScript.onerror = () => {
-                            console.error('Failed to load OrbitControls from all sources');
-                            reject(new Error('Failed to load 3D libraries'));
-                        };
-                        document.head.appendChild(altControlsScript);
-                    };
-                    document.head.appendChild(controlsScript);
-                };
-                threeScript.onerror = function() {
-                    console.error('Failed to load Three.js');
-                    reject(new Error('Failed to load Three.js'));
-                };
-                document.head.appendChild(threeScript);
-            });
-        }
-
-        function init3DPreview() {
-            const container = document.getElementById('label-3d-preview');
-            const loadingDiv = document.getElementById('preview-loading');
-            const errorDiv = document.getElementById('preview-error');
-            const controlsDiv = document.getElementById('preview-controls');
-            
-            if (!libraries3DLoaded || typeof THREE === 'undefined') {
-                console.error('Three.js not loaded');
-                showError();
+            if (libraries3DLoaded) {
+                init3DPreview();
                 return;
             }
 
+            // Load Three.js
+            const threeScript = document.createElement('script');
+            threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+            threeScript.onload = function() {
+                // Load OrbitControls
+                const controlsScript = document.createElement('script');
+                controlsScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+                controlsScript.onload = function() {
+                    libraries3DLoaded = true;
+                    init3DPreview();
+                };
+                controlsScript.onerror = function() {
+                    show2DFallback();
+                };
+                document.head.appendChild(controlsScript);
+            };
+            threeScript.onerror = function() {
+                show2DFallback();
+            };
+            document.head.appendChild(threeScript);
+        }
+
+        function init3DPreview() {
             try {
+                const container = document.getElementById('label-3d-preview');
+                if (!container || !window.THREE) {
+                    show2DFallback();
+                    return;
+                }
+
                 // Scene setup
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color(0xf8fafc);
-                
-                // Camera setup
+
+                // Camera
                 camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
-                camera.position.set(0, 0, 3);
-                
-                // Renderer setup
+                camera.position.set(0, 0, 200);
+
+                // Renderer
                 renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(container.offsetWidth, container.offsetHeight);
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 container.appendChild(renderer.domElement);
-                
-                // Controls (check if OrbitControls is available)
-                if (typeof THREE.OrbitControls !== 'undefined') {
-                    controls = new THREE.OrbitControls(camera, renderer.domElement);
-                    controls.enableDamping = true;
-                    controls.dampingFactor = 0.05;
-                    controls.maxDistance = 10;
-                    controls.minDistance = 1;
-                } else {
-                    console.warn('OrbitControls not available, using basic camera');
-                }
-                
+
+                // Controls - KLUCZOWE DLA OBRACANIA!
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enableZoom = true;
+                controls.enablePan = true;
+                controls.enableRotate = true;
+                controls.autoRotate = false;
+                controls.maxDistance = 500;
+                controls.minDistance = 50;
+
                 // Lighting
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
                 scene.add(ambientLight);
-                
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
-                directionalLight.position.set(5, 5, 5);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(100, 100, 50);
                 directionalLight.castShadow = true;
                 scene.add(directionalLight);
-                
-                // Create label based on configuration
-                createLabel();
-                
-                // Hide loading, show controls
-                loadingDiv.style.display = 'none';
-                controlsDiv.style.display = 'flex';
-                
-                // Animation loop
+
+                // Create label geometry based on shape and real dimensions
+                const labelGeometry = createLabelGeometry(
+                    projectConfig.shape,
+                    projectConfig.dimensions.width,
+                    projectConfig.dimensions.height
+                );
+
+                // Material based on selected material - NAPRAWIONE KOLORY!
+                const labelMaterial = createLabelMaterial(projectConfig.material);
+
+                // Create mesh
+                labelMesh = new THREE.Mesh(labelGeometry, labelMaterial);
+                labelMesh.castShadow = true;
+                labelMesh.receiveShadow = true;
+                scene.add(labelMesh);
+
+                // Add laminate layer if selected
+if (projectConfig.hasLaminate) {
+    const laminateGeometry = labelGeometry.clone();
+    laminateGeometry.scale(1.01, 1.01, 1); // Mniejsza różnica
+
+    // PRZEZROCZYSTY LAMINAT MATOWY
+    const laminateMaterial = new THREE.MeshLambertMaterial({
+        color: 0xffffff,         // Biały zamiast niebieskiego
+        transparent: true,
+        opacity: 0.15,           // Bardzo przezroczysty
+        side: THREE.DoubleSide
+    });
+
+    const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
+    laminateMesh.position.z = 0.5; // Bliżej etykiety
+    scene.add(laminateMesh);
+}
+
+                // Hide loading, start render loop
+                document.getElementById('preview-loading').style.display = 'none';
+                isAnimating = true;
                 animate();
-                
-                console.log('3D Preview initialized successfully');
-                
+
             } catch (error) {
-                console.error('Error initializing 3D preview:', error);
-                showError();
+                console.error('3D initialization error:', error);
+                show2DFallback();
             }
         }
 
-        function createLabel() {
-            const width = Math.max(projectConfig.dimensions.width / 100, 0.5); // Convert mm to scene units, min 0.5
-            const height = Math.max(projectConfig.dimensions.height / 100, 0.5);
-            
+        function createLabelGeometry(shape, width, height) {
             let geometry;
-            
-            // Create geometry based on shape
-            switch(projectConfig.shape) {
+
+            switch(shape) {
                 case 'circle':
-                case 'circular':
                     geometry = new THREE.CircleGeometry(Math.max(width, height) / 2, 32);
                     break;
+
                 case 'square':
                     const size = Math.max(width, height);
                     geometry = new THREE.PlaneGeometry(size, size);
                     break;
-                default: // rectangle and others
+
+                case 'rectangle':
                     geometry = new THREE.PlaneGeometry(width, height);
                     break;
+
+                case 'oval':
+                    geometry = new THREE.CircleGeometry(1, 32);
+                    geometry.scale(width/2, height/2, 1);
+                    break;
+
+                case 'star':
+                    geometry = createStarGeometry();
+                    geometry.scale(width/100, height/100, 1);
+                    break;
+
+                default:
+                    geometry = new THREE.PlaneGeometry(width, height);
             }
-            
-            // Material with nice orange color as default
-            const material = new THREE.MeshLambertMaterial({ 
-                color: 0xffa94d,
-                transparent: true,
-                opacity: 0.9
+
+            return geometry;
+        }
+
+        function createLabelMaterial(materialSlug) {
+    let materialConfig = {
+        side: THREE.DoubleSide
+    };
+
+    // NAPRAWIONE KOLORY MATERIAŁÓW W 3D! DOPASOWANE DO SLUG
+    switch(materialSlug) {
+        case 'paper-white-matte':
+            materialConfig.color = 0xffffff;
+            break;
+
+        case 'paper-white-glossy':
+            // BŁYSZCZĄCY PAPIER Z POLYSKIEM!
+            return new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                shininess: 100,
+                side: THREE.DoubleSide,
+                specular: 0x222222
             });
-            
-            // Load material texture if available
-            if (projectConfig.textureUrl && projectConfig.textureUrl !== '') {
-                const loader = new THREE.TextureLoader();
-                loader.load(
-                    projectConfig.textureUrl, 
-                    function(texture) {
-                        texture.wrapS = THREE.RepeatWrapping;
-                        texture.wrapT = THREE.RepeatWrapping;
-                        texture.repeat.set(1, 1);
-                        material.map = texture;
-                        material.needsUpdate = true;
-                        console.log('Material texture loaded');
-                    },
-                    undefined,
-                    function(error) {
-                        console.warn('Failed to load material texture:', error);
-                    }
-                );
+
+        case 'paper-cream':
+            materialConfig.color = 0xfff8e1;
+            break;
+
+        case 'foil-gold':
+    // Proceduralny bump - małe szumy imitujące fakturę
+    const size = 64;
+    const data = new Uint8Array(size * size * 3);
+    for (let i = 0; i < size * size * 3; i++) {
+        data[i] = 180 + Math.random() * 75; // jasne odcienie
+    }
+
+    // Światło otoczenia
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+
+    // Światło tylne (miękkie)
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    backLight.position.set(-2, 1, -5);
+    scene.add(backLight);
+
+    // Światło przednie – mniej ostre i przesunięte
+    const frontLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    frontLight.position.set(2, 2, 5); // z góry i lekko z boku
+    scene.add(frontLight);
+
+    // Tekstura bump
+    const bumpTexture = new THREE.DataTexture(data, size, size, THREE.RGBFormat);
+    bumpTexture.needsUpdate = true;
+    bumpTexture.wrapS = bumpTexture.wrapT = THREE.RepeatWrapping;
+    bumpTexture.repeat.set(4, 4);
+
+    return new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color(1.0, 0.84, 0.0), // złoto
+        metalness: 1.0,
+        roughness: 0.35,           // bardziej matowe odbicie -> miękki blik
+        bumpMap: bumpTexture,
+        bumpScale: 0.015,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.08,  // laminat lekko rozmywa odbicie
+        reflectivity: 0.85,
+        side: THREE.DoubleSide
+    });
+        case 'foil-silver':
+        // SREBRNA FOLIA Z POŁYSKIEM!
+            return new THREE.MeshStandardMaterial({
+                color: 0xc0c0c0,
+                metalness: 0.9,
+                roughness: 0.1,
+                side: THREE.DoubleSide,
+                emissive: 0x111111,     // Delikatne srebrne świecenie
+                emissiveIntensity: 0.1
+            });
+
+        case 'paper-waterproof':
+            materialConfig.color = 0xf0f8ff;
+            break;
+
+        default:
+            materialConfig.color = 0xffffff;
+    }
+
+    return new THREE.MeshLambertMaterial(materialConfig);
+}
+
+        function createStarGeometry() {
+            const shape = new THREE.Shape();
+            const outerRadius = 50;
+            const innerRadius = 25;
+            const points = 5;
+
+            for (let i = 0; i < points * 2; i++) {
+                const angle = (i * Math.PI) / points;
+                const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+
+                if (i === 0) {
+                    shape.moveTo(x, y);
+                } else {
+                    shape.lineTo(x, y);
+                }
             }
-            
-            labelMesh = new THREE.Mesh(geometry, material);
-            labelMesh.receiveShadow = true;
-            labelMesh.castShadow = true;
-            scene.add(labelMesh);
-            
-            // Load artwork if available
-            if (projectConfig.artworkUrl && projectConfig.artworkUrl !== '') {
-                const loader = new THREE.TextureLoader();
-                loader.load(
-                    projectConfig.artworkUrl, 
-                    function(texture) {
-                        // Create artwork overlay
-                        const artworkMaterial = new THREE.MeshLambertMaterial({ 
-                            map: texture, 
-                            transparent: true,
-                            opacity: 0.9
-                        });
-                        
-                        const artworkGeometry = geometry.clone();
-                        const artworkMesh = new THREE.Mesh(artworkGeometry, artworkMaterial);
-                        artworkMesh.position.z = 0.001; // Slightly above the base
-                        scene.add(artworkMesh);
-                        console.log('Artwork texture loaded');
-                    },
-                    undefined,
-                    function(error) {
-                        console.warn('Failed to load artwork texture:', error);
-                    }
-                );
-            }
+
+            shape.closePath();
+            return new THREE.ShapeGeometry(shape);
         }
 
         function animate() {
-            if (!renderer || !scene || !camera) return;
-            
+            if (!isAnimating) return;
+
             requestAnimationFrame(animate);
-            
-            if (isAnimating && labelMesh) {
-                labelMesh.rotation.z += 0.01;
-            }
-            
-            if (controls) {
-                controls.update();
-            }
-            
+            controls.update();
             renderer.render(scene, camera);
         }
 
-        function resetCamera() {
-            if (!camera || !controls) return;
-            camera.position.set(0, 0, 3);
-            if (controls.reset) {
-                controls.reset();
-            }
-        }
-
-        function toggleAnimation() {
-            isAnimating = !isAnimating;
-            const button = document.getElementById('toggle-animation');
-            if (button) {
-                button.style.backgroundColor = isAnimating ? '#f97316' : '';
-                button.style.color = isAnimating ? 'white' : '';
-            }
-        }
-
-        function showError() {
-            const loadingDiv = document.getElementById('preview-loading');
-            const errorDiv = document.getElementById('preview-error');
-            
-            if (loadingDiv) loadingDiv.style.display = 'none';
-            if (errorDiv) errorDiv.style.display = 'flex';
+        function show2DFallback() {
+            document.getElementById('preview-loading').style.display = 'none';
+            document.getElementById('preview-error').style.display = 'flex';
         }
 
         function proceedToPayment() {
-            // Here you would implement payment flow
             alert('Funkcja płatności będzie dostępna wkrótce!');
         }
 
-        // Window resize handler
+        // Handle window resize
         window.addEventListener('resize', function() {
-            if (!camera || !renderer) return;
-            
-            const container = document.getElementById('label-3d-preview');
-            if (container) {
+            if (camera && renderer) {
+                const container = document.getElementById('label-3d-preview');
                 camera.aspect = container.offsetWidth / container.offsetHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.offsetWidth, container.offsetHeight);
@@ -520,33 +636,13 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing 3D preview...');
-            
-            // Load 3D libraries and then initialize
-            load3DLibraries()
-                .then(() => {
-                    console.log('3D libraries loaded, initializing preview...');
-                    setTimeout(init3DPreview, 500); // Small delay to ensure container is properly sized
-                })
-                .catch((error) => {
-                    console.error('Failed to load 3D libraries:', error);
-                    setTimeout(showError, 1000); // Show error after 1 second
-                });
+            isAnimating = true;
+            load3DLibraries();
         });
 
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                const resetBtn = document.getElementById('reset-camera');
-                const toggleBtn = document.getElementById('toggle-animation');
-                
-                if (resetBtn) {
-                    resetBtn.addEventListener('click', resetCamera);
-                }
-                if (toggleBtn) {
-                    toggleBtn.addEventListener('click', toggleAnimation);
-                }
-            }, 1000);
+        // Cleanup when leaving page
+        window.addEventListener('beforeunload', function() {
+            isAnimating = false;
         });
     </script>
     @endpush

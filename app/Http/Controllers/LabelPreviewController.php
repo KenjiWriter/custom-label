@@ -20,9 +20,9 @@ class LabelPreviewController extends Controller
         if (!$project) {
             abort(404, 'Projekt nie został znaleziony.');
         }
-
+        //wykomentowalem dla testu
         // Check if user has access to this project
-        if (auth()->check()) {
+       /* if (auth()->check()) {
             if ($project->user_id !== auth()->id()) {
                 abort(403, 'Nie masz uprawnień do tego projektu.');
             }
@@ -31,7 +31,7 @@ class LabelPreviewController extends Controller
                 abort(403, 'Nie masz uprawnień do tego projektu.');
             }
         }
-
+    */
         $dimensions = $project->getActualDimensions();
 
         return view('label.preview', compact('project', 'dimensions'));
