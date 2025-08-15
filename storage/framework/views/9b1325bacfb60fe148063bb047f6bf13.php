@@ -56,7 +56,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('label-creator');
 
-$__html = app('livewire')->mount($__name, $__params, 'lw-352634266-0', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-235481482-0', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -165,4 +165,4 @@ if (isset($__slots)) unset($__slots);
 <?php if (isset($__componentOriginal5863877a5171c196453bfa0bd807e410)): ?>
 <?php $component = $__componentOriginal5863877a5171c196453bfa0bd807e410; ?>
 <?php unset($__componentOriginal5863877a5171c196453bfa0bd807e410); ?>
-<?php endif; ?><?php /**PATH C:\dev\custom-label\resources\views/home.blade.php ENDPATH**/ ?>
+<?php endif; ?><?php /**PATH C:\xampp\htdocs\custom-label\resources\views/home.blade.php ENDPATH**/ ?>
