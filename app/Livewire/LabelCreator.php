@@ -25,12 +25,15 @@ class LabelCreator extends Component
     public $customHeight = null;
     public $quantity = 100;
     public $artworkFile = null;
+    public $tempArtworkPath = null;
 
     // Computed properties - DOKŁADNIE JAK MIAŁEŚ
     public $calculatedPrice = 0;
     public $isConfigurationValid = false;
 
-    protected $rules = [
+    protected function rules()
+{
+    $rules = [
         'selectedShape' => 'required|exists:label_shapes,id',
         'selectedMaterial' => 'required|exists:label_materials,id',
         'selectedLaminate' => 'nullable',
@@ -38,9 +41,10 @@ class LabelCreator extends Component
         'customWidth' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
         'customHeight' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
         'quantity' => 'required|integer|min:1|max:10000',
-        'artworkFile' => 'nullable|file|mimes:jpg,jpeg,png,svg,pdf|max:10240',
+        'artworkFile' => 'nullable|image|max:10240', // max 10MB
     ];
-
+    return $rules;
+}
     protected $messages = [
         'selectedShape.required' => 'Wybierz kształt etykiety.',
         'selectedMaterial.required' => 'Wybierz materiał etykiety.',
@@ -62,6 +66,27 @@ class LabelCreator extends Component
         $this->selectedLaminate = '';
         $this->calculatePrice();
     }
+
+    // Dodaj metodę obsługi pliku:
+public function updatedArtworkFile()
+{
+    $this->validate([
+        'artworkFile' => 'image|max:10240', // max 10MB
+    ]);
+
+    if ($this->artworkFile) {
+        // Usuń stary plik jeśli istnieje
+        if ($this->tempArtworkPath && Storage::disk('public')->exists($this->tempArtworkPath)) {
+            Storage::disk('public')->delete($this->tempArtworkPath);
+        }
+
+        // ZMIANA: zapisuj na dysku 'public' z bezpośrednią ścieżką
+        $this->tempArtworkPath = $this->artworkFile->store('temp/artworks', 'public');
+
+        // Dodaj wiadomość o sukcesie
+        session()->flash('message', 'Grafika została pomyślnie wczytana.');
+    }
+}
 
     // TWOJA ORYGINALNA METODA updated() - PRZYWRÓCONA
     public function updated($propertyName)
@@ -212,68 +237,76 @@ public function updatedSelectedSize($value)
 
     // POPRAWIONA METODA saveProject() - Z TWOIMI DANYMI + MOJE POPRAWKI
     public function saveProject()
-    {
-        try {
-            // Sprawdź konfigurację przed walidacją
-            $this->checkConfiguration();
+{
+    try {
+        // Sprawdź konfigurację przed walidacją
+        $this->checkConfiguration();
 
-            if (!$this->isConfigurationValid) {
-                session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
-                return;
-            }
+        if (!$this->isConfigurationValid) {
+            session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
+            return;
+        }
 
-            // Walidacja z dostosowanymi regułami
-            $validatedData = $this->validate();
+        // Walidacja z dostosowanymi regułami
+        $validatedData = $this->validate();
 
-            // Debug info
-            logger('Saving project with data:', [
-                'selectedShape' => $this->selectedShape,
-                'selectedMaterial' => $this->selectedMaterial,
-                'useCustomSize' => $this->useCustomSize,
-                'customWidth' => $this->customWidth,
-                'customHeight' => $this->customHeight,
-                'selectedSize' => $this->selectedSize,
-                'selectedLaminate' => $this->selectedLaminate,
-                'quantity' => $this->quantity,
-                'calculatedPrice' => $this->calculatedPrice
-            ]);
+        // Debug info
+        logger('Saving project with data:', [
+            'selectedShape' => $this->selectedShape,
+            'selectedMaterial' => $this->selectedMaterial,
+            'useCustomSize' => $this->useCustomSize,
+            'customWidth' => $this->customWidth,
+            'customHeight' => $this->customHeight,
+            'selectedSize' => $this->selectedSize,
+            'selectedLaminate' => $this->selectedLaminate,
+            'quantity' => $this->quantity,
+            'calculatedPrice' => $this->calculatedPrice
+        ]);
 
-            // Prepare project data - TWOJA STRUKTURA DANYCH
-            $projectData = [
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
-                'label_shape_id' => $this->selectedShape,
-                'label_material_id' => $this->selectedMaterial,
-                'quantity' => $this->quantity,
-                'calculated_price' => $this->calculatedPrice,
-                'status' => 'preview',
-                'laminate_option_id' => $this->selectedLaminate ?: null,
-                'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
-                'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
-                'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
-            ];
+        // Prepare project data
+        $projectData = [
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'label_shape_id' => $this->selectedShape,
+            'label_material_id' => $this->selectedMaterial,
+            'quantity' => $this->quantity,
+            'calculated_price' => $this->calculatedPrice,
+            'status' => 'preview',
+            'laminate_option_id' => $this->selectedLaminate ?: null,
+            'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
+            'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
+            'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
+        ];
 
-            // MOJA POPRAWKA - sprawdź czy user jest zalogowany czy to gość
-            if (auth()->check()) {
-                $projectData['user_id'] = auth()->id();
-            } else {
-                $projectData['session_id'] = session()->getId();
-            }
+        // Sprawdź czy user jest zalogowany czy to gość
+        if (auth()->check()) {
+            $projectData['user_id'] = auth()->id();
+        } else {
+            $projectData['session_id'] = session()->getId();
+        }
 
-            // Create label project
-            $project = LabelProject::create($projectData);
+        // Create label project
+        $project = LabelProject::create($projectData);
 
-            // Handle file upload if present
-            if ($this->artworkFile) {
-                $path = $this->artworkFile->store('artwork', 'public');
-                $project->update(['artwork_file_path' => $path]);
-            }
+        // Handle file upload if present
+        if ($this->artworkFile) {
+            $path = $this->artworkFile->store('artwork', 'public');
+            $project->update(['artwork_file_path' => $path]);
+        }
 
-            logger('Project created successfully:', ['uuid' => $project->uuid]);
+        // Handle artwork from tempArtworkPath if exists
+        if ($this->tempArtworkPath) {
+            $finalArtworkPath = 'public/artworks/' . time() . '_' . basename($this->tempArtworkPath);
+            Storage::copy($this->tempArtworkPath, $finalArtworkPath);
+            $project->update(['artwork_file_path' => $finalArtworkPath]);
+        }
 
-          // Redirect to preview
-return redirect()->route('label.preview', ['uuid' => $project->uuid]);
+        logger('Project created successfully:', ['uuid' => $project->uuid]);
 
-        $this->dispatch('redirect-to-preview', url: $previewUrl);
+        // Generate preview URL
+        $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
+
+        // Redirect to preview
+        return redirect()->to($previewUrl);
 
     } catch (\Exception $e) {
         logger('Error saving project: ' . $e->getMessage());

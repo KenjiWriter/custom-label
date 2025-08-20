@@ -1,10 +1,19 @@
-<x-layouts.app title="Podgląd 3D etykiety - {{ $project->uuid }}">
+<?php if (isset($component)) { $__componentOriginal5863877a5171c196453bfa0bd807e410 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5863877a5171c196453bfa0bd807e410 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layouts.app','data' => ['title' => 'Podgląd 3D etykiety - '.e($project->uuid).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layouts.app'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Podgląd 3D etykiety - '.e($project->uuid).'']); ?>
 
     <div class="py-8">
         <!-- Header -->
         <div class="mb-8">
             <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-                <a href="{{ route('home') }}" class="hover:text-gray-700" wire:navigate>Kreator</a>
+                <a href="<?php echo e(route('home')); ?>" class="hover:text-gray-700" wire:navigate>Kreator</a>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -58,7 +67,7 @@
                                 <!-- 2D Fallback Preview -->
                                 <div class="bg-white border-2 border-dashed border-orange-300 rounded-xl p-8 max-w-md mx-auto">
                                     <div class="text-center">
-                                        @php
+                                        <?php
                                             $dimensions = $project->getActualDimensions();
 
                                             // WIĘKSZY ROZMIAR PREVIEW
@@ -135,64 +144,66 @@
                                                 default:
                                                     $shapeClass = 'rounded-2xl';
                                             }
-                                        @endphp
+                                        ?>
 
                                         <!-- DUŻA ZŁOTA OWALNA ETYKIETA -->
-                                        <div class="relative mx-auto {{ $materialEffects }}"
-                                             style="width: {{ $previewWidth }}px; height: {{ $previewHeight }}px;">
+                                        <div class="relative mx-auto <?php echo e($materialEffects); ?>"
+                                             style="width: <?php echo e($previewWidth); ?>px; height: <?php echo e($previewHeight); ?>px;">
 
                                             <!-- Główna etykieta -->
-                                            <div class="w-full h-full bg-gradient-to-br {{ $materialColor }} border-8 {{ $shapeClass }} flex items-center justify-center relative overflow-hidden"
+                                            <div class="w-full h-full bg-gradient-to-br <?php echo e($materialColor); ?> border-8 <?php echo e($shapeClass); ?> flex items-center justify-center relative overflow-hidden"
                                                  style="box-shadow: 0 30px 60px rgba(0,0,0,0.3);">
 
                                                 <!-- MOCNY efekt błyszczący dla folii -->
-                                                @if(str_contains($materialSlug, 'foil') || str_contains($materialSlug, 'glossy') || str_contains($materialSlug, 'folia'))
+                                                <?php if(str_contains($materialSlug, 'foil') || str_contains($materialSlug, 'glossy') || str_contains($materialSlug, 'folia')): ?>
                                                     <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-50 transform -skew-x-12"></div>
                                                     <div class="absolute top-6 left-6 w-16 h-16 bg-white rounded-full opacity-70 blur-lg"></div>
                                                     <div class="absolute bottom-8 right-8 w-10 h-10 bg-white rounded-full opacity-50 blur-md"></div>
-                                                @endif
+                                                <?php endif; ?>
 
                                                 <!-- MOCNY efekt metaliczny dla złotej/srebrnej folii -->
-                                                @if(str_contains($materialSlug, 'gold') || str_contains($materialSlug, 'silver') || str_contains($materialSlug, 'zlota') || str_contains($materialSlug, 'srebrna'))
+                                                <?php if(str_contains($materialSlug, 'gold') || str_contains($materialSlug, 'silver') || str_contains($materialSlug, 'zlota') || str_contains($materialSlug, 'srebrna')): ?>
                                                     <div class="absolute inset-0 bg-gradient-to-br from-white to-transparent opacity-40"></div>
                                                     <div class="absolute top-8 right-8 w-12 h-12 bg-white rounded-full opacity-60 blur-xl"></div>
                                                     <div class="absolute bottom-6 left-6 w-8 h-8 bg-white rounded-full opacity-50 blur-lg"></div>
                                                     <!-- DODATKOWE ZŁOTE REFLEKSY -->
                                                     <div class="absolute top-1/3 left-1/4 w-6 h-6 bg-yellow-200 rounded-full opacity-40 blur-md"></div>
                                                     <div class="absolute bottom-1/3 right-1/4 w-4 h-4 bg-yellow-300 rounded-full opacity-30 blur-sm"></div>
-                                                @endif
+                                                <?php endif; ?>
 
                                                 <!-- Gwiazda SVG dla kształtu gwiazdy -->
-                                                @if($shape === 'star')
+                                                <?php if($shape === 'star'): ?>
                                                     <svg class="absolute inset-0 w-full h-full text-current opacity-25" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                                     </svg>
-                                                @endif
+                                                <?php endif; ?>
 
                                                 <!-- WIĘKSZY tekst -->
                                                 <div class="text-center z-10 p-6">
                                                     <div class="text-xl font-bold text-gray-800 opacity-90 mb-3">
-                                                        {{ $project->labelMaterial->name }}
+                                                        <?php echo e($project->labelMaterial->name); ?>
+
                                                     </div>
                                                     <div class="text-lg text-gray-700 opacity-70">
-                                                        {{ $project->labelShape->name }}
+                                                        <?php echo e($project->labelShape->name); ?>
+
                                                     </div>
                                                     <div class="text-md text-gray-600 opacity-70 mt-2">
-                                                        {{ $dimensions['width'] }}×{{ $dimensions['height'] }}mm
+                                                        <?php echo e($dimensions['width']); ?>×<?php echo e($dimensions['height']); ?>mm
                                                     </div>
                                                 </div>
 
                                                 <!-- Tekstura dla papieru -->
-                                                @if(str_contains($materialSlug, 'paper'))
+                                                <?php if(str_contains($materialSlug, 'paper')): ?>
                                                     <div class="absolute inset-0 opacity-20">
                                                         <div class="w-full h-full" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%228%22 viewBox=%220 0 8 8%22><path fill=%22%23000%22 fill-opacity=%22.4%22 d=%22M1 7h1v1H1V7zm4-4h1v1H5V3z%22></path></svg>');"></div>
                                                     </div>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
 
                                             <!-- MOCNIEJSZY efekt laminatu -->
-                                            @if($project->laminateOption)
-                                                <div class="absolute inset-0 {{ $shapeClass }} border-6 border-blue-500 bg-gradient-to-br from-blue-200 to-transparent opacity-60 pointer-events-none">
+                                            <?php if($project->laminateOption): ?>
+                                                <div class="absolute inset-0 <?php echo e($shapeClass); ?> border-6 border-blue-500 bg-gradient-to-br from-blue-200 to-transparent opacity-60 pointer-events-none">
                                                     <!-- WIĘKSZE refleksy laminatu -->
                                                     <div class="absolute top-6 left-6 w-16 h-16 bg-white rounded-full opacity-80 blur-xl"></div>
                                                     <div class="absolute bottom-8 right-8 w-12 h-12 bg-white rounded-full opacity-60 blur-lg"></div>
@@ -203,42 +214,44 @@
                                                 <div class="absolute -top-6 -right-6 bg-blue-600 text-white text-lg px-6 py-3 rounded-full font-bold shadow-2xl z-20">
                                                     LAMINAT
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
 
                                             <!-- WIĘKSZA ikona materiału -->
                                             <div class="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-black bg-opacity-30 flex items-center justify-center text-2xl">
-                                                @if(str_contains($materialSlug, 'paper'))
+                                                <?php if(str_contains($materialSlug, 'paper')): ?>
                                                     📄
-                                                @elseif(str_contains($materialSlug, 'foil') || str_contains($materialSlug, 'folia'))
+                                                <?php elseif(str_contains($materialSlug, 'foil') || str_contains($materialSlug, 'folia')): ?>
                                                     ✨
-                                                @else
+                                                <?php else: ?>
                                                     📋
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
 
                                             <!-- WIĘKSZA informacja o ilości -->
                                             <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-lg px-6 py-3 rounded-full whitespace-nowrap shadow-xl">
-                                                {{ number_format($project->quantity) }} szt.
+                                                <?php echo e(number_format($project->quantity)); ?> szt.
                                             </div>
                                         </div>
 
                                         <!-- WIĘKSZE informacje dodatkowe -->
                                         <div class="mt-20 text-lg text-gray-600 space-y-4">
-                                            <div class="font-bold text-gray-900 text-3xl">{{ $project->labelShape->name }}</div>
+                                            <div class="font-bold text-gray-900 text-3xl"><?php echo e($project->labelShape->name); ?></div>
                                             <div class="flex flex-wrap justify-center gap-4 mt-8">
                                                 <span class="bg-gray-100 px-6 py-3 rounded-full text-lg font-medium">
-                                                    📐 {{ $dimensions['width'] }}×{{ $dimensions['height'] }}mm
+                                                    📐 <?php echo e($dimensions['width']); ?>×<?php echo e($dimensions['height']); ?>mm
                                                 </span>
                                                 <span class="bg-yellow-100 px-6 py-3 rounded-full text-lg font-medium">
-                                                    🎨 {{ $project->labelMaterial->name }}
+                                                    🎨 <?php echo e($project->labelMaterial->name); ?>
+
                                                 </span>
-                                                @if($project->laminateOption)
+                                                <?php if($project->laminateOption): ?>
                                                     <span class="bg-blue-100 px-6 py-3 rounded-full text-lg font-medium">
-                                                        🛡️ {{ $project->laminateOption->name }}
+                                                        🛡️ <?php echo e($project->laminateOption->name); ?>
+
                                                     </span>
-                                                @endif
+                                                <?php endif; ?>
                                                 <span class="bg-orange-100 px-6 py-3 rounded-full text-lg font-medium">
-                                                    📦 {{ number_format($project->quantity) }} szt.
+                                                    📦 <?php echo e(number_format($project->quantity)); ?> szt.
                                                 </span>
                                             </div>
                                         </div>
@@ -259,25 +272,25 @@
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Kształt:</span>
-                            <span class="font-medium">{{ $project->labelShape->name }}</span>
+                            <span class="font-medium"><?php echo e($project->labelShape->name); ?></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Materiał:</span>
-                            <span class="font-medium">{{ $project->labelMaterial->name }}</span>
+                            <span class="font-medium"><?php echo e($project->labelMaterial->name); ?></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Wymiary:</span>
-                            <span class="font-medium">{{ $project->getActualDimensions()['width'] }}×{{ $project->getActualDimensions()['height'] }}mm</span>
+                            <span class="font-medium"><?php echo e($project->getActualDimensions()['width']); ?>×<?php echo e($project->getActualDimensions()['height']); ?>mm</span>
                         </div>
-                        @if($project->laminateOption)
+                        <?php if($project->laminateOption): ?>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Laminat:</span>
-                            <span class="font-medium">{{ $project->laminateOption->name }}</span>
+                            <span class="font-medium"><?php echo e($project->laminateOption->name); ?></span>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Ilość:</span>
-                            <span class="font-medium">{{ number_format($project->quantity) }} szt.</span>
+                            <span class="font-medium"><?php echo e(number_format($project->quantity)); ?> szt.</span>
                         </div>
                     </div>
                 </div>
@@ -286,7 +299,7 @@
                 <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl shadow-lg p-6 border border-orange-200">
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Cena</h3>
                     <div class="text-3xl font-bold text-orange-600">
-                        {{ number_format($project->calculated_price, 2) }} zł
+                        <?php echo e(number_format($project->calculated_price, 2)); ?> zł
                     </div>
                     <p class="text-sm text-gray-600 mt-1">z VAT</p>
                 </div>
@@ -298,7 +311,7 @@
                         Przejdź do płatności
                     </button>
 
-                    <a href="{{ route('home') }}"
+                    <a href="<?php echo e(route('home')); ?>"
                        class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors" wire:navigate>
                         Wróć do kreatora
                     </a>
@@ -322,7 +335,7 @@
         </div>
     </div>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
     <script>
         let scene, camera, renderer, controls, labelMesh;
         let isAnimating = false;
@@ -330,15 +343,17 @@
 
         // Project configuration from backend
         const projectConfig = {
-    shape: '{{ $project->labelShape->slug }}',
-    material: '{{ $project->labelMaterial->slug }}',
+    shape: '<?php echo e($project->labelShape->slug); ?>',
+    material: '<?php echo e($project->labelMaterial->slug); ?>',
     dimensions: {
-        width: {{ $dimensions['width'] }},
-        height: {{ $dimensions['height'] }}
+        width: <?php echo e($dimensions['width']); ?>,
+        height: <?php echo e($dimensions['height']); ?>
+
     },
-    textureUrl: '{{ $project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : "" }}',
-    artworkUrl: '{{ $project->artwork_file_path ? Storage::url($project->artwork_file_path) : "" }}',
-    hasLaminate: {{ $project->laminateOption ? 'true' : 'false' }}
+    textureUrl: '<?php echo e($project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : ""); ?>',
+    artworkUrl: '<?php echo e($project->artwork_file_path ? Storage::url($project->artwork_file_path) : ""); ?>',
+    hasLaminate: <?php echo e($project->laminateOption ? 'true' : 'false'); ?>
+
 };
 
         // AUTOMATYCZNIE POKAZUJ 2D FALLBACK PO 2 SEKUNDACH
@@ -675,5 +690,15 @@ if (projectConfig.hasLaminate) {
             isAnimating = false;
         });
     </script>
-    @endpush
-</x-layouts.app>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5863877a5171c196453bfa0bd807e410)): ?>
+<?php $attributes = $__attributesOriginal5863877a5171c196453bfa0bd807e410; ?>
+<?php unset($__attributesOriginal5863877a5171c196453bfa0bd807e410); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5863877a5171c196453bfa0bd807e410)): ?>
+<?php $component = $__componentOriginal5863877a5171c196453bfa0bd807e410; ?>
+<?php unset($__componentOriginal5863877a5171c196453bfa0bd807e410); ?>
+<?php endif; ?>
+<?php /**PATH C:\xampp\htdocs\custom-label\resources\views/label/preview.blade.php ENDPATH**/ ?>

@@ -43,7 +43,7 @@ custom-label/
 }
 ```
 
-## Strategie dla Dużych Plików (Zawsze podawaj pełne kody z twoimi zmianami)
+## Strategie dla Dużych Plików
 
 ### 1. Chunking Context dla Livewire Components
 ```php

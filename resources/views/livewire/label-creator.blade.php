@@ -55,19 +55,21 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+            <!-- Poprawione wyświetlanie obrazków kształtów -->
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
     @foreach($shapes as $shape)
         <label class="relative cursor-pointer group">
             <input type="radio" wire:model.live="selectedShape" value="{{ $shape->id }}" class="sr-only">
             <div class="border-2 rounded-xl p-6 text-center transition-all duration-200 group-hover:shadow-xl group-hover:scale-105 bg-orange-50"
                  :class="$wire.selectedShape == {{ $shape->id }} ? 'border-orange-500 bg-orange-100 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300'">
 
-                <!-- OBRAZEK KSZTAŁTU -->
-                @if($shape->icon_path && file_exists(public_path($shape->icon_path)))
+                <!-- NAPRAWIONY OBRAZEK KSZTAŁTU -->
+                @if($shape->icon_path)
                     <div class="w-20 h-20 mx-auto mb-4 bg-white rounded-lg shadow-sm border border-gray-100 flex items-center justify-center">
-                        <img src="{{ asset($shape->icon_path) }}" 
-                             alt="{{ $shape->name }}" 
-                             class="w-16 h-16 object-contain">
+                        <img src="{{ asset($shape->icon_path) }}"
+                             alt="{{ $shape->name }}"
+                             class="w-16 h-16 object-contain"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-orange-600 text-2xl font-bold\'>{{ substr($shape->name, 0, 1) }}</span>';">
                     </div>
                 @else
                     <!-- FALLBACK - litera gdy brak obrazka -->
@@ -116,37 +118,46 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                @foreach($materials as $material)
-                    <label class="relative cursor-pointer group">
-                        <input type="radio" wire:model.live="selectedMaterial" value="{{ $material->id }}" class="sr-only">
-                        <div class="border-2 rounded-xl p-6 transition-all duration-200 group-hover:shadow-xl bg-orange-50"
-                             :class="$wire.selectedMaterial == {{ $material->id }} ? 'border-orange-500 bg-orange-100 shadow-lg' : 'border-gray-200 hover:border-gray-300'">
+    @foreach($materials as $material)
+        <label class="relative cursor-pointer group">
+            <input type="radio" wire:model.live="selectedMaterial" value="{{ $material->id }}" class="sr-only">
+            <div class="border-2 rounded-xl p-6 text-center transition-all duration-200 group-hover:shadow-xl"
+                 :class="$wire.selectedMaterial == {{ $material->id }} ? 'border-orange-500 bg-orange-50 shadow-lg' : 'border-gray-200 hover:border-orange-300'">
 
-                            @if($material->texture_image_path && file_exists(public_path($material->texture_image_path)))
-    <div class="w-16 h-16 mx-auto mb-4 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
-        <img src="{{ asset($material->texture_image_path) }}"
-             alt="{{ $material->name }}"
-             class="w-full h-full object-cover">
-    </div>
-@else
-    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
-        <span class="text-orange-600 text-sm font-bold">{{ substr($material->name, 0, 2) }}</span>
-    </div>
-@endif
+                <!-- NAPRAWIONY OBRAZEK MATERIAŁU -->
+                @if($material->texture_image_path)
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
+                        <img src="{{ asset($material->texture_image_path) }}"
+                             alt="{{ $material->name }}"
+                             class="w-full h-full object-cover"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center\'><span class=\'text-orange-600 text-xl font-bold\'>{{ substr($material->name, 0, 2) }}</span></div>';">
+                    </div>
+                @else
+                    <!-- FALLBACK -->
+                    <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+                        <span class="text-orange-600 text-xl font-bold">{{ substr($material->name, 0, 2) }}</span>
+                    </div>
+                @endif
 
-                            <h4 class="font-semibold text-gray-900 mb-2">{{ $material->name }}</h4>
+                <h4 class="font-semibold text-gray-900 mb-2">{{ $material->name }}</h4>
+                @if($material->description)
+                    <p class="text-sm text-gray-500 mb-2">{{ $material->description }}</p>
+                @endif
+                <div class="text-sm font-semibold text-orange-600">
+                    {{ number_format($material->price_per_cm2, 2) }} zł/cm²
+                </div>
 
-                            @if($material->description)
-                                <p class="text-sm text-gray-500 mb-3">{{ $material->description }}</p>
-                            @endif
-
-                            <div class="text-sm font-semibold text-orange-600">
-                                {{ number_format($material->price_per_cm2, 2) }} PLN/cm²
-                            </div>
-                        </div>
-                    </label>
-                @endforeach
+                @if($selectedMaterial == $material->id)
+                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                @endif
             </div>
+        </label>
+    @endforeach
+</div>
 
             @error('selectedMaterial')
                 <p class="text-red-600 text-sm mt-2 text-center">{{ $message }}</p>
@@ -175,52 +186,52 @@
                 <h4 class="text-lg font-semibold text-gray-900 border-b border-orange-200 pb-2">Opcje laminowania</h4>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- No laminate option -->
-                    <label class="relative cursor-pointer group">
-                        <input type="radio" wire:model.live="selectedLaminate" value="" class="sr-only">
-                        <div class="border-2 rounded-xl p-6 text-center transition-all duration-200 group-hover:shadow-xl bg-orange-50"
-                             :class="$wire.selectedLaminate === '' ? 'border-orange-500 bg-orange-100 shadow-lg' : 'border-gray-200 hover:border-gray-300'">
-                            <div class="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </div>
-                            <h4 class="font-medium text-gray-900 mb-1">Bez laminatu</h4>
-                            <p class="text-sm text-gray-500">Podstawowa wersja</p>
-                        </div>
-                    </label>
+    <!-- No laminate option -->
+    <label class="relative cursor-pointer group">
+        <input type="radio" wire:model.live="selectedLaminate" value="" class="sr-only">
+        <div class="border-2 rounded-xl p-6 text-center transition-all duration-200 group-hover:shadow-xl bg-orange-50"
+             :class="$wire.selectedLaminate === '' ? 'border-orange-500 bg-orange-100 shadow-lg' : 'border-gray-200 hover:border-gray-300'">
+            <div class="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <h4 class="font-medium text-gray-900 mb-1">Bez laminatu</h4>
+            <p class="text-sm text-gray-500">Podstawowa wersja</p>
+        </div>
+    </label>
 
-                    @foreach($laminateOptions as $laminate)
-                        <label class="relative cursor-pointer group">
-                            <input type="radio" wire:model.live="selectedLaminate" value="{{ $laminate->id }}" class="sr-only">
-                            <div class="border-2 rounded-xl p-6 text-center transition-all duration-200 group-hover:shadow-xl bg-orange-50"
-                                 :class="$wire.selectedLaminate == {{ $laminate->id }} ? 'border-orange-500 bg-orange-100 shadow-lg' : 'border-gray-200 hover:border-gray-300'">
+    @foreach($laminateOptions as $laminate)
+        <label class="relative cursor-pointer group">
+            <input type="radio" wire:model.live="selectedLaminate" value="{{ $laminate->id }}" class="sr-only">
+            <div class="border-2 rounded-xl p-6 text-center transition-all duration-200 group-hover:shadow-xl bg-orange-50"
+                 :class="$wire.selectedLaminate == {{ $laminate->id }} ? 'border-orange-500 bg-orange-100 shadow-lg' : 'border-gray-200 hover:border-gray-300'">
 
-                                @if($laminate->texture_image_path && file_exists(public_path($laminate->texture_image_path)))
-    <div class="w-12 h-12 mx-auto mb-3 rounded-lg overflow-hidden border border-gray-200">
-        <img src="{{ asset($laminate->texture_image_path) }}"
-             alt="{{ $laminate->name }}"
-             class="w-full h-full object-cover">
-    </div>
-@else
-    <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
-        <span class="text-orange-600 text-sm font-medium">{{ strtoupper(substr($laminate->finish_type ?? 'L', 0, 1)) }}</span>
-    </div>
-@endif
+                <!-- NAPRAWIONY OBRAZEK LAMINATU -->
+                @if($laminate->texture_image_path)
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden border border-gray-200">
+                        <img src="{{ asset($laminate->texture_image_path) }}"
+                             alt="{{ $laminate->name }}"
+                             class="w-full h-full object-cover"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center\'><span class=\'text-orange-600 text-sm font-medium\'>{{ strtoupper(substr($laminate->finish_type ?? 'L', 0, 1)) }}</span></div>';">
+                    </div>
+                @else
+                    <div class="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
+                        <span class="text-orange-600 text-sm font-medium">{{ strtoupper(substr($laminate->finish_type ?? 'L', 0, 1)) }}</span>
+                    </div>
+                @endif
 
-                                <h4 class="font-medium text-gray-900 mb-1">{{ $laminate->name }}</h4>
-
-                                @if($laminate->description)
-                                    <p class="text-sm text-gray-500 mb-2">{{ $laminate->description }}</p>
-                                @endif
-
-                                <div class="text-sm font-semibold text-orange-600">
-                                    +{{ number_format(($laminate->price_multiplier - 1) * 100, 0) }}%
-                                </div>
-                            </div>
-                        </label>
-                    @endforeach
+                <h4 class="font-medium text-gray-900 mb-1">{{ $laminate->name }}</h4>
+                @if($laminate->description)
+                    <p class="text-sm text-gray-500 mb-2">{{ $laminate->description }}</p>
+                @endif
+                <div class="text-sm font-semibold text-orange-600">
+                    +{{ number_format(($laminate->price_multiplier - 1) * 100, 0) }}%
                 </div>
+            </div>
+        </label>
+    @endforeach
+</div>
             </div>
 
             <!-- Size Selection -->
@@ -386,34 +397,87 @@
                 </div>
             </div>
 
-            <!-- Quantity and File Upload -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <label for="quantity" class="block text-sm font-semibold text-gray-700">
-                        Ilość (sztuk)
-                    </label>
-                    <input type="number" wire:model.live="quantity" id="quantity"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                           min="1" max="10000" placeholder="100">
-                    @error('quantity')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+            <div class="space-y-6">
+    <h4 class="text-lg font-semibold text-gray-900 border-b border-orange-200 pb-2">Grafika</h4>
+
+    <!-- Grid layout z plikiem po lewej i podglądem po prawej -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Lewa kolumna - upload pliku -->
+        <div class="bg-orange-50 rounded-xl p-6">
+            <div x-data="{ uploading: false, progress: 0 }"
+                 x-on:livewire-upload-start="uploading = true"
+                 x-on:livewire-upload-finish="uploading = false"
+                 x-on:livewire-upload-error="uploading = false"
+                 x-on:livewire-upload-progress="progress = $event.detail.progress">
+
+                <label class="block mb-4">
+                    <span class="text-gray-700">Dodaj swoją grafikę (opcjonalnie)</span>
+                    <input type="file" wire:model="artworkFile" accept="image/*" class="block w-full text-sm text-gray-500 mt-2
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-orange-50 file:text-orange-600
+                        hover:file:bg-orange-100">
+                    <p class="text-xs text-gray-500 mt-1">Max 10MB. Formaty: JPG, PNG, SVG</p>
+                </label>
+
+                <!-- Progress bar -->
+                <div x-show="uploading" class="mt-2">
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-orange-500 rounded-full" :style="`width: ${progress}%`"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">Wgrywanie... <span x-text="progress"></span>%</div>
                 </div>
 
-                <div class="space-y-4">
-                    <label for="artworkFile" class="block text-sm font-semibold text-gray-700">
-                        Plik graficzny (opcjonalnie)
-                    </label>
-                    <input type="file" wire:model="artworkFile" id="artworkFile"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                           accept=".jpg,.jpeg,.png,.svg,.pdf">
-                    <p class="text-xs text-gray-500">JPG, PNG, SVG, PDF - max 10MB</p>
-                    @error('artworkFile')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                @error('artworkFile') <span class="text-red-600 text-sm block mt-1">{{ $message }}</span> @enderror
+
+                <div class="flex items-center mt-4" x-show="!uploading && $wire.tempArtworkPath">
+                    <button type="button" wire:click="$set('tempArtworkPath', null)"
+                            class="text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Usuń grafikę
+                    </button>
                 </div>
             </div>
+        </div>
 
+        <!-- Prawa kolumna - podgląd obrazka -->
+        <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center">
+            @if($tempArtworkPath)
+    <div class="relative w-full h-full min-h-[200px] flex items-center justify-center">
+        <img src="/storage/{{ $tempArtworkPath }}"
+             alt="Podgląd grafiki"
+             class="max-w-full max-h-[300px] object-contain p-4"
+             onerror="this.onerror=null; this.src='/images/placeholder-image.png'; console.log('Błąd ładowania obrazka: ' + this.src);">
+
+
+@else
+    <div class="text-center p-8 text-gray-400 flex flex-col items-center">
+        <svg class="w-16 h-16 mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <p>Podgląd grafiki pojawi się tutaj</p>
+    </div>
+@endif
+        </div>
+    </div>
+</div>
+
+            <!-- Quantity and File Upload -->
+            <div class="space-y-4">
+    <label for="quantity" class="block text-sm font-semibold text-gray-700">
+        Ilość (sztuk)
+    </label>
+    <input type="number" wire:model.live="quantity" id="quantity"
+           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+           min="1" max="10000" placeholder="100">
+    @error('quantity')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>
             <!-- Price Display -->
 @if($calculatedPrice > 0)
     <div class="bg-gradient-to-br from-orange-100 to-amber-100 border border-orange-300 rounded-xl p-6">
