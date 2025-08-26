@@ -311,10 +311,11 @@
                         Przejdź do płatności
                     </button>
 
-                    <a href="<?php echo e(route('home')); ?>"
-                       class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors" wire:navigate>
+                    <!-- Zamieniony link na button z ID dla lepszej obsługi JavaScript -->
+                    <button id="backToCreator"
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors">
                         Wróć do kreatora
-                    </a>
+                    </button>
                 </div>
 
                 <!-- Trust Indicators -->
@@ -337,6 +338,56 @@
 
     <?php $__env->startPush('scripts'); ?>
     <script>
+        // Rozszerzona obsługa powrotu do kreatora z podglądu 3D
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Zapisz dane projektu w localStorage
+            const projectId = '<?php echo e($project->id); ?>';
+            localStorage.setItem('saved_project_id', projectId);
+            localStorage.setItem('saved_step', '4');
+            localStorage.setItem('saved_shape', '<?php echo e($project->label_shape_id); ?>');
+            localStorage.setItem('saved_material', '<?php echo e($project->label_material_id); ?>');
+            localStorage.setItem('saved_quantity', '<?php echo e($project->quantity); ?>');
+
+            // Zapisz wymiary
+            <?php if($project->predefined_size_id): ?>
+                localStorage.setItem('saved_size_type', 'predefined');
+                localStorage.setItem('saved_predefined_size', '<?php echo e($project->predefined_size_id); ?>');
+            <?php else: ?>
+                localStorage.setItem('saved_size_type', 'custom');
+                localStorage.setItem('saved_width', '<?php echo e($dimensions["width"]); ?>');
+                localStorage.setItem('saved_height', '<?php echo e($dimensions["height"]); ?>');
+            <?php endif; ?>
+
+            // Zapisz laminat jeśli istnieje
+            <?php if($project->laminateOption): ?>
+                localStorage.setItem('saved_laminate', '<?php echo e($project->laminate_option_id); ?>');
+            <?php else: ?>
+                localStorage.removeItem('saved_laminate');
+            <?php endif; ?>
+
+            // 2. Obsługa przycisku powrotu do kreatora
+            document.getElementById('backToCreator').addEventListener('click', function(e) {
+                e.preventDefault();
+                goBackToCreator();
+            });
+
+            // 3. Zabezpieczenie przed utratą danych przy użyciu przycisku wstecz przeglądarki
+            window.history.pushState({page: 'preview', projectId: projectId}, '', window.location.href);
+
+            window.addEventListener('popstate', function(event) {
+                // Przekieruj na kreator z zachowaniem parametrów
+                goBackToCreator();
+                // Zapobiegaj standardowej nawigacji
+                history.pushState(null, '', window.location.href);
+            });
+        });
+
+        // Funkcja pomocnicza do powrotu do kreatora
+        function goBackToCreator() {
+            // Przekieruj na stronę główną z parametrami
+            window.location.href = '<?php echo e(route("home")); ?>?project=<?php echo e($project->id); ?>&step=4&fromPreview=true';
+        }
+
         let scene, camera, renderer, controls, labelMesh;
         let isAnimating = false;
         let libraries3DLoaded = false;

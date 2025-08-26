@@ -298,10 +298,11 @@
                         Przejdź do płatności
                     </button>
 
-                    <a href="{{ route('home') }}"
-                       class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors" wire:navigate>
+                    <!-- Zamieniony link na button z ID dla lepszej obsługi JavaScript -->
+                    <button id="backToCreator"
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors">
                         Wróć do kreatora
-                    </a>
+                    </button>
                 </div>
 
                 <!-- Trust Indicators -->
@@ -324,6 +325,56 @@
 
     @push('scripts')
     <script>
+        // Rozszerzona obsługa powrotu do kreatora z podglądu 3D
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Zapisz dane projektu w localStorage
+            const projectId = '{{ $project->id }}';
+            localStorage.setItem('saved_project_id', projectId);
+            localStorage.setItem('saved_step', '4');
+            localStorage.setItem('saved_shape', '{{ $project->label_shape_id }}');
+            localStorage.setItem('saved_material', '{{ $project->label_material_id }}');
+            localStorage.setItem('saved_quantity', '{{ $project->quantity }}');
+
+            // Zapisz wymiary
+            @if($project->predefined_size_id)
+                localStorage.setItem('saved_size_type', 'predefined');
+                localStorage.setItem('saved_predefined_size', '{{ $project->predefined_size_id }}');
+            @else
+                localStorage.setItem('saved_size_type', 'custom');
+                localStorage.setItem('saved_width', '{{ $dimensions["width"] }}');
+                localStorage.setItem('saved_height', '{{ $dimensions["height"] }}');
+            @endif
+
+            // Zapisz laminat jeśli istnieje
+            @if($project->laminateOption)
+                localStorage.setItem('saved_laminate', '{{ $project->laminate_option_id }}');
+            @else
+                localStorage.removeItem('saved_laminate');
+            @endif
+
+            // 2. Obsługa przycisku powrotu do kreatora
+            document.getElementById('backToCreator').addEventListener('click', function(e) {
+                e.preventDefault();
+                goBackToCreator();
+            });
+
+            // 3. Zabezpieczenie przed utratą danych przy użyciu przycisku wstecz przeglądarki
+            window.history.pushState({page: 'preview', projectId: projectId}, '', window.location.href);
+
+            window.addEventListener('popstate', function(event) {
+                // Przekieruj na kreator z zachowaniem parametrów
+                goBackToCreator();
+                // Zapobiegaj standardowej nawigacji
+                history.pushState(null, '', window.location.href);
+            });
+        });
+
+        // Funkcja pomocnicza do powrotu do kreatora
+        function goBackToCreator() {
+            // Przekieruj na stronę główną z parametrami
+            window.location.href = '{{ route("home") }}?project={{ $project->id }}&step=4&fromPreview=true';
+        }
+
         let scene, camera, renderer, controls, labelMesh;
         let isAnimating = false;
         let libraries3DLoaded = false;
