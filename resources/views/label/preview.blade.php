@@ -414,11 +414,19 @@
                 camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
                 camera.position.set(0, 0, 200);
 
-                // Renderer
-                renderer = new THREE.WebGLRenderer({ antialias: true });
+                // Zmodyfikowany renderer
+                renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    alpha: true,
+                    powerPreference: "high-performance"
+                });
                 renderer.setSize(container.offsetWidth, container.offsetHeight);
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                // NOWE: dodaj korekcję tonalną i ustawienia gammy
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 0.8; // zmniejsz ekspozycję
+                renderer.outputEncoding = THREE.sRGBEncoding;
                 container.appendChild(renderer.domElement);
 
                 // Controls - KLUCZOWE DLA OBRACANIA!
@@ -432,20 +440,25 @@
                 controls.maxDistance = 500;
                 controls.minDistance = 50;
 
-                // UPROSZCZONE OŚWIETLENIE - BEZ NADMIERNEGO ŚWIECENIA
-                // Umiarkowane światło otoczenia
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                // ZMIENIONE OŚWIETLENIE - ŁAGODNIEJSZE BEZ EFEKTU ŚWIECENIA
+                // Łagodniejsze światło otoczenia
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
                 scene.add(ambientLight);
 
-                // Główne światło kierunkowe z przodu
-                const frontLight = new THREE.DirectionalLight(0xffffff, 0.6);
+                // Delikatne światło kierunkowe z przodu
+                const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
                 frontLight.position.set(0, 0, 100);
                 scene.add(frontLight);
 
-                // Delikatne światło z tyłu dla lepszej widoczności krawędzi
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.2);
+                // Bardzo słabe światło z tyłu
+                const backLight = new THREE.DirectionalLight(0xffffff, 0.1);
                 backLight.position.set(0, 0, -100);
                 scene.add(backLight);
+
+                // Nowe światło pomocnicze z góry
+                const topLight = new THREE.DirectionalLight(0xffffff, 0.2);
+                topLight.position.set(0, 100, 0);
+                scene.add(topLight);
 
                 // Create label geometry based on shape and real dimensions
                 const labelGeometry = createLabelGeometry(
@@ -454,7 +467,7 @@
                     projectConfig.dimensions.height
                 );
 
-                // ULEPSZONA FUNKCJA TWORZENIA MATERIAŁU
+                // POPRAWIONA FUNKCJA BEZ EFEKTU ŚWIECENIA
                 const labelMaterial = createLabelMaterial(projectConfig.material);
 
                 // Najpierw tworzenie mesha z bazowym materiałem
@@ -486,9 +499,23 @@
                             function(texture) {
                                 console.log('✅ Tekstura załadowana pomyślnie!');
 
+                                // NOWE: ustaw gamma i enkodowanie
+                                texture.encoding = THREE.sRGBEncoding;
+
                                 // Zastosuj teksturę do materiału
                                 labelMaterial.map = texture;
                                 labelMaterial.transparent = true;
+
+                                // NOWE: wyłącz automatyczną emisję światła
+                                labelMaterial.emissiveMap = null;
+                                labelMaterial.emissiveIntensity = 0;
+                                labelMaterial.emissive = new THREE.Color(0x000000);
+
+                                // NOWE: dostosuj parametry materiału by zapobiec nadmiernemu świeceniu
+                                if (labelMaterial.type.includes('MeshPhysical') || labelMaterial.type.includes('MeshStandard')) {
+                                    labelMaterial.envMapIntensity = 0.2;  // zmniejsz intensywność odbić
+                                    labelMaterial.lightMapIntensity = 0.5; // zmniejsz intensywność map światła
+                                }
 
                                 // Dostosuj mapowanie UV w zależności od kształtu
                                 if (projectConfig.shape === 'circle' || projectConfig.shape === 'oval') {
@@ -612,7 +639,7 @@
             return geometry;
         }
 
-        // FUNKCJA TWORZENIA MATERIAŁU - BEZ EMISJI ŚWIATŁA
+        // POPRAWIONA FUNKCJA BEZ EFEKTU ŚWIECENIA
         function createLabelMaterial(materialSlug) {
             console.log('Tworzenie materiału dla:', materialSlug);
 
@@ -621,8 +648,9 @@
                 side: THREE.DoubleSide,
                 transparent: true,
                 alphaTest: 0.1,
-                map: null
-                // Usunięto właściwości emissive i emissiveIntensity
+                map: null,
+                emissive: new THREE.Color(0x000000), // Czarny = brak emisji
+                emissiveIntensity: 0
             };
 
             let material;
@@ -630,65 +658,42 @@
             // Wybór typu materiału w zależności od slug
             switch(materialSlug) {
                 case 'paper-white-matte':
-                    material = new THREE.MeshStandardMaterial({
+                    material = new THREE.MeshLambertMaterial({
                         ...materialConfig,
                         color: 0xffffff,
-                        roughness: 0.7,  // Średnia chropowatość
-                        metalness: 0.0   // Brak metaliczności dla papieru
+                        reflectivity: 0.1 // Minimalna refleksyjność
                     });
                     break;
 
                 case 'paper-white-glossy':
-                    material = new THREE.MeshPhongMaterial({
+                    material = new THREE.MeshLambertMaterial({
                         ...materialConfig,
                         color: 0xffffff,
-                        shininess: 70,
-                        specular: 0x222222
+                        reflectivity: 0.3
                     });
                     break;
 
                 case 'paper-cream':
-                    material = new THREE.MeshStandardMaterial({
+                    material = new THREE.MeshLambertMaterial({
                         ...materialConfig,
                         color: 0xfff8e1,
-                        roughness: 0.7,
-                        metalness: 0.0
+                        reflectivity: 0.1
                     });
                     break;
 
                 case 'foil-gold':
-                    const size = 64;
-                    const data = new Uint8Array(size * size * 3);
-                    for (let i = 0; i < size * size * 3; i++) {
-                        data[i] = 180 + Math.random() * 75;
-                    }
-
-                    const bumpTexture = new THREE.DataTexture(data, size, size, THREE.RGBFormat);
-                    bumpTexture.needsUpdate = true;
-                    bumpTexture.wrapS = bumpTexture.wrapT = THREE.RepeatWrapping;
-                    bumpTexture.repeat.set(4, 4);
-
-                    material = new THREE.MeshPhysicalMaterial({
+                    material = new THREE.MeshLambertMaterial({
                         ...materialConfig,
                         color: new THREE.Color(1.0, 0.84, 0.0),
-                        metalness: 0.8,
-                        roughness: 0.2,
-                        bumpMap: bumpTexture,
-                        bumpScale: 0.01,
-                        clearcoat: 0.6,
-                        clearcoatRoughness: 0.2,
-                        reflectivity: 0.7
-                        // Usunięto emisję światła
+                        reflectivity: 0.5
                     });
                     break;
 
                 case 'foil-silver':
-                    material = new THREE.MeshStandardMaterial({
+                    material = new THREE.MeshLambertMaterial({
                         ...materialConfig,
                         color: 0xdddddd,
-                        metalness: 0.7,
-                        roughness: 0.1
-                        // Usunięto emisję światła
+                        reflectivity: 0.5
                     });
                     break;
 
