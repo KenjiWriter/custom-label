@@ -32,19 +32,20 @@ class LabelCreator extends Component
     public $isConfigurationValid = false;
 
     protected function rules()
-{
-    $rules = [
-        'selectedShape' => 'required|exists:label_shapes,id',
-        'selectedMaterial' => 'required|exists:label_materials,id',
-        'selectedLaminate' => 'nullable',
-        'selectedSize' => 'required_unless:useCustomSize,true|nullable|exists:predefined_sizes,id',
-        'customWidth' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
-        'customHeight' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
-        'quantity' => 'required|integer|min:1|max:10000',
-        'artworkFile' => 'nullable|image|max:10240', // max 10MB
-    ];
-    return $rules;
-}
+    {
+        $rules = [
+            'selectedShape' => 'required|exists:label_shapes,id',
+            'selectedMaterial' => 'required|exists:label_materials,id',
+            'selectedLaminate' => 'nullable',
+            'selectedSize' => 'required_unless:useCustomSize,true|nullable|exists:predefined_sizes,id',
+            'customWidth' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
+            'customHeight' => 'required_if:useCustomSize,true|nullable|numeric|min:10|max:500',
+            'quantity' => 'required|integer|min:1|max:10000',
+            'artworkFile' => 'nullable|image|max:10240', // max 10MB
+        ];
+        return $rules;
+    }
+
     protected $messages = [
         'selectedShape.required' => 'Wybierz kształt etykiety.',
         'selectedMaterial.required' => 'Wybierz materiał etykiety.',
@@ -68,25 +69,25 @@ class LabelCreator extends Component
     }
 
     // Dodaj metodę obsługi pliku:
-public function updatedArtworkFile()
-{
-    $this->validate([
-        'artworkFile' => 'image|max:10240', // max 10MB
-    ]);
+    public function updatedArtworkFile()
+    {
+        $this->validate([
+            'artworkFile' => 'image|max:10240', // max 10MB
+        ]);
 
-    if ($this->artworkFile) {
-        // Usuń stary plik jeśli istnieje
-        if ($this->tempArtworkPath && Storage::disk('public')->exists($this->tempArtworkPath)) {
-            Storage::disk('public')->delete($this->tempArtworkPath);
+        if ($this->artworkFile) {
+            // Usuń stary plik jeśli istnieje
+            if ($this->tempArtworkPath && Storage::disk('public')->exists($this->tempArtworkPath)) {
+                Storage::disk('public')->delete($this->tempArtworkPath);
+            }
+
+            // ZMIANA: zapisuj na dysku 'public' z bezpośrednią ścieżką
+            $this->tempArtworkPath = $this->artworkFile->store('temp/artworks', 'public');
+
+            // Dodaj wiadomość o sukcesie
+            session()->flash('message', 'Grafika została pomyślnie wczytana.');
         }
-
-        // ZMIANA: zapisuj na dysku 'public' z bezpośrednią ścieżką
-        $this->tempArtworkPath = $this->artworkFile->store('temp/artworks', 'public');
-
-        // Dodaj wiadomość o sukcesie
-        session()->flash('message', 'Grafika została pomyślnie wczytana.');
     }
-}
 
     // TWOJA ORYGINALNA METODA updated() - PRZYWRÓCONA
     public function updated($propertyName)
@@ -97,54 +98,54 @@ public function updatedArtworkFile()
     }
 
     public function updatedUseCustomSize($value)
-{
-    // Konwertuj string na boolean
-    $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    {
+        // Konwertuj string na boolean
+        $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
 
-    // Resetuj odpowiednie pola przy zmianie typu rozmiaru
-    if ($value) {
-        // Przełączenie na custom size - resetuj selected size
-        $this->selectedSize = null;
-    } else {
-        // Przełączenie na standardowe rozmiary - resetuj custom dimensions
-        $this->customWidth = null;
-        $this->customHeight = null;
+        // Resetuj odpowiednie pola przy zmianie typu rozmiaru
+        if ($value) {
+            // Przełączenie na custom size - resetuj selected size
+            $this->selectedSize = null;
+        } else {
+            // Przełączenie na standardowe rozmiary - resetuj custom dimensions
+            $this->customWidth = null;
+            $this->customHeight = null;
+        }
+
+        $this->calculatePrice();
+        $this->checkConfiguration();
     }
 
-    $this->calculatePrice();
-    $this->checkConfiguration();
-}
+    public function setCustomSize($isCustom)
+    {
+        $this->useCustomSize = $isCustom;
 
-public function setCustomSize($isCustom)
-{
-    $this->useCustomSize = $isCustom;
+        if ($isCustom) {
+            // Przełączenie na custom size - resetuj selected size
+            $this->selectedSize = null;
+        } else {
+            // Przełączenie na standardowe rozmiary - resetuj custom dimensions
+            $this->customWidth = null;
+            $this->customHeight = null;
+            $this->selectedSize = null; // Reset aby użytkownik mógł wybrać ponownie
+        }
 
-    if ($isCustom) {
-        // Przełączenie na custom size - resetuj selected size
-        $this->selectedSize = null;
-    } else {
-        // Przełączenie na standardowe rozmiary - resetuj custom dimensions
-        $this->customWidth = null;
-        $this->customHeight = null;
-        $this->selectedSize = null; // Reset aby użytkownik mógł wybrać ponownie
+        $this->calculatePrice();
+        $this->checkConfiguration();
     }
 
-    $this->calculatePrice();
-    $this->checkConfiguration();
-}
+    public function updatedSelectedSize($value)
+    {
+        // Gdy wybierasz standardowy rozmiar, upewnij się że custom size jest wyłączony
+        if ($value && $this->useCustomSize) {
+            $this->useCustomSize = false;
+            $this->customWidth = null;
+            $this->customHeight = null;
+        }
 
-public function updatedSelectedSize($value)
-{
-    // Gdy wybierasz standardowy rozmiar, upewnij się że custom size jest wyłączony
-    if ($value && $this->useCustomSize) {
-        $this->useCustomSize = false;
-        $this->customWidth = null;
-        $this->customHeight = null;
+        $this->calculatePrice();
+        $this->checkConfiguration();
     }
-
-    $this->calculatePrice();
-    $this->checkConfiguration();
-}
 
     // TWOJA ORYGINALNA METODA calculatePrice() - PRZYWRÓCONA
     public function calculatePrice()
@@ -235,84 +236,100 @@ public function updatedSelectedSize($value)
             ->get();
     }
 
-    // POPRAWIONA METODA saveProject() - Z TWOIMI DANYMI + MOJE POPRAWKI
+    // POPRAWIONA METODA saveProject() - Z MOJĄ ZMIANĄ DO OBRAZKA
     public function saveProject()
-{
-    try {
-        // Sprawdź konfigurację przed walidacją
-        $this->checkConfiguration();
+    {
+        try {
+            // Sprawdź konfigurację przed walidacją
+            $this->checkConfiguration();
 
-        if (!$this->isConfigurationValid) {
-            session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
-            return;
+            if (!$this->isConfigurationValid) {
+                session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
+                return;
+            }
+
+            // Walidacja z dostosowanymi regułami
+            $validatedData = $this->validate();
+
+            // Debug info
+            logger('Saving project with data:', [
+                'selectedShape' => $this->selectedShape,
+                'selectedMaterial' => $this->selectedMaterial,
+                'useCustomSize' => $this->useCustomSize,
+                'customWidth' => $this->customWidth,
+                'customHeight' => $this->customHeight,
+                'selectedSize' => $this->selectedSize,
+                'selectedLaminate' => $this->selectedLaminate,
+                'quantity' => $this->quantity,
+                'calculatedPrice' => $this->calculatedPrice
+            ]);
+
+            // Prepare project data
+            $projectData = [
+                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'label_shape_id' => $this->selectedShape,
+                'label_material_id' => $this->selectedMaterial,
+                'quantity' => $this->quantity,
+                'calculated_price' => $this->calculatedPrice,
+                'status' => 'preview',
+                'laminate_option_id' => $this->selectedLaminate ?: null,
+                'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
+                'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
+                'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
+            ];
+
+            // Sprawdź czy user jest zalogowany czy to gość
+            if (auth()->check()) {
+                $projectData['user_id'] = auth()->id();
+            } else {
+                $projectData['session_id'] = session()->getId();
+            }
+
+            // Create label project
+            $project = LabelProject::create($projectData);
+
+            // Handle file upload if present
+            if ($this->artworkFile) {
+                $path = $this->artworkFile->store('artwork', 'public');
+                $project->update(['artwork_file_path' => $path]);
+            }
+
+            // Handle artwork from tempArtworkPath if exists
+            if ($this->tempArtworkPath) {
+                try {
+                    // Sprawdź czy plik istnieje
+                    if (!Storage::disk('public')->exists($this->tempArtworkPath)) {
+                        logger('Ostrzeżenie: Plik nie istnieje:', ['path' => $this->tempArtworkPath]);
+                    }
+
+                    // Zapisz ścieżkę bez 'public/' na początku
+                    $project->update(['artwork_file_path' => $this->tempArtworkPath]);
+
+                    // Wyraźne logowanie dla debugowania
+                    $fullUrl = Storage::url($this->tempArtworkPath);
+                    logger('Zapisano ścieżkę do artwork:', [
+                        'tempPath' => $this->tempArtworkPath,
+                        'fullUrl' => $fullUrl,
+                        'fileExists' => Storage::disk('public')->exists($this->tempArtworkPath)
+                    ]);
+                } catch (\Exception $e) {
+                    logger('Błąd przy zapisie ścieżki do artwork:', ['error' => $e->getMessage()]);
+                }
+            }
+
+            logger('Project created successfully:', ['uuid' => $project->uuid]);
+
+            // Generate preview URL
+            $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
+
+            // Redirect to preview
+            return redirect()->to($previewUrl);
+
+        } catch (\Exception $e) {
+            logger('Error saving project: ' . $e->getMessage());
+            session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
         }
-
-        // Walidacja z dostosowanymi regułami
-        $validatedData = $this->validate();
-
-        // Debug info
-        logger('Saving project with data:', [
-            'selectedShape' => $this->selectedShape,
-            'selectedMaterial' => $this->selectedMaterial,
-            'useCustomSize' => $this->useCustomSize,
-            'customWidth' => $this->customWidth,
-            'customHeight' => $this->customHeight,
-            'selectedSize' => $this->selectedSize,
-            'selectedLaminate' => $this->selectedLaminate,
-            'quantity' => $this->quantity,
-            'calculatedPrice' => $this->calculatedPrice
-        ]);
-
-        // Prepare project data
-        $projectData = [
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'label_shape_id' => $this->selectedShape,
-            'label_material_id' => $this->selectedMaterial,
-            'quantity' => $this->quantity,
-            'calculated_price' => $this->calculatedPrice,
-            'status' => 'preview',
-            'laminate_option_id' => $this->selectedLaminate ?: null,
-            'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
-            'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
-            'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
-        ];
-
-        // Sprawdź czy user jest zalogowany czy to gość
-        if (auth()->check()) {
-            $projectData['user_id'] = auth()->id();
-        } else {
-            $projectData['session_id'] = session()->getId();
-        }
-
-        // Create label project
-        $project = LabelProject::create($projectData);
-
-        // Handle file upload if present
-        if ($this->artworkFile) {
-            $path = $this->artworkFile->store('artwork', 'public');
-            $project->update(['artwork_file_path' => $path]);
-        }
-
-        // Handle artwork from tempArtworkPath if exists
-        if ($this->tempArtworkPath) {
-            $finalArtworkPath = 'public/artworks/' . time() . '_' . basename($this->tempArtworkPath);
-            Storage::copy($this->tempArtworkPath, $finalArtworkPath);
-            $project->update(['artwork_file_path' => $finalArtworkPath]);
-        }
-
-        logger('Project created successfully:', ['uuid' => $project->uuid]);
-
-        // Generate preview URL
-        $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
-
-        // Redirect to preview
-        return redirect()->to($previewUrl);
-
-    } catch (\Exception $e) {
-        logger('Error saving project: ' . $e->getMessage());
-        session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
     }
-}
 
     // TWOJA ORYGINALNA METODA render() - PRZYWRÓCONA
     public function render()

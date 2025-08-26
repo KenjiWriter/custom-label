@@ -343,18 +343,38 @@
 
         // Project configuration from backend
         const projectConfig = {
-    shape: '<?php echo e($project->labelShape->slug); ?>',
-    material: '<?php echo e($project->labelMaterial->slug); ?>',
-    dimensions: {
-        width: <?php echo e($dimensions['width']); ?>,
-        height: <?php echo e($dimensions['height']); ?>
+            shape: '<?php echo e($project->labelShape->slug); ?>',
+            material: '<?php echo e($project->labelMaterial->slug); ?>',
+            dimensions: {
+                width: <?php echo e($dimensions['width']); ?>,
+                height: <?php echo e($dimensions['height']); ?>
 
-    },
-    textureUrl: '<?php echo e($project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : ""); ?>',
-    artworkUrl: '<?php echo e($project->artwork_file_path ? Storage::url($project->artwork_file_path) : ""); ?>',
-    hasLaminate: <?php echo e($project->laminateOption ? 'true' : 'false'); ?>
+            },
+            textureUrl: '<?php echo e($project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : ""); ?>',
+            // NAPRAWIONE: obsługa obu formatów ścieżki
+            artworkUrl: '<?php echo e($project->artwork_file_path ? (Str::startsWith($project->artwork_file_path, "http") ? $project->artwork_file_path : Storage::url($project->artwork_file_path)) : ""); ?>',
+            hasLaminate: <?php echo e($project->laminateOption ? 'true' : 'false'); ?>,
+            debug: {
+                hasArtwork: <?php echo e($project->artwork_file_path ? 'true' : 'false'); ?>,
+                artworkPath: '<?php echo e($project->artwork_file_path ?: "brak"); ?>'
+            }
+        };
 
-};
+        // Dodaj bezpośrednio po definicji projectConfig
+        // Wygeneruj alternatywny URL na wypadek problemów
+        const directStorageUrl = '/storage/<?php echo e($project->artwork_file_path); ?>';
+        console.log('Config główny URL:', projectConfig.artworkUrl);
+        console.log('Alternatywny URL:', directStorageUrl);
+
+        // Funkcja testująca dostępność zasobu
+        function testImageURL(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => reject(new Error(`Nie można załadować obrazu: ${url}`));
+                img.src = url;
+            });
+        }
 
         // AUTOMATYCZNIE POKAZUJ 2D FALLBACK PO 2 SEKUNDACH
         setTimeout(function() {
@@ -426,14 +446,20 @@
                 controls.maxDistance = 500;
                 controls.minDistance = 50;
 
-                // Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                // UPROSZCZONE OŚWIETLENIE - BEZ NADMIERNEGO ŚWIECENIA
+                // Umiarkowane światło otoczenia
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
                 scene.add(ambientLight);
 
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                directionalLight.position.set(100, 100, 50);
-                directionalLight.castShadow = true;
-                scene.add(directionalLight);
+                // Główne światło kierunkowe z przodu
+                const frontLight = new THREE.DirectionalLight(0xffffff, 0.6);
+                frontLight.position.set(0, 0, 100);
+                scene.add(frontLight);
+
+                // Delikatne światło z tyłu dla lepszej widoczności krawędzi
+                const backLight = new THREE.DirectionalLight(0xffffff, 0.2);
+                backLight.position.set(0, 0, -100);
+                scene.add(backLight);
 
                 // Create label geometry based on shape and real dimensions
                 const labelGeometry = createLabelGeometry(
@@ -442,62 +468,118 @@
                     projectConfig.dimensions.height
                 );
 
-                // Tworzenie materiału dla etykiety
-        const labelMaterial = createLabelMaterial(projectConfig.material);
+                // ULEPSZONA FUNKCJA TWORZENIA MATERIAŁU
+                const labelMaterial = createLabelMaterial(projectConfig.material);
 
-        // Dodaj obsługę grafiki użytkownika jeśli jest dostępna
-        if (projectConfig.artworkUrl) {
-            // Załaduj teksturę z grafiki użytkownika
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(projectConfig.artworkUrl,
-                // onLoad callback
-                function(texture) {
-                    // Zastosuj teksturę do materiału
-                    labelMaterial.map = texture;
-                    labelMaterial.needsUpdate = true;
+                // Najpierw tworzenie mesha z bazowym materiałem
+                labelMesh = new THREE.Mesh(labelGeometry, labelMaterial);
+                labelMesh.castShadow = true;
+                labelMesh.receiveShadow = true;
+                scene.add(labelMesh);
 
-                    // Dostosuj mapowanie tekstury
-                    texture.wrapS = THREE.RepeatWrapping;
-                    texture.wrapT = THREE.RepeatWrapping;
-                    texture.repeat.set(1, 1);
+                // Zastąp istniejącą obsługę artwork tym kodem
+                if (projectConfig.artworkUrl) {
+                    console.log('Próbuję załadować grafikę z URL:', projectConfig.artworkUrl);
 
-                    // Zaktualizuj mesh etykiety
-                    if (labelMesh) {
-                        labelMesh.material = labelMaterial;
+                    const textureLoader = new THREE.TextureLoader();
+                    textureLoader.crossOrigin = 'anonymous';
+
+                    // NOWA FUNKCJA: próbuje załadować teksturę z różnych URL-i, dopóki nie zadziała
+                    function tryLoadTexture(urls, index = 0) {
+                        if (index >= urls.length) {
+                            console.error('❌ Wszystkie próby ładowania tekstury nie powiodły się');
+                            return;
+                        }
+
+                        const currentUrl = urls[index] + '?cb=' + new Date().getTime();
+                        console.log(`Próba ${index+1}/${urls.length}: ${currentUrl}`);
+
+                        textureLoader.load(
+                            currentUrl,
+                            // Success
+                            function(texture) {
+                                console.log('✅ Tekstura załadowana pomyślnie!');
+
+                                // Zastosuj teksturę do materiału
+                                labelMaterial.map = texture;
+                                labelMaterial.transparent = true;
+
+                                // Dostosuj mapowanie UV w zależności od kształtu
+                                if (projectConfig.shape === 'circle' || projectConfig.shape === 'oval') {
+                                    texture.center.set(0.5, 0.5);
+                                    texture.repeat.set(1, 1);
+                                } else {
+                                    texture.wrapS = THREE.ClampToEdgeWrapping;
+                                    texture.wrapT = THREE.ClampToEdgeWrapping;
+                                }
+
+                                texture.needsUpdate = true;
+                                labelMaterial.needsUpdate = true;
+
+                                // Wymuś ponowne renderowanie sceny
+                                labelMesh.material = labelMaterial;
+                                renderer.render(scene, camera);
+
+                                console.log('Rendering z teksturą zakończony');
+                            },
+                            // Progress
+                            function(xhr) {
+                                const percent = xhr.loaded / xhr.total * 100;
+                                console.log(`Ładowanie: ${percent.toFixed(1)}%`);
+                            },
+                            // Error - próbuj następny URL
+                            function(error) {
+                                console.warn(`❌ Błąd ładowania ${currentUrl}:`, error);
+                                tryLoadTexture(urls, index + 1);
+                            }
+                        );
                     }
-                },
-                // onProgress callback
-                undefined,
-                // onError callback
-                function(error) {
-                    console.error('Błąd ładowania grafiki:', error);
-                }
-            );
-        }
 
-        // Create mesh
-        labelMesh = new THREE.Mesh(labelGeometry, labelMaterial);
-        labelMesh.castShadow = true;
-        labelMesh.receiveShadow = true;
-        scene.add(labelMesh);
+                    // Przygotuj listę alternatywnych URL-i do wypróbowania
+                    const urlsToTry = [
+                        projectConfig.artworkUrl,
+                        directStorageUrl,
+                        '/storage/' + projectConfig.debug.artworkPath,
+                    ];
+
+                    // Rozpocznij próby ładowania
+                    tryLoadTexture(urlsToTry);
+
+                } else {
+                    console.log('Brak URL do grafiki użytkownika');
+                }
 
                 // Add laminate layer if selected
-if (projectConfig.hasLaminate) {
-    const laminateGeometry = labelGeometry.clone();
-    laminateGeometry.scale(1.01, 1.01, 1); // Mniejsza różnica
+                if (projectConfig.hasLaminate) {
+                    const laminateGeometry = labelGeometry.clone();
+                    laminateGeometry.scale(1.01, 1.01, 1); // Mniejsza różnica
 
-    // PRZEZROCZYSTY LAMINAT MATOWY
-    const laminateMaterial = new THREE.MeshLambertMaterial({
-        color: 0xffffff,         // Biały zamiast niebieskiego
-        transparent: true,
-        opacity: 0.15,           // Bardzo przezroczysty
-        side: THREE.DoubleSide
-    });
+                    // PRZEZROCZYSTY LAMINAT MATOWY
+                    const laminateMaterial = new THREE.MeshLambertMaterial({
+                        color: 0xffffff,         // Biały zamiast niebieskiego
+                        transparent: true,
+                        opacity: 0.15,           // Bardzo przezroczysty
+                        side: THREE.DoubleSide
+                    });
 
-    const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
-    laminateMesh.position.z = 0.5; // Bliżej etykiety
-    scene.add(laminateMesh);
-}
+                    const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
+                    laminateMesh.position.z = 0.5; // Bliżej etykiety
+                    scene.add(laminateMesh);
+                }
+
+                // Na końcu funkcji init3DPreview()
+                // Dodaj weryfikację po inicjalizacji
+                if (projectConfig.artworkUrl) {
+                    console.log('==== WERYFIKACJA ARTWORK ====');
+                    console.log('URL artwork:', projectConfig.artworkUrl);
+                    console.log('Czy material ma mapę?', labelMaterial.map !== null);
+
+                    // Test ładowania obrazka przez standardowy Image API
+                    const testImg = new Image();
+                    testImg.onload = () => console.log('✅ Test IMG: Obraz załadowany pomyślnie');
+                    testImg.onerror = () => console.log('❌ Test IMG: Błąd ładowania obrazu');
+                    testImg.src = projectConfig.artworkUrl;
+                }
 
                 // Hide loading, start render loop
                 document.getElementById('preview-loading').style.display = 'none';
@@ -544,90 +626,95 @@ if (projectConfig.hasLaminate) {
             return geometry;
         }
 
+        // FUNKCJA TWORZENIA MATERIAŁU - BEZ EMISJI ŚWIATŁA
         function createLabelMaterial(materialSlug) {
-    let materialConfig = {
-        side: THREE.DoubleSide
-    };
+            console.log('Tworzenie materiału dla:', materialSlug);
 
-    // NAPRAWIONE KOLORY MATERIAŁÓW W 3D! DOPASOWANE DO SLUG
-    switch(materialSlug) {
-        case 'paper-white-matte':
-            materialConfig.color = 0xffffff;
-            break;
-
-        case 'paper-white-glossy':
-            // BŁYSZCZĄCY PAPIER Z POLYSKIEM!
-            return new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                shininess: 100,
+            // Podstawowa konfiguracja materiału - BEZ EMISJI
+            let materialConfig = {
                 side: THREE.DoubleSide,
-                specular: 0x222222
-            });
+                transparent: true,
+                alphaTest: 0.1,
+                map: null
+                // Usunięto właściwości emissive i emissiveIntensity
+            };
 
-        case 'paper-cream':
-            materialConfig.color = 0xfff8e1;
-            break;
+            let material;
 
-        case 'foil-gold':
-    // Proceduralny bump - małe szumy imitujące fakturę
-    const size = 64;
-    const data = new Uint8Array(size * size * 3);
-    for (let i = 0; i < size * size * 3; i++) {
-        data[i] = 180 + Math.random() * 75; // jasne odcienie
-    }
+            // Wybór typu materiału w zależności od slug
+            switch(materialSlug) {
+                case 'paper-white-matte':
+                    material = new THREE.MeshStandardMaterial({
+                        ...materialConfig,
+                        color: 0xffffff,
+                        roughness: 0.7,  // Średnia chropowatość
+                        metalness: 0.0   // Brak metaliczności dla papieru
+                    });
+                    break;
 
-    // Światło otoczenia
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambient);
+                case 'paper-white-glossy':
+                    material = new THREE.MeshPhongMaterial({
+                        ...materialConfig,
+                        color: 0xffffff,
+                        shininess: 70,
+                        specular: 0x222222
+                    });
+                    break;
 
-    // Światło tylne (miękkie)
-    const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    backLight.position.set(-2, 1, -5);
-    scene.add(backLight);
+                case 'paper-cream':
+                    material = new THREE.MeshStandardMaterial({
+                        ...materialConfig,
+                        color: 0xfff8e1,
+                        roughness: 0.7,
+                        metalness: 0.0
+                    });
+                    break;
 
-    // Światło przednie – mniej ostre i przesunięte
-    const frontLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    frontLight.position.set(2, 2, 5); // z góry i lekko z boku
-    scene.add(frontLight);
+                case 'foil-gold':
+                    const size = 64;
+                    const data = new Uint8Array(size * size * 3);
+                    for (let i = 0; i < size * size * 3; i++) {
+                        data[i] = 180 + Math.random() * 75;
+                    }
 
-    // Tekstura bump
-    const bumpTexture = new THREE.DataTexture(data, size, size, THREE.RGBFormat);
-    bumpTexture.needsUpdate = true;
-    bumpTexture.wrapS = bumpTexture.wrapT = THREE.RepeatWrapping;
-    bumpTexture.repeat.set(4, 4);
+                    const bumpTexture = new THREE.DataTexture(data, size, size, THREE.RGBFormat);
+                    bumpTexture.needsUpdate = true;
+                    bumpTexture.wrapS = bumpTexture.wrapT = THREE.RepeatWrapping;
+                    bumpTexture.repeat.set(4, 4);
 
-    return new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color(1.0, 0.84, 0.0), // złoto
-        metalness: 1.0,
-        roughness: 0.35,           // bardziej matowe odbicie -> miękki blik
-        bumpMap: bumpTexture,
-        bumpScale: 0.015,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.08,  // laminat lekko rozmywa odbicie
-        reflectivity: 0.85,
-        side: THREE.DoubleSide
-    });
-        case 'foil-silver':
-        // SREBRNA FOLIA Z POŁYSKIEM!
-            return new THREE.MeshStandardMaterial({
-                color: 0xc0c0c0,
-                metalness: 0.9,
-                roughness: 0.1,
-                side: THREE.DoubleSide,
-                emissive: 0x111111,     // Delikatne srebrne świecenie
-                emissiveIntensity: 0.1
-            });
+                    material = new THREE.MeshPhysicalMaterial({
+                        ...materialConfig,
+                        color: new THREE.Color(1.0, 0.84, 0.0),
+                        metalness: 0.8,
+                        roughness: 0.2,
+                        bumpMap: bumpTexture,
+                        bumpScale: 0.01,
+                        clearcoat: 0.6,
+                        clearcoatRoughness: 0.2,
+                        reflectivity: 0.7
+                        // Usunięto emisję światła
+                    });
+                    break;
 
-        case 'paper-waterproof':
-            materialConfig.color = 0xf0f8ff;
-            break;
+                case 'foil-silver':
+                    material = new THREE.MeshStandardMaterial({
+                        ...materialConfig,
+                        color: 0xdddddd,
+                        metalness: 0.7,
+                        roughness: 0.1
+                        // Usunięto emisję światła
+                    });
+                    break;
 
-        default:
-            materialConfig.color = 0xffffff;
-    }
+                default:
+                    material = new THREE.MeshLambertMaterial({
+                        ...materialConfig,
+                        color: 0xffffff
+                    });
+            }
 
-    return new THREE.MeshLambertMaterial(materialConfig);
-}
+            return material;
+        }
 
         function createStarGeometry() {
             const shape = new THREE.Shape();
@@ -680,7 +767,18 @@ if (projectConfig.hasLaminate) {
         });
 
         // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (projectConfig.artworkUrl) {
+                try {
+                    const result = await testImageURL(projectConfig.artworkUrl);
+                    console.log('Test URL obrazka: SUKCES');
+                } catch (error) {
+                    console.error('Test URL obrazka: BŁĄD', error);
+                    // Spróbuj inne podejście
+                    console.log('Próba alternatywnego URL:', '/storage/' + projectConfig.debug.artworkPath);
+                }
+            }
+
             isAnimating = true;
             load3DLibraries();
         });
