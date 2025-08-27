@@ -83,19 +83,49 @@
         </div>
     </div>
 
-    <!-- Label Creator Section -->
-<div class="py-16 bg-white rounded-2xl shadow-xl mb-16" data-creator-section>
-    <div class="px-6 lg:px-12">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">
-                Kreator etykiet
+    <!-- Enhanced Label Creator Section with animated elements and improved visual design -->
+<div class="py-20 px-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden rounded-3xl shadow-2xl mb-20 border border-orange-100" data-creator-section>
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute w-64 h-64 bg-orange-50 opacity-70 rounded-full -top-20 -left-20 animate-pulse-slow"></div>
+        <div class="absolute w-96 h-96 bg-yellow-50 opacity-30 rounded-full -bottom-40 -right-40 animate-pulse-slow" style="animation-delay: 1.5s"></div>
+        <div class="absolute w-32 h-32 bg-gradient-to-r from-orange-100 to-yellow-100 opacity-40 rounded-full top-1/4 right-10 animate-float" style="animation-duration: 6s"></div>
+        <svg class="absolute left-10 top-1/3 text-orange-50 w-40 h-40 animate-float" style="animation-delay: 0.5s" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor" d="M41.2,-65.8C54.1,-56.1,65.7,-45.9,73.7,-32.9C81.8,-19.9,86.3,-3.9,83.8,11.1C81.4,26.1,71.9,40.2,60,50.8C48.1,61.4,33.7,68.5,18.9,72.8C4,77.2,-11.2,78.7,-23.6,73.4C-35.9,68.1,-45.4,56,-54.1,43.9C-62.8,31.8,-70.7,19.9,-73.5,6.4C-76.2,-7.2,-73.8,-22.3,-65.4,-33C-57,-43.7,-42.7,-50,-29.5,-59.5C-16.4,-69,-8.2,-81.7,2.9,-86.4C14.1,-91,28.2,-75.5,41.2,-65.8Z" transform="translate(100 100)" />
+        </svg>
+    </div>
+
+    <div class="max-w-6xl mx-auto relative z-10">
+        <div class="text-center mb-14">
+            <!-- Badge like other sections -->
+            <span class="inline-block px-4 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-medium mb-4 animate-pulse-slow">ZAPROJEKTUJ TERAZ</span>
+
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-5">
+                Kreator Etykiet <span class="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-600">CustomLabels</span>
             </h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                Skonfiguruj swoją etykietę krok po kroku. Każda zmiana natychmiast wpływa na cenę i podgląd.
+
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Skonfiguruj swoją etykietę krok po kroku.
+                Każda zmiana natychmiast wpływa na cenę i podgląd.
+                <span class="block mt-2 text-orange-500 font-medium">Rozpocznij poniżej!</span>
             </p>
         </div>
 
-        <?php
+        <!-- Visual divider -->
+        <div class="flex items-center justify-center mb-10">
+            <div class="h-1 w-16 bg-gradient-to-r from-orange-300 to-orange-500 rounded-full"></div>
+            <div class="mx-4">
+                <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                </svg>
+            </div>
+            <div class="h-1 w-16 bg-gradient-to-r from-orange-500 to-orange-300 rounded-full"></div>
+        </div>
+
+        <!-- Creator container with enhanced styling -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 transform transition-all duration-500 hover:shadow-xl">
+            <!-- Creator component -->
+            <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -111,6 +141,47 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
+
+            <!-- Trust indicators -->
+            <div class="mt-10 pt-6 border-t border-gray-100">
+                <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        Bezpieczne płatności
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Gwarancja satysfakcji
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Szybka realizacja zamówień
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Wsparcie 24/7
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extra incentive -->
+        <div class="mt-8 text-center">
+            <div class="inline-block bg-gradient-to-r from-orange-50 to-yellow-50 px-6 py-3 rounded-full border border-orange-100 text-orange-600 text-sm font-medium animate-bounce" style="animation-duration: 3s;">
+                <svg class="w-4 h-4 inline-block mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.707.293l.707.707L15.657 5a1 1 0 01-1.414 1.414L13 5.172l-1.243 1.242a1 1 0 01-1.414-1.414l2-2A1 1 0 0112 2zm2 5a2 2 0 012 2v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5a2 2 0 012-2h5zM9 9a1 1 0 00-1 1v5a1 1 0 001 1h5a1 1 0 001-1v-5a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                Zamów dziś i otrzymaj darmową próbkę!
+            </div>
+        </div>
     </div>
 </div>
 
