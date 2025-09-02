@@ -1,4 +1,4 @@
-<div> <!-- Dodany zewnętrzny div jako pojedynczy element główny -->
+<div> <!-- Zewnętrzny div -->
     <div data-creator-section
          x-data="{
             currentStep: 1,
@@ -21,37 +21,42 @@
          class="space-y-8"
          id="label-creator">
 
-        <!-- Enhanced Progress Bar -->
+        <!-- Poprawiony pasek postępu - tylko podkreślenie dla aktywnych kroków -->
         <div class="relative mb-12">
             <div class="flex items-center justify-between">
                 <template x-for="step in totalSteps" :key="step">
-                    <div class="flex items-center" :class="step < totalSteps ? 'flex-1' : ''">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300"
-                             :class="currentStep >= step ? 'bg-orange-500 border-orange-500 text-white shadow-lg creator-step-active' : 'bg-white border-gray-300 text-gray-400'">
-                            <span x-text="step" class="font-semibold"></span>
-                        </div>
-                        <div x-show="step < totalSteps" class="flex-1 h-1 mx-4 transition-all duration-300 creator-progress"
-                             :class="currentStep > step ? 'bg-orange-500' : 'bg-gray-200'">
+                    <div class="flex-1 flex items-center" :class="step === 1 ? 'justify-start' : (step === totalSteps ? 'justify-end' : 'justify-center')">
+                        <div class="relative">
+                            <div class="flex items-center relative z-10">
+                                <div
+                                    class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                                    :class="currentStep >= step
+                                        ? 'bg-orange-600 text-white'
+                                        : 'bg-gray-200 text-gray-500'">
+                                    <span class="text-sm font-semibold" x-text="step"></span>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium transition-colors no-underline"
+                                        :class="currentStep >= step ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-gray-500'">
+                                        <span x-show="step === 1" class="no-underline">Wybierz kształt</span>
+                                        <span x-show="step === 2" class="no-underline">Wybierz materiał</span>
+                                        <span x-show="step === 3" class="no-underline">Wybierz rozmiar</span>
+                                        <span x-show="step === 4" class="no-underline">Finalizacja</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Connect line, except for last step -->
+                            <div x-show="step < totalSteps"
+                                 class="w-full h-1 absolute top-5 left-10"
+                                 :class="currentStep > step ? 'bg-orange-600' : 'bg-gray-200'"></div>
                         </div>
                     </div>
                 </template>
             </div>
-
-            <!-- Step Labels with improved animation -->
-            <div class="flex justify-between mt-4 text-sm">
-                <span class="text-center font-medium transform transition-all duration-300"
-                      :class="currentStep >= 1 ? 'text-orange-600 scale-110' : 'text-gray-500'">Kształt</span>
-                <span class="text-center font-medium transform transition-all duration-300"
-                      :class="currentStep >= 2 ? 'text-orange-600 scale-110' : 'text-gray-500'">Materiał</span>
-                <span class="text-center font-medium transform transition-all duration-300"
-                      :class="currentStep >= 3 ? 'text-orange-600 scale-110' : 'text-gray-500'">Laminat & Rozmiar</span>
-                <span class="text-center font-medium transform transition-all duration-300"
-                      :class="currentStep >= 4 ? 'text-orange-600 scale-110' : 'text-gray-500'">Finalizacja</span>
-            </div>
         </div>
 
-        <form wire:submit="saveProject" class="space-y-12">
-            <!-- Step 1: Shape Selection -->
+        <form class="space-y-8">
+            <!-- Step 1: Choose Shape -->
             <div x-show="currentStep === 1"
                  x-transition:enter="transition ease-out duration-300 transform step-enter-right"
                  x-transition:enter-start="opacity-0 translate-x-8"
@@ -68,52 +73,56 @@
                     </p>
                 </div>
 
-                <!-- Ulepszone wyświetlanie obrazków kształtów -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     @foreach($shapes as $shape)
-                        <label class="relative cursor-pointer group perspective-500">
-                            <input type="radio" wire:model.live="selectedShape" value="{{ $shape->id }}" class="sr-only">
-                            <div class="shape-card border-2 rounded-xl p-6 text-center transition-all duration-200"
-                                 :class="$wire.selectedShape == {{ $shape->id }} ? 'border-orange-500 bg-orange-100 shadow-lg selected' : 'border-gray-200 hover:border-gray-300 bg-orange-50'">
-
-                                <!-- Obrazek kształtu w kontenerze -->
-                                <div class="shape-image-container w-20 h-20 mx-auto mb-4 bg-white rounded-lg shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden">
-                                    @if($shape->icon_path)
-                                        <img src="{{ asset($shape->icon_path) }}"
-                                             alt="{{ $shape->name }}"
-                                             class="w-16 h-16 object-contain transform transition-all duration-300 group-hover:scale-110"
-                                             onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-orange-600 text-2xl font-bold icon-3d\'>{{ substr($shape->name, 0, 1) }}</span>';">
-                                    @else
-                                        <!-- FALLBACK - litera gdy brak obrazka -->
-                                        <div class="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center icon-3d">
-                                            <span class="text-orange-600 text-2xl font-bold">{{ substr($shape->name, 0, 1) }}</span>
+                        <label class="relative cursor-pointer">
+                            <input
+                                type="radio"
+                                wire:model.live="selectedShape"
+                                value="{{ $shape->id }}"
+                                class="sr-only peer"
+                            >
+                            <div class="flex flex-col items-center p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50">
+                                <div class="bg-orange-100 p-3 rounded-full mb-3">
+                                    @if($shape->slug == 'circle')
+                                        <div class="w-12 h-12 bg-orange-600 rounded-full"></div>
+                                    @elseif($shape->slug == 'rectangle')
+                                        <div class="w-12 h-8 bg-orange-600 rounded-md"></div>
+                                    @elseif($shape->slug == 'square')
+                                        <div class="w-10 h-10 bg-orange-600 rounded-md"></div>
+                                    @elseif($shape->slug == 'oval')
+                                        <div class="w-12 h-8 bg-orange-600 rounded-full"></div>
+                                    @elseif($shape->slug == 'star')
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                            </svg>
                                         </div>
+                                    @else
+                                        <div class="w-12 h-12 bg-orange-600 rounded-md"></div>
                                     @endif
                                 </div>
 
-                                <h4 class="font-semibold text-gray-900 mb-2">{{ $shape->name }}</h4>
-                                @if($shape->description)
-                                    <p class="text-sm text-gray-500 leading-relaxed">{{ $shape->description }}</p>
-                                @endif
-
-                                <!-- Indicator with animation -->
-                                <div class="shape-indicator absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center"
-                                     x-show="$wire.selectedShape == {{ $shape->id }}">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                </div>
+                                <span class="font-medium text-gray-900 text-sm">{{ $shape->name }}</span>
+                                <p class="mt-1 text-xs text-gray-500">{{ Str::limit($shape->description, 60) }}</p>
                             </div>
                         </label>
                     @endforeach
                 </div>
 
-                @error('selectedShape')
-                    <p class="text-red-600 text-sm mt-2 text-center">{{ $message }}</p>
-                @enderror
+                <div class="flex justify-center">
+                    <button
+                        type="button"
+                        class="px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ $selectedShape ? 'bg-orange-600 text-white shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
+                        @click="nextStep()"
+                        :disabled="!{{ $selectedShape ? 'true' : 'false' }}"
+                    >
+                        Dalej
+                    </button>
+                </div>
             </div>
 
-            <!-- Step 2: Material Selection -->
+            <!-- Step 2: Choose Material -->
             <div x-show="currentStep === 2"
                  x-transition:enter="transition ease-out duration-300 transform step-enter-right"
                  x-transition:enter-start="opacity-0 translate-x-8"
@@ -130,60 +139,129 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Poprawione karty materiałów z lepszymi ilustracjami -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     @foreach($materials as $material)
-                        <label class="relative cursor-pointer group perspective-500">
-                            <input type="radio" wire:model.live="selectedMaterial" value="{{ $material->id }}" class="sr-only">
-                            <div class="material-card border-2 rounded-xl p-6 text-center transition-all duration-300"
-                                 :class="$wire.selectedMaterial == {{ $material->id }} ? 'border-orange-500 bg-orange-50 shadow-lg selected-item' : 'border-gray-200 hover:border-orange-300'">
-
-                                <!-- NAPRAWIONY OBRAZEK MATERIAŁU z efektami -->
-                                @php
-                                    $isGlossy = str_contains(strtolower($material->finish_type ?? ''), 'glossy');
-                                    $isMatte = str_contains(strtolower($material->finish_type ?? ''), 'matte');
-                                @endphp
-
-                                <div class="material-texture w-20 h-20 mx-auto mb-4 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm relative
-                                          {{ $isGlossy ? 'material-glossy' : ($isMatte ? 'material-matte' : '') }}">
-                                    @if($material->texture_image_path)
-                                        <img src="{{ asset($material->texture_image_path) }}"
-                                             alt="{{ $material->name }}"
-                                             class="w-full h-full object-cover transform transition-all duration-500"
-                                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center\'><span class=\'text-orange-600 text-xl font-bold\'>{{ substr($material->name, 0, 2) }}</span></div>';">
+                        <label class="relative cursor-pointer">
+                            <input
+                                type="radio"
+                                wire:model.live="selectedMaterial"
+                                value="{{ $material->id }}"
+                                class="sr-only peer"
+                            >
+                            <div class="flex flex-col h-full p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50">
+                                <div class="flex-shrink-0 mb-3 h-20 overflow-hidden rounded-lg flex items-center justify-center">
+                                    @if($material->image_path)
+                                        <img src="{{ asset($material->image_path) }}" alt="{{ $material->name }}" class="w-full h-full object-cover">
                                     @else
-                                        <!-- FALLBACK -->
-                                        <div class="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-                                            <span class="text-orange-600 text-xl font-bold icon-3d">{{ substr($material->name, 0, 2) }}</span>
-                                        </div>
+                                        <!-- Znacznie ulepszone ikony dla różnych materiałów -->
+                                        @if(str_contains($material->slug, 'white-matte') || str_contains($material->slug, 'bialy-matowy'))
+                                            <div class="w-28 h-16 bg-gray-50 border-2 border-gray-200 rounded-md flex items-center justify-center relative">
+                                                <div class="absolute inset-0 bg-white"></div>
+                                                <span class="relative z-10 font-medium text-gray-800">BIAŁY MAT</span>
+                                            </div>
+                                        @elseif(str_contains($material->slug, 'white-glossy') || str_contains($material->slug, 'bialy-blysk'))
+                                            <div class="w-28 h-16 bg-gray-50 border-2 border-gray-200 rounded-md flex items-center justify-center relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-white"></div>
+                                                <div class="absolute -inset-x-full top-0 bottom-0 h-full w-[400%] animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white to-transparent opacity-60"></div>
+                                                <span class="relative z-10 font-medium text-gray-800">BŁYSZCZĄCY</span>
+                                            </div>
+                                        @elseif(str_contains($material->slug, 'kraft') || str_contains($material->slug, 'kraft'))
+                                            <div class="w-28 h-16 rounded-md flex items-center justify-center" style="background-color: #d4b996;">
+                                                <div class="w-full h-full flex items-center justify-center" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZDRiOTk2Ij48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiNjM2E0ODIiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=');">
+                                                    <span class="text-white font-medium shadow-sm">KRAFT</span>
+                                                </div>
+                                            </div>
+                                        @elseif(str_contains($material->slug, 'gold') || str_contains($material->slug, 'zlot'))
+                                            <div class="w-28 h-16 rounded-md flex items-center justify-center relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600"></div>
+                                                <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-yellow-200 to-transparent opacity-70 animate-pulse"></div>
+                                                <span class="relative z-10 font-medium text-white drop-shadow-md">ZŁOTY</span>
+                                            </div>
+                                        @elseif(str_contains($material->slug, 'silver') || str_contains($material->slug, 'srebr'))
+                                            <div class="w-28 h-16 rounded-md flex items-center justify-center relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-400 to-gray-500"></div>
+                                                <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70"></div>
+                                                <span class="relative z-10 font-medium text-white drop-shadow-md">SREBRNY</span>
+                                            </div>
+                                        @elseif(str_contains($material->slug, 'waterproof') || str_contains($material->slug, 'wodoodporn'))
+                                            <div class="w-28 h-16 bg-blue-50 rounded-md flex items-center justify-center relative overflow-hidden border border-blue-200">
+                                                <div class="absolute inset-0 bg-gradient-to-b from-white via-blue-50 to-blue-100 opacity-80"></div>
+                                                <div class="absolute top-0 left-0 right-0 h-2 bg-blue-400 opacity-30"></div>
+                                                <div class="w-full h-full flex flex-col items-center justify-center relative z-10">
+                                                    <svg class="w-8 h-8 text-blue-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l-9-5 9-5 9 5-9 5z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14v10"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l-9-5 9-5 9 5-9 5z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14v10"></path>
+                                                    </svg>
+                                                    <span class="text-xs font-medium text-blue-700">WODOODPORNY</span>
+                                                </div>
+                                            </div>
+                                        @elseif(str_contains($material->slug, 'transparent') || str_contains($material->slug, 'przezroczyst'))
+                                            <div class="w-28 h-16 rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200">
+                                                <div class="absolute inset-0 bg-white bg-opacity-30 backdrop-blur-sm"></div>
+                                                <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-40"></div>
+                                                <div class="w-20 h-8 border border-dashed border-gray-300 rounded flex items-center justify-center bg-transparent relative z-10">
+                                                    <span class="text-xs font-medium text-gray-500">PRZEZROCZYSTY</span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="w-28 h-16 bg-gray-100 rounded-md flex items-center justify-center">
+                                                <svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                                </svg>
+                                            </div>
+                                        @endif
                                     @endif
                                 </div>
 
-                                <h4 class="font-semibold text-gray-900 mb-2">{{ $material->name }}</h4>
-                                @if($material->description)
-                                    <p class="text-sm text-gray-500 mb-2">{{ $material->description }}</p>
-                                @endif
-                                <div class="text-sm font-semibold text-orange-600 price-tag">
-                                    {{ number_format($material->price_per_cm2, 2) }} zł/cm²
+                                <div class="flex-grow space-y-1">
+                                    <span class="font-medium text-gray-900">{{ $material->name }}</span>
+                                    <p class="text-sm text-gray-500">{{ Str::limit($material->description, 80) }}</p>
                                 </div>
 
-                                <!-- Indicator with animation -->
-                                <div class="shape-indicator absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center"
-                                     x-show="$wire.selectedMaterial == {{ $material->id }}">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <div class="text-sm text-orange-600 font-medium">
+                                        {{ number_format($material->price_per_cm2 * 100, 2) }} zł / 100 cm²
+                                    </div>
+                                    @if($material->is_waterproof)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                            Wodoodporny
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </label>
                     @endforeach
                 </div>
 
-                @error('selectedMaterial')
-                    <p class="text-red-600 text-sm mt-2 text-center">{{ $message }}</p>
-                @enderror
+                <div class="flex justify-between">
+                    <button
+                        type="button"
+                        class="px-8 py-3 font-semibold rounded-xl bg-gray-200 text-gray-700 transition-all duration-200 hover:bg-gray-300"
+                        @click="prevStep()"
+                    >
+                        Wstecz
+                    </button>
+
+                    <button
+                        type="button"
+                        class="px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ $selectedMaterial ? 'bg-orange-600 text-white shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
+                        @click="nextStep()"
+                        :disabled="!{{ $selectedMaterial ? 'true' : 'false' }}"
+                    >
+                        Dalej
+                    </button>
+                </div>
             </div>
 
-            <!-- Step 3: Laminate & Size -->
+            <!-- Step 3: Choose Size -->
             <div x-show="currentStep === 3"
                  x-transition:enter="transition ease-out duration-300 transform step-enter-right"
                  x-transition:enter-start="opacity-0 translate-x-8"
@@ -194,61 +272,202 @@
                  class="space-y-8 step-3">
 
                 <div class="text-center">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Laminat i rozmiar</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Wybierz rozmiar</h3>
                     <p class="text-gray-600 max-w-2xl mx-auto">
-                        Wybierz opcjonalny laminat dla dodatkowej ochrony oraz określ rozmiar etykiety.
+                        Wybierz jeden z dostępnych standardowych rozmiarów lub podaj własne wymiary.
                     </p>
                 </div>
 
-                <!-- Laminate Selection -->
-                <div class="space-y-6">
-                    <h4 class="text-lg font-semibold text-gray-900 border-b border-orange-200 pb-2">Opcje laminowania</h4>
+                <!-- Size Type Tabs -->
+                <div class="flex justify-center bg-gray-100 rounded-xl overflow-hidden p-1 max-w-md mx-auto">
+                    <button
+                        type="button"
+                        wire:click="setCustomSize(false)"
+                        class="py-3 px-6 rounded-xl text-center font-medium transition-all duration-200 flex-1 {{ !$useCustomSize ? 'bg-white shadow' : 'text-gray-600 hover:bg-gray-50' }}">
+                        Standardowe rozmiary
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setCustomSize(true)"
+                        class="py-3 px-6 rounded-xl text-center font-medium transition-all duration-200 flex-1 {{ $useCustomSize ? 'bg-white shadow' : 'text-gray-600 hover:bg-gray-50' }}">
+                        Własne wymiary
+                    </button>
+                </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- No laminate option -->
-                        <label class="relative cursor-pointer group perspective-500">
-                            <input type="radio" wire:model.live="selectedLaminate" value="" class="sr-only">
-                            <div class="laminate-card border-2 rounded-xl p-6 text-center transition-all duration-300 bg-orange-50"
-                                 :class="$wire.selectedLaminate === '' ? 'border-orange-500 bg-orange-100 shadow-lg selected-item' : 'border-gray-200 hover:border-gray-300'">
-                                <div class="laminate-texture w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-gray-400 icon-3d transform transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Custom Size Form -->
+                <div x-show="{{ $useCustomSize ? 'true' : 'false' }}" class="max-w-md mx-auto">
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                        <h4 class="font-semibold text-gray-900 mb-4">Podaj własne wymiary</h4>
+
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Szerokość (mm)</label>
+                                <div class="relative">
+                                    <input
+                                        type="number"
+                                        wire:model.blur="customWidth"
+                                        class="w-full py-2 px-3 border border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50 transition-colors"
+                                        min="10"
+                                        max="500"
+                                        step="1"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span class="text-gray-500">mm</span>
+                                    </div>
+                                </div>
+                                @error('customWidth') <p class="mt-1 text-red-600 text-sm">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Wysokość (mm)</label>
+                                <div class="relative">
+                                    <input
+                                        type="number"
+                                        wire:model.blur="customHeight"
+                                        class="w-full py-2 px-3 border border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50 transition-colors"
+                                        min="10"
+                                        max="500"
+                                        step="1"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span class="text-gray-500">mm</span>
+                                    </div>
+                                </div>
+                                @error('customHeight') <p class="mt-1 text-red-600 text-sm">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>Minimalne wymiary: 10mm × 10mm</p>
+                            <p>Maksymalne wymiary: 500mm × 500mm</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predefined Sizes -->
+                <div x-show="!{{ $useCustomSize ? 'true' : 'false' }}" class="max-w-4xl mx-auto">
+                    @if(count($availableSizes) > 0)
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            @foreach($availableSizes as $size)
+                                <label class="relative cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        wire:model.live="selectedSize"
+                                        value="{{ $size->id }}"
+                                        class="sr-only peer"
+                                    >
+                                    <div class="p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full">
+                                        <div class="font-semibold text-gray-900 mb-1">{{ $size->name }}</div>
+                                        <div class="text-sm text-gray-500 mb-2">{{ $size->width_mm }} × {{ $size->height_mm }} mm</div>
+
+                                        <div class="relative h-20 bg-gray-100 rounded-lg overflow-hidden">
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <div style="width: {{ min(80, $size->width_mm / 2) }}px; height: {{ min(60, $size->height_mm / 2) }}px;" class="bg-orange-300 rounded shadow-sm"></div>
+                                            </div>
+                                            <div class="absolute bottom-1 right-2 text-xs text-gray-500">
+                                                {{ $size->width_mm }}×{{ $size->height_mm }}mm
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500 bg-orange-50 rounded-xl">
+                            <p class="mb-2">Brak dostępnych standardowych rozmiarów dla wybranego kształtu.</p>
+                            <p class="text-sm">Przejdź na rozmiar niestandardowy powyżej.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Laminat - ustawiony w jednej linii -->
+                <div class="space-y-4">
+                    <h4 class="font-semibold text-gray-900 text-lg text-center">Wybierz laminat (opcjonalnie)</h4>
+                    <p class="text-gray-500 text-sm text-center max-w-2xl mx-auto">
+                        Laminat zwiększa trwałość etykiety i chroni przed wilgocią, promieniowaniem UV oraz uszkodzeniami mechanicznymi.
+                    </p>
+
+                    <div class="flex flex-nowrap overflow-x-auto gap-4 pb-4 px-2">
+                        <!-- Opcja bez laminatu -->
+                        <label class="relative cursor-pointer flex-shrink-0" style="min-width: 220px; max-width: 280px;">
+                            <input
+                                type="radio"
+                                wire:model.live="selectedLaminate"
+                                value=""
+                                class="sr-only peer"
+                            >
+                            <div class="p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full flex flex-col" style="min-height: 180px;">
+                                <div class="flex-shrink-0 mb-3 h-16 flex items-center justify-center">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </div>
-                                <h4 class="font-medium text-gray-900 mb-1">Bez laminatu</h4>
-                                <p class="text-sm text-gray-500">Podstawowa wersja</p>
+
+                                <div class="flex-grow">
+                                    <div class="font-medium text-gray-900 mb-1">Bez laminatu</div>
+                                    <p class="text-sm text-gray-500">Standardowe wykończenie bez dodatkowej ochrony.</p>
+                                </div>
+
+                                <div class="mt-3 text-center">
+                                    <span class="text-sm font-medium text-gray-500">Bez dopłaty</span>
+                                </div>
                             </div>
                         </label>
 
-                        @foreach($laminateOptions as $laminate)
-                            <label class="relative cursor-pointer group perspective-500">
-                                <input type="radio" wire:model.live="selectedLaminate" value="{{ $laminate->id }}" class="sr-only">
-                                <div class="laminate-card border-2 rounded-xl p-6 text-center transition-all duration-300 bg-orange-50"
-                                     :class="$wire.selectedLaminate == {{ $laminate->id }} ? 'border-orange-500 bg-orange-100 shadow-lg selected-item' : 'border-gray-200 hover:border-gray-300'">
-
-                                    <!-- Laminat z efektami -->
-                                    <div class="laminate-texture w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden border border-gray-200 relative">
-                                        @if($laminate->texture_image_path)
-                                            <img src="{{ asset($laminate->texture_image_path) }}"
-                                                 alt="{{ $laminate->name }}"
-                                                 class="w-full h-full object-cover transform transition-all duration-500"
-                                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center\'><span class=\'text-orange-600 text-sm font-medium\'>{{ strtoupper(substr($laminate->finish_type ?? 'L', 0, 1)) }}</span></div>';">
+                        <!-- Opcje laminatu -->
+                        @foreach($laminateOptions as $option)
+                            <label class="relative cursor-pointer flex-shrink-0" style="min-width: 220px; max-width: 280px;">
+                                <input
+                                    type="radio"
+                                    wire:model.live="selectedLaminate"
+                                    value="{{ $option->id }}"
+                                    class="sr-only peer"
+                                >
+                                <div class="p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full flex flex-col" style="min-height: 180px;">
+                                    <div class="flex-shrink-0 mb-3 h-16 overflow-hidden rounded-lg relative">
+                                        @if($option->texture_image_path)
+                                            <img src="{{ asset($option->texture_image_path) }}" alt="{{ $option->name }}" class="w-full h-full object-cover">
                                         @else
-                                            <div class="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-                                                <span class="text-orange-600 text-sm font-medium icon-3d">{{ strtoupper(substr($laminate->finish_type ?? 'L', 0, 1)) }}</span>
-                                            </div>
+                                            <!-- Dynamiczne ikony dla różnych typów laminatu -->
+                                            @if(str_contains($option->slug, 'matte') || str_contains($option->slug, 'mat'))
+                                                <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
+                                                    <div class="absolute top-2 left-2 w-8 h-8 bg-white rounded-full opacity-25"></div>
+                                                    <span class="text-sm font-medium text-gray-800">MAT</span>
+                                                </div>
+                                            @elseif(str_contains($option->slug, 'glossy') || str_contains($option->slug, 'blysk'))
+                                                <div class="w-full h-full bg-gradient-to-br from-white to-blue-50 flex items-center justify-center relative overflow-hidden">
+                                                    <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70"></div>
+                                                    <span class="text-sm font-medium text-gray-800 z-10">POŁYSK</span>
+                                                </div>
+                                            @elseif(str_contains($option->slug, 'soft-touch') || str_contains($option->slug, 'soft'))
+                                                <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center relative">
+                                                    <div class="absolute inset-0 bg-black opacity-5 filter blur-sm"></div>
+                                                    <span class="text-sm font-medium text-gray-800">SOFT</span>
+                                                </div>
+                                            @else
+                                                <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                                                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                                    </svg>
+                                                </div>
+                                            @endif
                                         @endif
-                                        <!-- Efekty wizualne -->
-                                        <div class="laminate-shine"></div>
-                                        <div class="laminate-effect"></div>
+
+                                        <!-- Ikonka efektu na laminacie -->
+                                        <div class="absolute bottom-1 right-1 bg-blue-500 rounded-full p-1 shadow-sm">
+                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
                                     </div>
 
-                                    <h4 class="font-medium text-gray-900 mb-1">{{ $laminate->name }}</h4>
-                                    @if($laminate->description)
-                                        <p class="text-sm text-gray-500 mb-2">{{ $laminate->description }}</p>
-                                    @endif
-                                    <div class="text-sm font-semibold text-orange-600 price-tag">
-                                        +{{ number_format(($laminate->price_multiplier - 1) * 100, 0) }}%
+                                    <div class="flex-grow">
+                                        <div class="font-medium text-gray-900 mb-1">{{ $option->name }}</div>
+                                        <p class="text-xs text-gray-500">{{ Str::limit($option->description, 60) }}</p>
+                                    </div>
+
+                                    <div class="mt-3 text-center">
+                                        <span class="text-sm font-medium text-orange-600">+{{ number_format(($option->price_multiplier - 1) * 100, 0) }}%</span>
                                     </div>
                                 </div>
                             </label>
@@ -256,108 +475,24 @@
                     </div>
                 </div>
 
-                <!-- Size Selection -->
-                <div class="space-y-6">
-                    <h4 class="text-lg font-semibold text-gray-900 border-b border-orange-200 pb-2">Wybierz rozmiar</h4>
+                <!-- Przyciski Wstecz/Dalej w sekcji rozmiaru -->
+                <div class="flex justify-between">
+                    <button
+                        type="button"
+                        class="px-8 py-3 font-semibold rounded-xl bg-gray-200 text-gray-700 transition-all duration-200 hover:bg-gray-300"
+                        @click="prevStep()"
+                    >
+                        Wstecz
+                    </button>
 
-                    <!-- Size Type Toggle - Ulepszone -->
-                    <div class="flex flex-wrap gap-4 justify-center bg-orange-50 p-4 rounded-xl"
-                         x-data="{ customSize: @entangle('useCustomSize').live }">
-
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="radio"
-                                   x-model="customSize"
-                                   :value="false"
-                                   @change="$wire.set('useCustomSize', false); $wire.set('selectedSize', null); $wire.set('customWidth', null); $wire.set('customHeight', null);"
-                                   class="mr-2 text-orange-500 focus:ring-orange-500">
-                            <span class="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors duration-200">Standardowe rozmiary</span>
-                        </label>
-
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="radio"
-                                   x-model="customSize"
-                                   :value="true"
-                                   @change="$wire.set('useCustomSize', true); $wire.set('selectedSize', null);"
-                                   class="mr-2 text-orange-500 focus:ring-orange-500">
-                            <span class="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors duration-200">Rozmiar niestandardowy</span>
-                        </label>
-                    </div>
-
-                    <!-- Predefined Sizes -->
-                    @if(!$useCustomSize && $availableSizes->count() > 0)
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" wire:key="standard-sizes-{{ $selectedShape }}">
-                            @foreach($availableSizes as $size)
-                                <label class="relative cursor-pointer group perspective-500">
-                                    <input type="radio" wire:model.live="selectedSize" value="{{ $size->id }}" class="sr-only">
-                                    <div class="border-2 p-4 rounded-xl text-center transition-all duration-300 size-preview-container
-                                        {{ $selectedSize == $size->id
-                                            ? 'border-orange-500 bg-orange-50 shadow-lg transform scale-105 selected-item'
-                                            : 'border-gray-200 hover:border-orange-300 hover:shadow-md' }}">
-
-                                        <div class="text-sm font-medium text-gray-900 mb-1 size-preview">
-                                            {{ $size->name }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 size-preview">
-                                            {{ $size->width_mm }}×{{ $size->height_mm }}mm
-                                        </div>
-
-                                        <!-- Indicator with animation -->
-                                        @if($selectedSize == $size->id)
-                                            <div class="shape-indicator absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <!-- Custom Size Inputs -->
-                    @if($useCustomSize)
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" wire:key="custom-size-inputs">
-                            <div>
-                                <label for="customWidth" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Szerokość (mm)
-                                </label>
-                                <input type="number" wire:model.live="customWidth" id="customWidth"
-                                       class="form-input-enhanced w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                                       placeholder="np. 100" min="10" max="500">
-                                @error('customWidth')
-                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="customHeight" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Wysokość (mm)
-                                </label>
-                                <input type="number" wire:model.live="customHeight" id="customHeight"
-                                       class="form-input-enhanced w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                                       placeholder="np. 60" min="10" max="500">
-                                @error('customHeight')
-                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        @if($customWidth && $customHeight)
-                            <div class="mt-4 p-4 bg-orange-50 rounded-xl text-center transform transition-all duration-300 hover:shadow-md hover:bg-orange-100">
-                                <p class="text-sm text-gray-600">
-                                    <span class="font-semibold text-orange-600">Powierzchnia: {{ number_format(($customWidth * $customHeight) / 100, 1) }} cm²</span>
-                                </p>
-                            </div>
-                        @endif
-                    @endif
-
-                    @if(!$useCustomSize && $availableSizes->count() === 0 && $selectedShape)
-                        <div class="text-center py-8 text-gray-500 bg-orange-50 rounded-xl">
-                            <p class="mb-2">Brak dostępnych standardowych rozmiarów dla wybranego kształtu.</p>
-                            <p class="text-sm">Przejdź na rozmiar niestandardowy powyżej.</p>
-                        </div>
-                    @endif
+                    <button
+                        type="button"
+                        class="px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ ($useCustomSize && $customWidth && $customHeight) || (!$useCustomSize && $selectedSize) ? 'bg-orange-600 text-white shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
+                        @click="nextStep()"
+                        :disabled="!({{ ($useCustomSize && $customWidth && $customHeight) || (!$useCustomSize && $selectedSize) ? 'true' : 'false' }})"
+                    >
+                        Dalej
+                    </button>
                 </div>
             </div>
 
@@ -395,17 +530,6 @@
                         @endif
 
                         <div class="flex justify-between py-2 border-b border-orange-200 hover:bg-orange-100/30 transition-colors duration-200 rounded px-2">
-                            <span class="text-gray-600 font-medium">Laminat:</span>
-                            <span class="font-semibold text-gray-900">
-                                @if($selectedLaminate)
-                                    {{ $laminateOptions->find($selectedLaminate)->name }}
-                                @else
-                                    Bez laminatu
-                                @endif
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between py-2 border-b border-orange-200 hover:bg-orange-100/30 transition-colors duration-200 rounded px-2">
                             <span class="text-gray-600 font-medium">Rozmiar:</span>
                             <span class="font-semibold text-gray-900">
                                 @if($useCustomSize && $customWidth && $customHeight)
@@ -417,6 +541,17 @@
                                 @endif
                             </span>
                         </div>
+
+                        <div class="flex justify-between py-2 border-b border-orange-200 hover:bg-orange-100/30 transition-colors duration-200 rounded px-2">
+                            <span class="text-gray-600 font-medium">Laminat:</span>
+                            <span class="font-semibold text-gray-900">
+                                @if($selectedLaminate)
+                                    {{ $laminateOptions->find($selectedLaminate)->name ?? 'Bez laminatu' }}
+                                @else
+                                    Bez laminatu
+                                @endif
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -425,43 +560,47 @@
 
                     <!-- Grid layout z plikiem po lewej i podglądem po prawej -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Lewa kolumna - upload pliku -->
-                        <div class="bg-orange-50 rounded-xl p-6 transform transition-all duration-300 hover:shadow-lg">
-                            <div x-data="{ uploading: false, progress: 0 }"
-                                 x-on:livewire-upload-start="uploading = true"
-                                 x-on:livewire-upload-finish="uploading = false"
-                                 x-on:livewire-upload-error="uploading = false"
-                                 x-on:livewire-upload-progress="progress = $event.detail.progress">
-
-                                <label class="block mb-4">
-                                    <span class="text-gray-700">Dodaj swoją grafikę (opcjonalnie)</span>
-                                    <input type="file" wire:model="artworkFile" accept="image/*" class="block w-full text-sm text-gray-500 mt-2
-                                        file:mr-4 file:py-2 file:px-4
-                                        file:rounded-full file:border-0
-                                        file:text-sm file:font-semibold
-                                        file:bg-orange-50 file:text-orange-600
-                                        hover:file:bg-orange-100">
-                                    <p class="text-xs text-gray-500 mt-1">Max 10MB. Formaty: JPG, PNG, SVG</p>
-                                </label>
-
-                                <!-- Progress bar -->
-                                <div x-show="uploading" class="mt-2">
-                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div class="h-full bg-orange-500 rounded-full" :style="`width: ${progress}%`"></div>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1">Wgrywanie... <span x-text="progress"></span>%</div>
+                        <!-- Lewa kolumna - wybór pliku -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Plik graficzny (opcjonalnie)</label>
+                                <div class="bg-white border border-gray-300 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center">
+                                    <label class="w-full cursor-pointer">
+                                        <div class="space-y-4">
+                                            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 text-orange-600">
+                                                <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-center">
+                                                <p class="text-sm text-gray-600">
+                                                    <span class="font-medium text-orange-600">Kliknij aby wybrać plik</span> lub przeciągnij i upuść
+                                                </p>
+                                                <p class="mt-1 text-xs text-gray-500">
+                                                    PNG, JPG, GIF do 10MB
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <input type="file" wire:model="artworkFile" class="hidden">
+                                    </label>
                                 </div>
+                            </div>
 
-                                @error('artworkFile') <span class="text-red-600 text-sm block mt-1">{{ $message }}</span> @enderror
-
-                                <div class="flex items-center mt-4" x-show="!uploading && $wire.tempArtworkPath">
-                                    <button type="button" wire:click="$set('tempArtworkPath', null)"
-                                            class="text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ilość</label>
+                                <div class="flex items-center">
+                                    <button type="button" wire:click="$set('quantity', Math.max(1, {{ $quantity }} - 10))" class="p-2 rounded-l-lg bg-orange-100 text-orange-600 border border-r-0 border-orange-200 hover:bg-orange-200 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                                         </svg>
-                                        Usuń grafikę
                                     </button>
+                                    <input type="number" wire:model.blur="quantity" min="1" max="10000" class="w-24 text-center py-2 border-y border-orange-200">
+                                    <button type="button" wire:click="$set('quantity', {{ $quantity }} + 10)" class="p-2 rounded-r-lg bg-orange-100 text-orange-600 border border-l-0 border-orange-200 hover:bg-orange-200 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                    </button>
+                                    <span class="ml-2 text-gray-600">sztuk</span>
                                 </div>
                             </div>
                         </div>
@@ -486,24 +625,21 @@
                                                 if (!this.dragging) return;
 
                                                 const container = e.currentTarget.getBoundingClientRect();
-                                                const x = ((e.clientX - container.left) / container.width) * 100;
-                                                const y = ((e.clientY - container.top) / container.height) * 100;
+                                                const x = (e.clientX - container.left) / container.width * 100;
+                                                const y = (e.clientY - container.top) / container.height * 100;
 
-                                                this.posX = Math.max(0, Math.min(100, x));
-                                                this.posY = Math.max(0, Math.min(100, y));
+                                                this.posX = Math.min(Math.max(x, 0), 100);
+                                                this.posY = Math.min(Math.max(y, 0), 100);
                                             },
                                             endDrag() {
                                                 this.dragging = false;
-                                                $wire.set('imagePositionX', this.posX);
-                                                $wire.set('imagePositionY', this.posY);
                                             },
                                             updateScale(delta) {
-                                                this.scale = Math.max(50, Math.min(150, this.scale + delta));
-                                                $wire.set('imageScale', this.scale);
+                                                this.scale = Math.min(Math.max(this.scale + delta, 20), 200);
                                             },
                                             updateRotation(delta) {
                                                 this.rotation = (this.rotation + delta) % 360;
-                                                $wire.set('imageRotation', this.rotation);
+                                                if (this.rotation < 0) this.rotation += 360;
                                             }
                                         }"
                                         @mousedown="startDrag"
@@ -529,21 +665,16 @@
                                         <div class="absolute bottom-2 right-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 flex items-center space-x-2">
                                             <button type="button" @click="updateScale(10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                                 </svg>
                                             </button>
                                             <button type="button" @click="updateScale(-10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
                                                 </svg>
                                             </button>
-                                            <button type="button" @click="updateRotation(90)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                                </svg>
-                                            </button>
-                                            <button type="button" @click="posX = 50; posY = 50; scale = 100; rotation = 0; $wire.set('imagePositionX', 50); $wire.set('imagePositionY', 50); $wire.set('imageScale', 100); $wire.set('imageRotation', 0);"
-                                                    class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
+                                            <div class="w-px h-5 bg-gray-300 mx-1"></div>
+                                            <button type="button" @click="updateRotation(15)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                                 </svg>
@@ -556,132 +687,42 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="text-center p-8 text-gray-400 flex flex-col items-center">
-                                    <svg class="w-16 h-16 mb-3 opacity-30 transform transition-all duration-500 hover:scale-110 icon-3d" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <p>Podgląd grafiki pojawi się tutaj</p>
+                                <div class="text-center p-4">
+                                    <div class="text-gray-400 mb-2">
+                                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-500">Podgląd wybranego obrazka</p>
                                 </div>
                             @endif
                         </div>
                     </div>
-                </div>
 
-                <!-- Quantity and File Upload -->
-                <div class="space-y-4">
-                    <label for="quantity" class="block text-sm font-semibold text-gray-700">
-                        Ilość (sztuk)
-                    </label>
-                    <input type="number" wire:model.live="quantity" id="quantity"
-                           class="form-input-enhanced w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                           min="1" max="10000" placeholder="100">
-                    @error('quantity')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Price Display with pulse animation -->
-                @if($calculatedPrice > 0)
-                    <div class="bg-gradient-to-br from-orange-100 to-amber-100 border border-orange-300 rounded-xl p-6 transform transition-all duration-500 hover:shadow-xl hover:scale-[1.01] pulse-dot">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h4 class="text-lg font-semibold text-orange-900">Szacowana cena:</h4>
-                                <p class="text-sm text-orange-700">
-                                    {{ $quantity }} szt. ×
-                                    {{ $quantity > 0 ? number_format($calculatedPrice / $quantity, 2) : '0.00' }} PLN
-                                </p>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-3xl font-bold text-orange-900 transform transition-all duration-300 hover:scale-110">{{ number_format($calculatedPrice, 2) }} PLN</div>
-                                <p class="text-orange-700 text-sm">brutto (zawiera 23% VAT)</p>
-                            </div>
-                        </div>
+                    <!-- Price Section -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 text-center">
+                        <div class="text-lg font-medium text-gray-700 mb-1">Całkowita cena</div>
+                        <div class="text-3xl font-bold text-orange-600 mb-1">{{ number_format($calculatedPrice, 2) }} zł</div>
+                        <div class="text-sm text-gray-500">z VAT</div>
                     </div>
-                @endif
-            </div>
 
-            <!-- Enhanced Navigation Buttons -->
-            <div class="flex justify-between items-center pt-8 border-t border-orange-100">
-                <!-- Previous Step Button with improved hover effects -->
-                <button type="button" @click="prevStep()" x-show="currentStep > 1"
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 transform -translate-x-4"
-                        x-transition:enter-end="opacity-100 transform translate-x-0"
-                        class="btn-prev group flex items-center px-6 py-3 bg-white border-2 border-orange-200 rounded-xl text-orange-600 hover:bg-orange-50 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-                    <!-- Button background animation -->
-                    <div class="absolute inset-0 w-0 bg-gradient-to-r from-orange-100 to-orange-50 transition-all duration-300 ease-out group-hover:w-full"></div>
+                    <div class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                        <button
+                            type="button"
+                            class="w-full sm:w-auto px-8 py-3 font-semibold rounded-xl bg-gray-200 text-gray-700 transition-all duration-200 hover:bg-gray-300"
+                            @click="prevStep()"
+                        >
+                            Wróć do rozmiarów
+                        </button>
 
-                    <!-- Button content -->
-                    <div class="relative flex items-center">
-                        <!-- Animated arrow icon -->
-                        <svg class="w-5 h-5 mr-2 btn-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                        <span class="font-medium">Poprzedni krok</span>
-                    </div>
-                </button>
-
-                <!-- Spacer for first step -->
-                <div x-show="currentStep === 1"></div>
-
-                <div class="flex space-x-4">
-                    <!-- Next Step Button with pulse effect -->
-                    <button type="button" @click="nextStep()" x-show="currentStep < totalSteps"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 transform translate-x-4"
-                            x-transition:enter-end="opacity-100 transform translate-x-0"
-                            class="btn-next group relative flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 transform">
-
-                        <!-- Pulse effect behind button -->
-                        <span class="absolute inset-0 rounded-xl bg-orange-500 -z-10 opacity-0 group-hover:animate-ping-slow group-hover:opacity-30"></span>
-
-                        <span class="font-medium mr-2">Następny krok</span>
-
-                        <!-- Animated arrow with bouncing effect -->
-                        <svg class="w-5 h-5 btn-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-
-                    <!-- Submit Button with 3D preview icon and glow effect -->
-                    <button type="submit"
-                            x-show="currentStep === totalSteps"
-                            wire:loading.attr="disabled"
-                            wire:target="saveProject"
-                            :disabled="!$wire.isConfigurationValid"
-                            :class="$wire.isConfigurationValid
-                                ? 'btn-submit bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 hover:from-orange-700 hover:via-amber-600 hover:to-orange-700'
-                                : 'bg-gray-400 cursor-not-allowed'"
-                            class="group relative flex items-center px-8 py-4 rounded-xl font-medium text-white transition-all duration-300 overflow-hidden">
-
-                            <!-- Animated gradient background for enabled button -->
-                            <div x-show="$wire.isConfigurationValid"
-                                 class="absolute inset-0 bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 bg-[length:200%_100%] animate-gradient-x-slow -z-10"></div>
-
-                            <!-- Shine effect on hover -->
-                            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent -skew-x-30 opacity-0 group-hover:animate-shine"></div>
-
-                            <!-- Loading state with improved spinner -->
-                            <div wire:loading wire:target="saveProject" class="flex items-center">
-                                <svg class="loading-spinner -ml-1 mr-3 h-5 w-5 text-white filter drop-shadow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span class="font-medium">Zapisywanie...</span>
-                            </div>
-
-                            <!-- Normal state with 3D icon -->
-                            <div wire:loading.remove wire:target="saveProject" class="flex items-center">
-                                <!-- 3D view icon with animation -->
-                                <div class="mr-3 relative">
-                                    <svg class="w-6 h-6 text-white transform group-hover:scale-110 transition-transform duration-300 filter drop-shadow icon-3d" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    <!-- Small pulse dot -->
-                                    <span class="absolute top-0 right-0 w-2 h-2 bg-yellow-300 rounded-full animate-ping-slow opacity-75"></span>
-                                </div>
+                        <!-- Final Submit Button -->
+                        <button
+                            type="button"
+                            wire:click="saveProject"
+                            class="w-full sm:w-auto px-8 py-4 font-semibold rounded-xl transition-all duration-200 shadow-lg {{ $isConfigurationValid ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
+                            :disabled="!{{ $isConfigurationValid ? 'true' : 'false' }}"
+                        >
+                            <div class="flex items-center justify-center space-x-2">
                                 <span class="font-medium">Przejdź do podglądu 3D</span>
                             </div>
                         </button>
@@ -709,4 +750,30 @@
                 @endif
         </form>
     </div>
+
+    <!-- SKRYPT OBSŁUGUJĄCY POWRÓT Z PODGLĄDU 3D -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sprawdź czy mamy parametr returnToCreator w URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnToCreator = urlParams.get('returnToCreator') === 'true';
+
+        if (returnToCreator) {
+            // Opóźnij wykonanie aby dać komponentowi Livewire czas na inicjalizację
+            setTimeout(() => {
+                // Wywołaj metodę Livewire do przywrócenia danych projektu
+                const component = window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                component.call('restoreFromPreview');
+
+                // Zmień krok na 4 (finalizacja)
+                if (window.Alpine) {
+                    const stepContainer = document.querySelector('[x-data]');
+                    if (stepContainer && stepContainer.__x) {
+                        stepContainer.__x.getUnobservedData().currentStep = 4;
+                    }
+                }
+            }, 200);
+        }
+    });
+    </script>
 </div>

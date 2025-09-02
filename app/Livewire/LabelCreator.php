@@ -10,6 +10,7 @@ use App\Models\PredefinedSize;
 use App\Models\LaminateOption;
 use App\Models\LabelProject;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 class LabelCreator extends Component
 {
@@ -34,6 +35,9 @@ class LabelCreator extends Component
     // Computed properties - DOKŁADNIE JAK MIAŁEŚ
     public $calculatedPrice = 0;
     public $isConfigurationValid = false;
+
+    // Nowa właściwość do śledzenia kroku kreatora
+    public $currentStep = 1;
 
     protected function rules()
     {
@@ -65,11 +69,72 @@ class LabelCreator extends Component
         'artworkFile.max' => 'Maksymalny rozmiar pliku to 10MB.',
     ];
 
-    public function mount()
+    /**
+     * Mount komponentu - wywoływane przy inicjalizacji
+     */
+    public function mount(Request $request)
     {
         $this->useCustomSize = false;
         $this->selectedLaminate = '';
-        $this->calculatePrice();
+
+        // Sprawdź czy wracamy z podglądu 3D
+        $fromPreview = $request->has('fromPreview') && $request->fromPreview === 'true';
+        $returnToCreator = $request->has('returnToCreator') && $request->returnToCreator === 'true';
+
+        // Jeśli mamy ID projektu w URL i wracamy z podglądu
+        if ($request->has('project') && ($fromPreview || $returnToCreator)) {
+            $projectId = $request->project;
+
+            // Pobierz projekt z bazy danych
+            $project = LabelProject::find($projectId);
+
+            if ($project) {
+                // Ustaw aktualny krok na 4 (finalizacja)
+                $this->currentStep = 4;
+
+                // Przypisz dane projektu do właściwości komponentu
+                $this->selectedShape = $project->label_shape_id;
+                $this->selectedMaterial = $project->label_material_id;
+                $this->quantity = $project->quantity;
+
+                // Obsługa rozmiaru
+                if ($project->predefined_size_id) {
+                    $this->useCustomSize = false;
+                    $this->selectedSize = $project->predefined_size_id;
+                } else {
+                    $this->useCustomSize = true;
+                    $this->customWidth = $project->custom_width_mm;
+                    $this->customHeight = $project->custom_height_mm;
+                }
+
+                // Obsługa laminatu
+                if ($project->laminate_option_id) {
+                    $this->selectedLaminate = $project->laminate_option_id;
+                }
+
+                // Obsługa obrazka
+                if ($project->artwork_file_path) {
+                    $this->tempArtworkPath = $project->artwork_file_path;
+
+                    // Jeśli mamy dane pozycjonowania obrazka
+                    if ($project->image_position_x !== null) {
+                        $this->imagePositionX = $project->image_position_x;
+                        $this->imagePositionY = $project->image_position_y;
+                        $this->imageScale = $project->image_scale;
+                        $this->imageRotation = $project->image_rotation;
+                    }
+                }
+
+                // Przelicz cenę na nowo
+                $this->calculatePrice();
+                $this->checkConfiguration();
+
+                // Emituj zdarzenie, że formularz został zaktualizowany
+                $this->dispatch('formUpdated');
+            }
+        } else {
+            $this->calculatePrice();
+        }
     }
 
     // Dodaj metodę obsługi pliku:
@@ -238,6 +303,65 @@ class LabelCreator extends Component
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
+    }
+
+    /**
+     * Przywraca dane projektu po powrocie z podglądu 3D
+     */
+    public function restoreFromPreview()
+    {
+        // Pobierz ID projektu z URL
+        $projectId = request()->query('project');
+
+        if ($projectId) {
+            // Pobierz projekt z bazy danych
+            $project = LabelProject::find($projectId);
+
+            if ($project) {
+                // Ustaw aktualny krok na 4 (finalizacja)
+                $this->currentStep = 4;
+
+                // Przypisz dane projektu do właściwości komponentu
+                $this->selectedShape = $project->label_shape_id;
+                $this->selectedMaterial = $project->label_material_id;
+                $this->quantity = $project->quantity;
+
+                // Obsługa rozmiaru
+                if ($project->predefined_size_id) {
+                    $this->useCustomSize = false;
+                    $this->selectedSize = $project->predefined_size_id;
+                } else {
+                    $this->useCustomSize = true;
+                    $this->customWidth = $project->custom_width_mm;
+                    $this->customHeight = $project->custom_height_mm;
+                }
+
+                // Obsługa laminatu
+                if ($project->laminate_option_id) {
+                    $this->selectedLaminate = $project->laminate_option_id;
+                }
+
+                // Obsługa obrazka
+                if ($project->artwork_file_path) {
+                    $this->tempArtworkPath = $project->artwork_file_path;
+
+                    // Jeśli mamy dane pozycjonowania obrazka
+                    if ($project->image_position_x !== null) {
+                        $this->imagePositionX = $project->image_position_x;
+                        $this->imagePositionY = $project->image_position_y;
+                        $this->imageScale = $project->image_scale;
+                        $this->imageRotation = $project->image_rotation;
+                    }
+                }
+
+                // Przelicz cenę na nowo
+                $this->calculatePrice();
+                $this->checkConfiguration();
+
+                // Emituj zdarzenie, że formularz został zaktualizowany
+                $this->dispatch('formUpdated');
+            }
+        }
     }
 
     // POPRAWIONA METODA saveProject() - Z MOJĄ ZMIANĄ DO OBRAZKA

@@ -612,103 +612,165 @@
                 labelMesh.receiveShadow = true;
                 scene.add(labelMesh);
 
-                // NAPRAWIONY KOD ŁADOWANIA I APLIKOWANIA TEKSTUR
-                if (projectConfig.artworkUrl || projectConfig.debug.artworkPath) {
-                    console.log('Ładowanie tekstury użytkownika...');
+                // NOWA IMPLEMENTACJA NAKŁADANIA OBRAZKA NA ETYKIETĘ 3D
+                if (projectConfig.debug.hasArtwork) {
+                    console.log('🖼️ ULEPSZONA IMPLEMENTACJA NAKŁADANIA OBRAZKA');
 
-                    // Tworzymy listę URLi do spróbowania (bez filtrowania)
-                    const urls = [
+                    // Przygotowanie URL obrazków do próbowania
+                    const imageUrls = [
                         projectConfig.artworkUrl,
+                        directStorageUrl,
                         '/storage/' + projectConfig.debug.artworkPath,
-                        window.location.origin + '/storage/' + projectConfig.debug.artworkPath,
-                        '/storage/app/public/' + projectConfig.debug.artworkPath,
-                        window.location.origin + '/storage/app/public/' + projectConfig.debug.artworkPath
-                    ];
+                        window.location.origin + '/storage/' + projectConfig.debug.artworkPath
+                    ].filter(url => url && url !== '/storage/' && url !== '/storage/brak');
 
-                    console.log('Dostępne URLe:', urls);
+                    console.log('Dostępne adresy URL:', imageUrls);
 
-                    // Konfiguracja loadera tekstur
+                    // 1. Stwórz geometrię dla "twarzy" etykiety
+                    const faceMesh = new THREE.Mesh(
+                        new THREE.ShapeGeometry(shape),
+                        new THREE.MeshBasicMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0,
+                            side: THREE.DoubleSide,
+                            depthWrite: false,
+                            renderOrder: 1
+                        })
+                    );
+
+                    // Przesuwamy płaszczyznę twarzy tuż przed etykietę
+                    faceMesh.position.z = labelDepth / 2 + 0.01;
+                    scene.add(faceMesh);
+
+                    // 2. Stwórz teksturę i materiał dla obrazka
                     const textureLoader = new THREE.TextureLoader();
-                    textureLoader.crossOrigin = 'anonymous';
+                    textureLoader.crossOrigin = 'Anonymous';
 
-                    // Flaga czy załadowaliśmy już obrazek pomyślnie
-                    let textureLoaded = false;
-
-                    // Funkcja do mapowania tekstury na materiał
-                    function applyTextureToMaterial(texture) {
-                        console.log('Aplikowanie tekstury do materiału:', texture);
-
-                        // Ustawienia podstawowe tekstury
-                        texture.encoding = THREE.sRGBEncoding;
-                        texture.needsUpdate = true;
-
-                        // Ustaw mapowanie tekstury na współrzędne UV
-                        texture.center.set(0.5, 0.5);
-                        texture.offset.x = ((projectConfig.imagePosition.x || 50) - 50) / 100;
-                        texture.offset.y = ((projectConfig.imagePosition.y || 50) - 50) / -100;
-                        texture.rotation = (projectConfig.imagePosition.rotation || 0) * Math.PI / 180;
-
-                        const scale = projectConfig.imagePosition.scale || 100;
-                        texture.repeat.set(100/scale, 100/scale);
-
-                        // Zapobiegnij powtarzaniu
-                        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-
-                        // Zastosuj teksturę jako mapę koloru materiału
-                        labelMaterial.map = texture;
-                        labelMaterial.needsUpdate = true;
-
-                        // Wymuś ponowne renderowanie
+                    // Funkcja do renderowania sceny
+                    function updateAndRender() {
                         renderer.render(scene, camera);
                     }
 
-                    // Próbujemy każdy URL po kolei
-                    for (let i = 0; i < urls.length && !textureLoaded; i++) {
-                        const url = urls[i];
-                        if (!url) continue;
+                    // Funkcja do próbowania kolejnych URL
+                    function tryLoadTexture(urlIndex = 0) {
+                        if (urlIndex >= imageUrls.length) {
+                            console.error('❌ Nie można załadować obrazka z żadnego URL');
+                            // Utwórz teksturę awaryjną - czerwoną planszę
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 256;
+                            canvas.height = 256;
+                            const ctx = canvas.getContext('2d');
+                            ctx.fillStyle = 'red';
+                            ctx.fillRect(0, 0, 256, 256);
+                            ctx.fillStyle = 'white';
+                            ctx.font = '20px Arial';
+                            ctx.fillText('Błąd ładowania', 60, 128);
 
-                        console.log(`Próba ${i+1}/${urls.length}: ${url}`);
+                            const errorTexture = new THREE.CanvasTexture(canvas);
+                            applyTextureToFace(errorTexture);
+                            return;
+                        }
 
-                        // Dodaj timestamp aby uniknąć cache'owania
-                        const urlWithTimestamp = url + '?t=' + new Date().getTime();
+                        const url = imageUrls[urlIndex] + '?cache=' + Date.now();
+                        console.log(`Próba ${urlIndex + 1}/${imageUrls.length}: ${url}`);
 
-                        // Bezpośrednie ładowanie tekstury
                         textureLoader.load(
-                            urlWithTimestamp,
+                            url,
                             // Sukces
                             function(texture) {
-                                if (textureLoaded) return; // Unikamy wielokrotnego ładowania
-
-                                console.log('Tekstura załadowana pomyślnie z:', urlWithTimestamp);
-                                textureLoaded = true;
-                                applyTextureToMaterial(texture);
+                                console.log('✅ Załadowano obrazek pomyślnie!');
+                                applyTextureToFace(texture);
                             },
-                            // Postęp - nie używamy, ale można dodać wskaźnik ładowania
+                            // Progress
                             undefined,
-                            // Błąd - idziemy do następnego URL
+                            // Błąd
                             function(error) {
-                                console.warn(`Błąd ładowania tekstury z ${urlWithTimestamp}:`, error);
+                                console.warn(`❌ Błąd ładowania z URL ${url}:`, error);
+                                setTimeout(() => tryLoadTexture(urlIndex + 1), 100);
                             }
                         );
                     }
 
-                    // Dodatkowy fallback, jeśli żaden z URLów nie zadziała
-                    setTimeout(() => {
-                        if (!textureLoaded && projectConfig.debug.artworkPath) {
-                            console.log('Próba bezpośredniego ładowania przez IMG tag...');
+                    // Funkcja nakładająca teksturę na twarz etykiety
+                    function applyTextureToFace(texture) {
+                        // Stwórz nowy materiał z teksturą
+                        const texturedMaterial = new THREE.MeshBasicMaterial({
+                            map: texture,
+                            transparent: true,
+                            side: THREE.DoubleSide,
+                            depthTest: true,
+                            depthWrite: false,
+                            renderOrder: 2
+                        });
 
-                            // Tworzymy element IMG do sprawdzenia czy obrazek faktycznie istnieje
-                            const img = new Image();
-                            img.crossOrigin = "Anonymous";
-                            img.onload = function() {
-                                console.log('Obrazek załadowany przez IMG tag, tworzę teksturę...');
-                                const texture = new THREE.Texture(img);
-                                texture.needsUpdate = true;
-                                applyTextureToMaterial(texture);
-                            };
-                            img.src = '/storage/' + projectConfig.debug.artworkPath + '?t=' + new Date().getTime();
+                        // Zastosuj transformację UV zgodnie z ustawieniami użytkownika
+                        texture.center.set(0.5, 0.5); // Punkt obrotu w środku tekstury
+
+                        // Przesunięcie - zakres 0-100 przekształcamy na offsety UV
+                        const offsetX = (projectConfig.imagePosition.x - 50) / 100;
+                        const offsetY = (projectConfig.imagePosition.y - 50) / -100; // Odwracamy oś Y
+                        texture.offset.set(offsetX, offsetY);
+
+                        // Skalowanie
+                        const scale = projectConfig.imagePosition.scale / 100;
+                        texture.repeat.set(1/scale, 1/scale);
+
+                        // Rotacja
+                        texture.rotation = projectConfig.imagePosition.rotation * Math.PI / 180;
+
+                        // Stwórz nową siatkę z geometrią twarzy i nowym materiałem
+                        const artworkMesh = new THREE.Mesh(
+                            new THREE.ShapeGeometry(shape),
+                            texturedMaterial
+                        );
+
+                        // Ustaw pozycję równoległą do twarzy etykiety, ale nieco bliżej kamery
+                        artworkMesh.position.z = labelDepth / 2 + 0.1;
+
+                        // Usuń starą siatkę twarzy i dodaj nową
+                        scene.remove(faceMesh);
+                        scene.add(artworkMesh);
+
+                        // Zapisz referencję do siatki dla przyszłych aktualizacji
+                        faceMesh = artworkMesh;
+
+                        // Wykonaj rendering
+                        updateAndRender();
+
+                        console.log('✅ Zastosowano teksturę do etykiety');
+                    }
+
+                    // Rozpocznij próby ładowania
+                    tryLoadTexture(0);
+
+                    // Dodaj funkcje pomocnicze
+                    window.debugArtwork = function() {
+                        console.log('Dostępne adresy URL:', imageUrls);
+                        console.log('Aktualna siatka twarzy:', faceMesh);
+
+                        // Zmień tymczasowo na czerwony kolor dla widoczności
+                        if (faceMesh.material) {
+                            const originalMaterial = faceMesh.material.clone();
+                            faceMesh.material.color.set(0xff0000);
+                            faceMesh.material.opacity = 0.7;
+                            faceMesh.material.transparent = true;
+                            faceMesh.material.map = null;
+                            faceMesh.material.needsUpdate = true;
+                            updateAndRender();
+
+                            // Przywróć po sekundzie
+                            setTimeout(() => {
+                                faceMesh.material = originalMaterial;
+                                updateAndRender();
+                            }, 1000);
                         }
-                    }, 2000);
+                    };
+
+                    window.reloadArtwork = function() {
+                        console.log('🔄 Wymuszam ponowne ładowanie obrazka...');
+                        tryLoadTexture(0);
+                    };
                 }
 
                 // Add laminate layer if selected
@@ -732,51 +794,27 @@
                 // Dodajemy miarki pokazujące wymiary
                 addRulers(scene, projectConfig.dimensions.width, projectConfig.dimensions.height, labelDepth);
 
-                // Dodaj funkcję do debugowania tekstur - można wywołać z konsoli
+                // Dodaj funkcję diagnostyczną
                 window.debugTextureLoading = function() {
                     console.log('=== DIAGNOSTYKA ŁADOWANIA TEKSTUR ===');
                     console.log('projectConfig:', projectConfig);
-
-                    if (projectConfig.artworkUrl) {
-                        fetch(projectConfig.artworkUrl)
-                            .then(response => {
-                                console.log('Fetch artworkUrl:',
-                                    response.ok ? 'SUKCES' : 'BŁĄD',
-                                    response.status,
-                                    response.statusText);
-                                return response.blob();
-                            })
-                            .then(blob => console.log('Rozmiar pliku:', blob.size, 'typ:', blob.type))
-                            .catch(err => console.error('Błąd fetch:', err));
-                    }
-
-                    if (projectConfig.debug.artworkPath) {
-                        const url = '/storage/' + projectConfig.debug.artworkPath;
-                        fetch(url)
-                            .then(response => {
-                                console.log('Fetch storage path:',
-                                    response.ok ? 'SUKCES' : 'BŁĄD',
-                                    response.status,
-                                    response.statusText);
-                                return response.blob();
-                            })
-                            .then(blob => console.log('Rozmiar pliku:', blob.size, 'typ:', blob.type))
-                            .catch(err => console.error('Błąd fetch:', err));
-                    }
 
                     if (labelMaterial) {
                         console.log('Status materiału:', labelMaterial);
                         console.log('Mapa tekstury:', labelMaterial.map);
                     }
+
+                    // Pokazuje wszystkie dostępne ścieżki do obrazka
+                    const paths = [
+                        projectConfig.artworkUrl,
+                        '/storage/' + projectConfig.debug.artworkPath,
+                        window.location.origin + '/storage/' + projectConfig.debug.artworkPath
+                    ];
+                    console.log('Możliwe ścieżki:', paths);
                 };
 
-                // Wywołaj automatycznie po załadowaniu
-                setTimeout(window.debugTextureLoading, 3000);
-
-                // Dodaj informacje debugowe
-                console.log('Inicjalizacja 3D zakończona');
-                console.log('Geometria:', geometry);
-                console.log('Materiał:', labelMaterial);
+                // Uruchom diagnostykę po krótkiej chwili
+                setTimeout(window.debugTextureLoading, 2000);
 
                 // Hide loading, start render loop
                 document.getElementById('preview-loading').style.display = 'none';
