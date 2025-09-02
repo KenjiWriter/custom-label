@@ -365,6 +365,14 @@
                 localStorage.removeItem('saved_laminate');
             <?php endif; ?>
 
+            // Zapisz dane pozycjonowania obrazu jeśli istnieją
+            <?php if(isset($project->image_position_x)): ?>
+                localStorage.setItem('saved_image_position_x', '<?php echo e($project->image_position_x); ?>');
+                localStorage.setItem('saved_image_position_y', '<?php echo e($project->image_position_y); ?>');
+                localStorage.setItem('saved_image_scale', '<?php echo e($project->image_scale); ?>');
+                localStorage.setItem('saved_image_rotation', '<?php echo e($project->image_rotation); ?>');
+            <?php endif; ?>
+
             // 2. Obsługa przycisku powrotu do kreatora
             document.getElementById('backToCreator').addEventListener('click', function(e) {
                 e.preventDefault();
@@ -402,9 +410,16 @@
 
             },
             textureUrl: '<?php echo e($project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : ""); ?>',
-            // NAPRAWIONE: obsługa obu formatów ścieżki
             artworkUrl: '<?php echo e($project->artwork_file_path ? (Str::startsWith($project->artwork_file_path, "http") ? $project->artwork_file_path : Storage::url($project->artwork_file_path)) : ""); ?>',
             hasLaminate: <?php echo e($project->laminateOption ? 'true' : 'false'); ?>,
+            // Dodajemy dane pozycjonowania obrazu
+            imagePosition: {
+                x: <?php echo e($project->image_position_x ?? 50); ?>,
+                y: <?php echo e($project->image_position_y ?? 50); ?>,
+                scale: <?php echo e($project->image_scale ?? 100); ?>,
+                rotation: <?php echo e($project->image_rotation ?? 0); ?>
+
+            },
             debug: {
                 hasArtwork: <?php echo e($project->artwork_file_path ? 'true' : 'false'); ?>,
                 artworkPath: '<?php echo e($project->artwork_file_path ?: "brak"); ?>'
@@ -427,12 +442,12 @@
             });
         }
 
-        // AUTOMATYCZNIE POKAZUJ 2D FALLBACK PO 2 SEKUNDACH
+        // AUTOMATYCZNIE POKAZUJ 2D FALLBACK PO 5 SEKUNDACH (ZWIĘKSZONY CZAS)
         setTimeout(function() {
             if (document.getElementById('preview-loading').style.display !== 'none') {
                 show2DFallback();
             }
-        }, 2000);
+        }, 5000);
 
         // Try to load 3D libraries
         function load3DLibraries() {
@@ -525,111 +540,195 @@
                 topLight.position.set(0, 100, 0);
                 scene.add(topLight);
 
-                // Create label geometry based on shape and real dimensions
-                const labelGeometry = createLabelGeometry(
-                    projectConfig.shape,
-                    projectConfig.dimensions.width,
-                    projectConfig.dimensions.height
-                );
+                // CAŁKOWICIE NOWY KOD TWORZENIA ETYKIETY 3D
+                const width = projectConfig.dimensions.width;
+                const height = projectConfig.dimensions.height;
+                const labelDepth = 2; // ZMIENIONE Z 8 NA 2 - realistyczna grubość etykiety
 
-                // POPRAWIONA FUNKCJA BEZ EFEKTU ŚWIECENIA
-                const labelMaterial = createLabelMaterial(projectConfig.material);
+                // Tworzenie podstawowego kształtu 2D
+                let shape = new THREE.Shape();
+                if (projectConfig.shape === 'circle') {
+                    const radius = Math.max(width, height) / 2;
+                    shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
+                } else if (projectConfig.shape === 'oval') {
+                    const rx = width / 2;
+                    const ry = height / 2;
+                    const segments = 32;
+                    for (let i = 0; i <= segments; i++) {
+                        const theta = (i / segments) * Math.PI * 2;
+                        const x = rx * Math.cos(theta);
+                        const y = ry * Math.sin(theta);
+                        if (i === 0) shape.moveTo(x, y);
+                        else shape.lineTo(x, y);
+                    }
+                } else if (projectConfig.shape === 'star') {
+                    const outerRadius = Math.min(width, height) / 2;
+                    const innerRadius = outerRadius * 0.4;
+                    const points = 5;
+                    for (let i = 0; i < points * 2; i++) {
+                        const angle = (i * Math.PI) / points;
+                        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                        const x = radius * Math.cos(angle);
+                        const y = radius * Math.sin(angle);
+                        if (i === 0) shape.moveTo(x, y);
+                        else shape.lineTo(x, y);
+                    }
+                } else {
+                    // Prostokąt/kwadrat
+                    const halfWidth = width / 2;
+                    const halfHeight = height / 2;
+                    shape.moveTo(-halfWidth, -halfHeight);
+                    shape.lineTo(halfWidth, -halfHeight);
+                    shape.lineTo(halfWidth, halfHeight);
+                    shape.lineTo(-halfWidth, halfHeight);
+                }
+                shape.closePath();
 
-                // Najpierw tworzenie mesha z bazowym materiałem
-                labelMesh = new THREE.Mesh(labelGeometry, labelMaterial);
+                // Ustawienia ekstrudowania - kluczowe dla dobrego wyglądu
+                const extrudeSettings = {
+                    steps: 1,
+                    depth: labelDepth,
+                    bevelEnabled: true,
+                    bevelThickness: 0.8,
+                    bevelSize: 0.7,
+                    bevelOffset: 0,
+                    bevelSegments: 3
+                };
+
+                // Stwórz geometrię 3D
+                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+                // Kolor materiału zależny od wybranego typu
+                let materialColor;
+                if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota')) {
+                    materialColor = 0xffd700; // Złoty
+                } else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
+                    materialColor = 0xe0e0e0; // Srebrny
+                } else {
+                    materialColor = 0xffffff; // Biały
+                }
+
+                // Parametry materiału zależne od typu
+                const roughness = projectConfig.material.includes('glossy') ? 0.1 : 0.7;
+                const metalness = projectConfig.material.includes('foil') ||
+                                 projectConfig.material.includes('folia') ? 0.8 : 0.1;
+
+                // Tworzenie jednolitego materiału dla całej etykiety
+                const labelMaterial = new THREE.MeshStandardMaterial({
+                    color: materialColor,
+                    roughness: roughness,
+                    metalness: metalness,
+                    side: THREE.DoubleSide
+                });
+
+                // Tworzenie siatki
+                labelMesh = new THREE.Mesh(geometry, labelMaterial);
                 labelMesh.castShadow = true;
                 labelMesh.receiveShadow = true;
                 scene.add(labelMesh);
 
-                // Zastąp istniejącą obsługę artwork tym kodem
-                if (projectConfig.artworkUrl) {
-                    console.log('Próbuję załadować grafikę z URL:', projectConfig.artworkUrl);
+                // NAPRAWIONY KOD ŁADOWANIA I APLIKOWANIA TEKSTUR
+                if (projectConfig.artworkUrl || projectConfig.debug.artworkPath) {
+                    console.log('Ładowanie tekstury użytkownika...');
 
+                    // Tworzymy listę URLi do spróbowania (bez filtrowania)
+                    const urls = [
+                        projectConfig.artworkUrl,
+                        '/storage/' + projectConfig.debug.artworkPath,
+                        window.location.origin + '/storage/' + projectConfig.debug.artworkPath,
+                        '/storage/app/public/' + projectConfig.debug.artworkPath,
+                        window.location.origin + '/storage/app/public/' + projectConfig.debug.artworkPath
+                    ];
+
+                    console.log('Dostępne URLe:', urls);
+
+                    // Konfiguracja loadera tekstur
                     const textureLoader = new THREE.TextureLoader();
                     textureLoader.crossOrigin = 'anonymous';
 
-                    // NOWA FUNKCJA: próbuje załadować teksturę z różnych URL-i, dopóki nie zadziała
-                    function tryLoadTexture(urls, index = 0) {
-                        if (index >= urls.length) {
-                            console.error('❌ Wszystkie próby ładowania tekstury nie powiodły się');
-                            return;
-                        }
+                    // Flaga czy załadowaliśmy już obrazek pomyślnie
+                    let textureLoaded = false;
 
-                        const currentUrl = urls[index] + '?cb=' + new Date().getTime();
-                        console.log(`Próba ${index+1}/${urls.length}: ${currentUrl}`);
+                    // Funkcja do mapowania tekstury na materiał
+                    function applyTextureToMaterial(texture) {
+                        console.log('Aplikowanie tekstury do materiału:', texture);
 
+                        // Ustawienia podstawowe tekstury
+                        texture.encoding = THREE.sRGBEncoding;
+                        texture.needsUpdate = true;
+
+                        // Ustaw mapowanie tekstury na współrzędne UV
+                        texture.center.set(0.5, 0.5);
+                        texture.offset.x = ((projectConfig.imagePosition.x || 50) - 50) / 100;
+                        texture.offset.y = ((projectConfig.imagePosition.y || 50) - 50) / -100;
+                        texture.rotation = (projectConfig.imagePosition.rotation || 0) * Math.PI / 180;
+
+                        const scale = projectConfig.imagePosition.scale || 100;
+                        texture.repeat.set(100/scale, 100/scale);
+
+                        // Zapobiegnij powtarzaniu
+                        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+
+                        // Zastosuj teksturę jako mapę koloru materiału
+                        labelMaterial.map = texture;
+                        labelMaterial.needsUpdate = true;
+
+                        // Wymuś ponowne renderowanie
+                        renderer.render(scene, camera);
+                    }
+
+                    // Próbujemy każdy URL po kolei
+                    for (let i = 0; i < urls.length && !textureLoaded; i++) {
+                        const url = urls[i];
+                        if (!url) continue;
+
+                        console.log(`Próba ${i+1}/${urls.length}: ${url}`);
+
+                        // Dodaj timestamp aby uniknąć cache'owania
+                        const urlWithTimestamp = url + '?t=' + new Date().getTime();
+
+                        // Bezpośrednie ładowanie tekstury
                         textureLoader.load(
-                            currentUrl,
-                            // Success
+                            urlWithTimestamp,
+                            // Sukces
                             function(texture) {
-                                console.log('✅ Tekstura załadowana pomyślnie!');
+                                if (textureLoaded) return; // Unikamy wielokrotnego ładowania
 
-                                // NOWE: ustaw gamma i enkodowanie
-                                texture.encoding = THREE.sRGBEncoding;
-
-                                // Zastosuj teksturę do materiału
-                                labelMaterial.map = texture;
-                                labelMaterial.transparent = true;
-
-                                // NOWE: wyłącz automatyczną emisję światła
-                                labelMaterial.emissiveMap = null;
-                                labelMaterial.emissiveIntensity = 0;
-                                labelMaterial.emissive = new THREE.Color(0x000000);
-
-                                // NOWE: dostosuj parametry materiału by zapobiec nadmiernemu świeceniu
-                                if (labelMaterial.type.includes('MeshPhysical') || labelMaterial.type.includes('MeshStandard')) {
-                                    labelMaterial.envMapIntensity = 0.2;  // zmniejsz intensywność odbić
-                                    labelMaterial.lightMapIntensity = 0.5; // zmniejsz intensywność map światła
-                                }
-
-                                // Dostosuj mapowanie UV w zależności od kształtu
-                                if (projectConfig.shape === 'circle' || projectConfig.shape === 'oval') {
-                                    texture.center.set(0.5, 0.5);
-                                    texture.repeat.set(1, 1);
-                                } else {
-                                    texture.wrapS = THREE.ClampToEdgeWrapping;
-                                    texture.wrapT = THREE.ClampToEdgeWrapping;
-                                }
-
-                                texture.needsUpdate = true;
-                                labelMaterial.needsUpdate = true;
-
-                                // Wymuś ponowne renderowanie sceny
-                                labelMesh.material = labelMaterial;
-                                renderer.render(scene, camera);
-
-                                console.log('Rendering z teksturą zakończony');
+                                console.log('Tekstura załadowana pomyślnie z:', urlWithTimestamp);
+                                textureLoaded = true;
+                                applyTextureToMaterial(texture);
                             },
-                            // Progress
-                            function(xhr) {
-                                const percent = xhr.loaded / xhr.total * 100;
-                                console.log(`Ładowanie: ${percent.toFixed(1)}%`);
-                            },
-                            // Error - próbuj następny URL
+                            // Postęp - nie używamy, ale można dodać wskaźnik ładowania
+                            undefined,
+                            // Błąd - idziemy do następnego URL
                             function(error) {
-                                console.warn(`❌ Błąd ładowania ${currentUrl}:`, error);
-                                tryLoadTexture(urls, index + 1);
+                                console.warn(`Błąd ładowania tekstury z ${urlWithTimestamp}:`, error);
                             }
                         );
                     }
 
-                    // Przygotuj listę alternatywnych URL-i do wypróbowania
-                    const urlsToTry = [
-                        projectConfig.artworkUrl,
-                        directStorageUrl,
-                        '/storage/' + projectConfig.debug.artworkPath,
-                    ];
+                    // Dodatkowy fallback, jeśli żaden z URLów nie zadziała
+                    setTimeout(() => {
+                        if (!textureLoaded && projectConfig.debug.artworkPath) {
+                            console.log('Próba bezpośredniego ładowania przez IMG tag...');
 
-                    // Rozpocznij próby ładowania
-                    tryLoadTexture(urlsToTry);
-
-                } else {
-                    console.log('Brak URL do grafiki użytkownika');
+                            // Tworzymy element IMG do sprawdzenia czy obrazek faktycznie istnieje
+                            const img = new Image();
+                            img.crossOrigin = "Anonymous";
+                            img.onload = function() {
+                                console.log('Obrazek załadowany przez IMG tag, tworzę teksturę...');
+                                const texture = new THREE.Texture(img);
+                                texture.needsUpdate = true;
+                                applyTextureToMaterial(texture);
+                            };
+                            img.src = '/storage/' + projectConfig.debug.artworkPath + '?t=' + new Date().getTime();
+                        }
+                    }, 2000);
                 }
 
                 // Add laminate layer if selected
                 if (projectConfig.hasLaminate) {
-                    const laminateGeometry = labelGeometry.clone();
+                    const laminateGeometry = geometry.clone();
                     laminateGeometry.scale(1.01, 1.01, 1); // Mniejsza różnica
 
                     // PRZEZROCZYSTY LAMINAT MATOWY
@@ -645,19 +744,54 @@
                     scene.add(laminateMesh);
                 }
 
-                // Na końcu funkcji init3DPreview()
-                // Dodaj weryfikację po inicjalizacji
-                if (projectConfig.artworkUrl) {
-                    console.log('==== WERYFIKACJA ARTWORK ====');
-                    console.log('URL artwork:', projectConfig.artworkUrl);
-                    console.log('Czy material ma mapę?', labelMaterial.map !== null);
+                // Dodajemy miarki pokazujące wymiary
+                addRulers(scene, projectConfig.dimensions.width, projectConfig.dimensions.height, labelDepth);
 
-                    // Test ładowania obrazka przez standardowy Image API
-                    const testImg = new Image();
-                    testImg.onload = () => console.log('✅ Test IMG: Obraz załadowany pomyślnie');
-                    testImg.onerror = () => console.log('❌ Test IMG: Błąd ładowania obrazu');
-                    testImg.src = projectConfig.artworkUrl;
-                }
+                // Dodaj funkcję do debugowania tekstur - można wywołać z konsoli
+                window.debugTextureLoading = function() {
+                    console.log('=== DIAGNOSTYKA ŁADOWANIA TEKSTUR ===');
+                    console.log('projectConfig:', projectConfig);
+
+                    if (projectConfig.artworkUrl) {
+                        fetch(projectConfig.artworkUrl)
+                            .then(response => {
+                                console.log('Fetch artworkUrl:',
+                                    response.ok ? 'SUKCES' : 'BŁĄD',
+                                    response.status,
+                                    response.statusText);
+                                return response.blob();
+                            })
+                            .then(blob => console.log('Rozmiar pliku:', blob.size, 'typ:', blob.type))
+                            .catch(err => console.error('Błąd fetch:', err));
+                    }
+
+                    if (projectConfig.debug.artworkPath) {
+                        const url = '/storage/' + projectConfig.debug.artworkPath;
+                        fetch(url)
+                            .then(response => {
+                                console.log('Fetch storage path:',
+                                    response.ok ? 'SUKCES' : 'BŁĄD',
+                                    response.status,
+                                    response.statusText);
+                                return response.blob();
+                            })
+                            .then(blob => console.log('Rozmiar pliku:', blob.size, 'typ:', blob.type))
+                            .catch(err => console.error('Błąd fetch:', err));
+                    }
+
+                    if (labelMaterial) {
+                        console.log('Status materiału:', labelMaterial);
+                        console.log('Mapa tekstury:', labelMaterial.map);
+                    }
+                };
+
+                // Wywołaj automatycznie po załadowaniu
+                setTimeout(window.debugTextureLoading, 3000);
+
+                // Dodaj informacje debugowe
+                console.log('Inicjalizacja 3D zakończona');
+                console.log('Geometria:', geometry);
+                console.log('Materiał:', labelMaterial);
 
                 // Hide loading, start render loop
                 document.getElementById('preview-loading').style.display = 'none';
@@ -668,6 +802,104 @@
                 console.error('3D initialization error:', error);
                 show2DFallback();
             }
+        }
+
+        // Funkcja dodająca miarki pokazujące wymiary
+        function addRulers(scene, width, height, depth) {
+            const rulerColor = 0x333333;
+            const rulerWidth = 0.5;
+            const labelOffset = 15; // Odległość miarki od etykiety
+
+            // Miarka szerokości (pozioma)
+            const widthGeometry = new THREE.BoxGeometry(width, rulerWidth, rulerWidth);
+            const widthMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
+            const widthRuler = new THREE.Mesh(widthGeometry, widthMaterial);
+            widthRuler.position.set(0, -height/2 - labelOffset, 0);
+            scene.add(widthRuler);
+
+            // Znaczniki i liczby szerokości
+            const tickSize = 2;
+            const tickSpacing = 10; // 10mm między znacznikami
+            const numTicks = Math.floor(width / tickSpacing);
+
+            for (let i = 0; i <= numTicks; i++) {
+                // Pomijamy środkowy znacznik aby uniknąć nakładania się z miarką wysokości
+                if (i === Math.floor(numTicks / 2) && i * tickSpacing === width / 2) continue;
+
+                const tickPos = -width/2 + i * tickSpacing;
+                const tickGeometry = new THREE.BoxGeometry(rulerWidth, tickSize, rulerWidth);
+                const tick = new THREE.Mesh(tickGeometry, widthMaterial);
+                tick.position.set(tickPos, -height/2 - labelOffset, 0);
+                scene.add(tick);
+
+                // Dodaj tekst z wymiarami
+                if (i % 2 === 0) { // Dodaj liczby co drugi znacznik dla czytelności
+                    addTextLabel(scene, `${i * tickSpacing}`,
+                        tickPos, -height/2 - labelOffset - tickSize - 3, 0);
+                }
+            }
+
+            // Tekst z wymiarami szerokości
+            addTextLabel(scene, `${width}mm`, 0, -height/2 - labelOffset - 10, 0, 1.5);
+
+            // Miarka wysokości (pionowa)
+            const heightGeometry = new THREE.BoxGeometry(rulerWidth, height, rulerWidth);
+            const heightMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
+            const heightRuler = new THREE.Mesh(heightGeometry, heightMaterial);
+            heightRuler.position.set(-width/2 - labelOffset, 0, 0);
+            scene.add(heightRuler);
+
+            // Znaczniki i liczby wysokości
+            const heightTicks = Math.floor(height / tickSpacing);
+
+            for (let i = 0; i <= heightTicks; i++) {
+                const tickPos = -height/2 + i * tickSpacing;
+                const tickGeometry = new THREE.BoxGeometry(tickSize, rulerWidth, rulerWidth);
+                const tick = new THREE.Mesh(tickGeometry, heightMaterial);
+                tick.position.set(-width/2 - labelOffset, tickPos, 0);
+                scene.add(tick);
+
+                // Dodaj tekst z wymiarami
+                if (i % 2 === 0) { // Dodaj liczby co drugi znacznik
+                    addTextLabel(scene, `${i * tickSpacing}`,
+                        -width/2 - labelOffset - tickSize - 3, tickPos, 0);
+                }
+            }
+
+            // Tekst z wymiarami wysokości
+            addTextLabel(scene, `${height}mm`, -width/2 - labelOffset - 15, 0, 0, 1.5, true);
+        }
+
+        // Funkcja pomocnicza do dodawania etykiet tekstowych
+        function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 100;
+            canvas.height = 50;
+
+            // Ustaw właściwości tekstu
+            context.fillStyle = '#000000';
+            context.font = `${16 * size}px Arial`;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, canvas.width/2, canvas.height/2);
+
+            // Stwórz teksturę
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(material);
+
+            // Skaluj i pozycjonuj
+            sprite.scale.set(10 * size, 5 * size, 1);
+            sprite.position.set(x, y, z);
+
+            // Obróć tekst jeśli potrzeba (dla pionowych pomiarów)
+            if (rotated) {
+                sprite.material.rotation = Math.PI / 2;
+            }
+
+            scene.add(sprite);
+            return sprite;
         }
 
         function createLabelGeometry(shape, width, height) {
@@ -704,75 +936,7 @@
             return geometry;
         }
 
-        // POPRAWIONA FUNKCJA BEZ EFEKTU ŚWIECENIA
-        function createLabelMaterial(materialSlug) {
-            console.log('Tworzenie materiału dla:', materialSlug);
-
-            // Podstawowa konfiguracja materiału - BEZ EMISJI
-            let materialConfig = {
-                side: THREE.DoubleSide,
-                transparent: true,
-                alphaTest: 0.1,
-                map: null,
-                emissive: new THREE.Color(0x000000), // Czarny = brak emisji
-                emissiveIntensity: 0
-            };
-
-            let material;
-
-            // Wybór typu materiału w zależności od slug
-            switch(materialSlug) {
-                case 'paper-white-matte':
-                    material = new THREE.MeshLambertMaterial({
-                        ...materialConfig,
-                        color: 0xffffff,
-                        reflectivity: 0.1 // Minimalna refleksyjność
-                    });
-                    break;
-
-                case 'paper-white-glossy':
-                    material = new THREE.MeshLambertMaterial({
-                        ...materialConfig,
-                        color: 0xffffff,
-                        reflectivity: 0.3
-                    });
-                    break;
-
-                case 'paper-cream':
-                    material = new THREE.MeshLambertMaterial({
-                        ...materialConfig,
-                        color: 0xfff8e1,
-                        reflectivity: 0.1
-                    });
-                    break;
-
-                case 'foil-gold':
-                    material = new THREE.MeshLambertMaterial({
-                        ...materialConfig,
-                        color: new THREE.Color(1.0, 0.84, 0.0),
-                        reflectivity: 0.5
-                    });
-                    break;
-
-                case 'foil-silver':
-                    material = new THREE.MeshLambertMaterial({
-                        ...materialConfig,
-                        color: 0xdddddd,
-                        reflectivity: 0.5
-                    });
-                    break;
-
-                default:
-                    material = new THREE.MeshLambertMaterial({
-                        ...materialConfig,
-                        color: 0xffffff
-                    });
-            }
-
-            return material;
-        }
-
-        function createStarGeometry() {
+        function createStarGeometry(extrude = false, depth = 0) {
             const shape = new THREE.Shape();
             const outerRadius = 50;
             const innerRadius = 25;
@@ -792,7 +956,22 @@
             }
 
             shape.closePath();
-            return new THREE.ShapeGeometry(shape);
+
+            if (extrude) {
+                const extrudeSettings = {
+                    steps: 1,
+                    depth: depth,
+                    bevelEnabled: true,
+                    bevelThickness: 0.5,
+                    bevelSize: 0.5,
+                    bevelOffset: 0,
+                    bevelSegments: 3
+                };
+
+                return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            } else {
+                return new THREE.ShapeGeometry(shape);
+            }
         }
 
         function animate() {

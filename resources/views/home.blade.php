@@ -7,6 +7,42 @@
     @vite(['resources/js/home.js'])
 @endpush
 
+@push('scripts')
+    @vite(['resources/js/home.js'])
+    <script>
+        // Enhanced smooth scrolling with offset for fixed header
+        document.addEventListener('DOMContentLoaded', function() {
+            const smoothScrollLinks = document.querySelectorAll('a[href^="#"]');
+
+            smoothScrollLinks.forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    if(targetId === '#') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        // Calculate header height for offset
+                        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+
+                        // Update URL without scroll
+                        history.pushState(null, null, targetId);
+                    }
+                });
+            });
+        });
+    </script>
+@endpush
+
+
+
 <!-- Enhanced Hero Section with animated gradient -->
     <div class="bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 py-20 px-4 relative overflow-hidden animate-gradient-x">
         <!-- Improved animated background elements -->
@@ -148,18 +184,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Extra incentive -->
-        <div class="mt-8 text-center">
-            <div class="inline-block bg-gradient-to-r from-orange-50 to-yellow-50 px-6 py-3 rounded-full border border-orange-100 text-orange-600 text-sm font-medium animate-bounce" style="animation-duration: 3s;">
-                <svg class="w-4 h-4 inline-block mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.707.293l.707.707L15.657 5a1 1 0 01-1.414 1.414L13 5.172l-1.243 1.242a1 1 0 01-1.414-1.414l2-2A1 1 0 0112 2zm2 5a2 2 0 012 2v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5a2 2 0 012-2h5zM9 9a1 1 0 00-1 1v5a1 1 0 001 1h5a1 1 0 001-1v-5a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                </svg>
-                Zamów dziś i otrzymaj darmową próbkę!
-            </div>
-        </div>
-    </div>
-</div>
 
     <!-- Enhanced Templates Section with more visual flair -->
     <div class="py-20 px-4 bg-gradient-to-b from-gray-50 to-white">

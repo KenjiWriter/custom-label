@@ -1,0 +1,406 @@
+/* ====== ZAAWANSOWANE STYLE DLA KREATORA ETYKIET ====== */
+
+/* Animacje i efekty podstawowe */
+@keyframes float-subtle {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) skewX(-30deg); opacity: 0; }
+    20% { transform: translateX(100%) skewX(-30deg); opacity: 0.4; }
+    100% { transform: translateX(100%) skewX(-30deg); opacity: 0; }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+    50% { box-shadow: 0 0 20px 5px rgba(249, 115, 22, 0.6); }
+}
+
+@keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes scale-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-in-right {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-left {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Efekty 3D dla kart */
+.perspective-500 {
+    perspective: 500px;
+}
+
+.preserve-3d {
+    transform-style: preserve-3d;
+}
+
+/* Ulepszone style dla progress bara */
+.creator-progress {
+    position: relative;
+    overflow: hidden;
+}
+
+.creator-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(to right, rgba(255,255,255,0.2), rgba(255,255,255,0.5), rgba(255,255,255,0.2));
+    animation: shine 3s infinite;
+}
+
+.creator-step-active {
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3), 0 10px 15px -5px rgba(249, 115, 22, 0.5);
+    animation: pulse-glow 2s infinite;
+}
+
+/* Efekty dla kształtów */
+.shape-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.shape-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.shape-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+    transition: height 0.4s ease;
+}
+
+.shape-card:hover::before {
+    height: 100%;
+}
+
+.shape-card.selected {
+    animation: bounce-subtle 2s infinite;
+}
+
+.shape-image-container {
+    transition: transform 0.5s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.shape-card:hover .shape-image-container {
+    transform: scale(1.1) rotate(2deg);
+}
+
+.shape-indicator {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.shape-card.selected .shape-indicator {
+    transform: scale(1);
+}
+
+/* Efekty dla materiałów */
+.material-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.material-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+}
+
+.material-texture {
+    transition: all 0.5s ease;
+    transform-origin: center;
+}
+
+.material-card:hover .material-texture {
+    transform: scale(1.15);
+}
+
+/* Glossy material effect */
+.material-glossy::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    transition: all 0.6s ease-in-out;
+    z-index: 2;
+}
+
+.material-card:hover .material-glossy::before {
+    transform: rotate(30deg) translate(50%, 50%);
+}
+
+/* Matte material effect */
+.material-matte {
+    position: relative;
+}
+
+.material-matte::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.material-card:hover .material-matte::before {
+    opacity: 1;
+}
+
+/* Efekty dla laminatu */
+.laminate-card {
+    transition: all 0.4s ease;
+}
+
+.laminate-card:hover {
+    transform: scale(1.05);
+    z-index: 5;
+}
+
+.laminate-texture {
+    position: relative;
+    overflow: hidden;
+}
+
+.laminate-shine {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: linear-gradient(135deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.2) 25%,
+        rgba(255,255,255,0.2) 50%,
+        rgba(255,255,255,0) 100%);
+}
+
+.laminate-card:hover .laminate-shine {
+    opacity: 1;
+}
+
+/* Efekty dla przycisków */
+.btn-prev {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-prev:hover {
+    transform: translateX(-3px);
+}
+
+.btn-next {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-next:hover {
+    transform: translateX(3px);
+}
+
+.btn-submit {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.7s ease;
+    z-index: -1;
+}
+
+.btn-submit:hover::before {
+    left: 100%;
+}
+
+.btn-submit:not(:disabled):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.5);
+}
+
+.btn-arrow {
+    transition: transform 0.3s ease;
+}
+
+.btn-prev:hover .btn-arrow {
+    transform: translateX(-4px);
+}
+
+.btn-next:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+/* Animacje dla kroków */
+.step-enter {
+    animation: scale-in 0.5s forwards;
+}
+
+.step-enter-right {
+    animation: slide-in-right 0.5s forwards;
+}
+
+.step-enter-left {
+    animation: slide-in-left 0.5s forwards;
+}
+
+/* Style dla wybranego kształtu/materiału */
+.selected-item {
+    position: relative;
+    z-index: 5;
+}
+
+.selected-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4), 0 10px 20px -5px rgba(249, 115, 22, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.selected-item:hover::after {
+    opacity: 1;
+}
+
+/* Efekty dla price tagów */
+.price-tag {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.price-tag:hover {
+    transform: scale(1.1);
+}
+
+/* Efekty dla ikon */
+.icon-3d {
+    transition: all 0.3s ease;
+}
+
+.icon-3d:hover {
+    transform: perspective(100px) rotateX(10deg) rotateY(10deg) scale(1.1);
+}
+
+/* Ulepszone podświetlenie pól formularza */
+.form-input-enhanced {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.form-input-enhanced:focus {
+    border-color: rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
+    outline: none;
+}
+
+/* Spinner animacja */
+.loading-spinner {
+    animation: rotate-slow 1.5s linear infinite;
+}
+
+/* Animacje dla podglądu rozmiaru */
+.size-preview-container {
+    transition: all 0.5s ease;
+}
+
+.size-preview {
+    transition: all 0.5s ease;
+    transform-origin: center;
+}
+
+.size-preview-container:hover .size-preview {
+    transform: scale(1.05);
+}
+
+/* Efekt laminatu */
+.laminate-effect {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0.1)
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.laminate-card:hover .laminate-effect {
+    opacity: 1;
+}
+
+/* Pulsujący indykator aktywności */
+.pulse-dot {
+    position: relative;
+}
+
+.pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(249, 115, 22, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse-glow 2s infinite;
+}

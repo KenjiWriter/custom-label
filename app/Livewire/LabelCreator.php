@@ -26,6 +26,10 @@ class LabelCreator extends Component
     public $quantity = 100;
     public $artworkFile = null;
     public $tempArtworkPath = null;
+    public $imagePositionX = 50; // Domyślnie wycentrowany w poziomie
+    public $imagePositionY = 50; // Domyślnie wycentrowany w pionie
+    public $imageScale = 100;    // Domyślnie 100% skala
+    public $imageRotation = 0;   // Domyślnie bez rotacji
 
     // Computed properties - DOKŁADNIE JAK MIAŁEŚ
     public $calculatedPrice = 0;
@@ -277,6 +281,13 @@ class LabelCreator extends Component
                 'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
                 'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
             ];
+
+                $project = new LabelProject();
+
+                $project->image_position_x = $this->imagePositionX;
+                $project->image_position_y = $this->imagePositionY;
+                $project->image_scale = $this->imageScale;
+                $project->image_rotation = $this->imageRotation;
 
             // Sprawdź czy user jest zalogowany czy to gość
             if (auth()->check()) {
