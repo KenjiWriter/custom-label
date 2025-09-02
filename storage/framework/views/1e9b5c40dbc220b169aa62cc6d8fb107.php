@@ -21,7 +21,7 @@
          class="space-y-8"
          id="label-creator">
 
-        <!-- Poprawiony pasek postępu - tylko podkreślenie dla aktywnych kroków -->
+        <!-- Poprawiony pasek postępu - usunięte przekreślenia -->
         <div class="relative mb-12">
             <div class="flex items-center justify-between">
                 <template x-for="step in totalSteps" :key="step">
@@ -36,16 +36,16 @@
                                     <span class="text-sm font-semibold" x-text="step"></span>
                                 </div>
                                 <div class="ml-3">
-                                    <div class="text-sm font-medium transition-colors no-underline"
+                                    <div class="text-sm font-medium transition-colors"
                                         :class="currentStep >= step ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-gray-500'">
-                                        <span x-show="step === 1" class="no-underline">Wybierz kształt</span>
-                                        <span x-show="step === 2" class="no-underline">Wybierz materiał</span>
-                                        <span x-show="step === 3" class="no-underline">Wybierz rozmiar</span>
-                                        <span x-show="step === 4" class="no-underline">Finalizacja</span>
+                                        <span x-show="step === 1">Wybierz kształt</span>
+                                        <span x-show="step === 2">Wybierz materiał</span>
+                                        <span x-show="step === 3">Wybierz rozmiar</span>
+                                        <span x-show="step === 4">Finalizacja</span>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Connect line, except for last step -->
+                            <!-- Linia łącząca -->
                             <div x-show="step < totalSteps"
                                  class="w-full h-1 absolute top-5 left-10"
                                  :class="currentStep > step ? 'bg-orange-600' : 'bg-gray-200'"></div>
@@ -139,7 +139,7 @@
                     </p>
                 </div>
 
-                <!-- Poprawione karty materiałów z lepszymi ilustracjami -->
+                <!-- Poprawione karty materiałów z lepszymi ikonami -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $materials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <label class="relative cursor-pointer">
@@ -154,38 +154,48 @@
                                     <!--[if BLOCK]><![endif]--><?php if($material->image_path): ?>
                                         <img src="<?php echo e(asset($material->image_path)); ?>" alt="<?php echo e($material->name); ?>" class="w-full h-full object-cover">
                                     <?php else: ?>
-                                        <!-- Znacznie ulepszone ikony dla różnych materiałów -->
                                         <!--[if BLOCK]><![endif]--><?php if(str_contains($material->slug, 'white-matte') || str_contains($material->slug, 'bialy-matowy')): ?>
-                                            <div class="w-28 h-16 bg-gray-50 border-2 border-gray-200 rounded-md flex items-center justify-center relative">
-                                                <div class="absolute inset-0 bg-white"></div>
-                                                <span class="relative z-10 font-medium text-gray-800">BIAŁY MAT</span>
-                                            </div>
-                                        <?php elseif(str_contains($material->slug, 'white-glossy') || str_contains($material->slug, 'bialy-blysk')): ?>
-                                            <div class="w-28 h-16 bg-gray-50 border-2 border-gray-200 rounded-md flex items-center justify-center relative overflow-hidden">
-                                                <div class="absolute inset-0 bg-white"></div>
-                                                <div class="absolute -inset-x-full top-0 bottom-0 h-full w-[400%] animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white to-transparent opacity-60"></div>
-                                                <span class="relative z-10 font-medium text-gray-800">BŁYSZCZĄCY</span>
-                                            </div>
+    <div class="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden">
+        <!-- Gradient tła dla papieru matowego - delikatny, bez połysku -->
+        <div class="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100"></div>
+        <!-- Subtelna tekstura matowa -->
+        <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZjBmMGYwIj48L3JlY3Q+PHBhdGggZD0iTTAgMEwxMCAxME0xMCAwTDAgMTAiIHN0cm9rZT0iI2U4ZThlOCIgc3Ryb2tlLXdpZHRoPSIxIj48L3BhdGg+PC9zdmc+');"></div>
+        <!-- Brak efektu połysku -->
+        <span class="relative z-10 font-medium text-gray-400">PAPIER BIAŁY MATOWY</span>
+    </div>
+<?php elseif(str_contains($material->slug, 'white-glossy') || str_contains($material->slug, 'bialy-blysk')): ?>
+    <div class="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden">
+        <!-- Jaśniejszy gradient dla papieru błyszczącego z niebieskim odcieniem -->
+        <div class="absolute inset-0 bg-gradient-to-br from-white via-blue-50 to-blue-100"></div>
+        <!-- Efekt połysku jak w folii -->
+        <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70 animate-pulse"></div>
+        <!-- Przesuwający się efekt błysku -->
+        <div class="absolute -inset-full w-[400%] h-[200%]" style="background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.9) 40%, transparent 60%); transform: rotate(25deg); animation: shine 3s linear infinite;"></div>
+        <!-- Efekt refleksów światła -->
+        <div class="absolute top-1/3 left-1/4 w-8 h-8 bg-white rounded-full opacity-80 blur-sm"></div>
+        <div class="absolute bottom-1/4 right-1/3 w-6 h-6 bg-white rounded-full opacity-70 blur-sm"></div>
+        <span class="relative z-10 font-medium text-gray-400">PAPIER BIAŁY BŁYSZCZĄCY</span>
+    </div>
                                         <?php elseif(str_contains($material->slug, 'kraft') || str_contains($material->slug, 'kraft')): ?>
-                                            <div class="w-28 h-16 rounded-md flex items-center justify-center" style="background-color: #d4b996;">
+                                            <div class="w-full h-full rounded-md flex items-center justify-center" style="background-color: #d4b996;">
                                                 <div class="w-full h-full flex items-center justify-center" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZDRiOTk2Ij48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiNjM2E0ODIiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=');">
-                                                    <span class="text-white font-medium shadow-sm">KRAFT</span>
+                                                    <span class="text-white font-medium shadow-sm">PAPIER KRAFT</span>
                                                 </div>
                                             </div>
                                         <?php elseif(str_contains($material->slug, 'gold') || str_contains($material->slug, 'zlot')): ?>
-                                            <div class="w-28 h-16 rounded-md flex items-center justify-center relative overflow-hidden">
+                                            <div class="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden">
                                                 <div class="absolute inset-0 bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600"></div>
                                                 <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-yellow-200 to-transparent opacity-70 animate-pulse"></div>
-                                                <span class="relative z-10 font-medium text-white drop-shadow-md">ZŁOTY</span>
+                                                <span class="relative z-10 font-medium text-white drop-shadow-md">FOLIA ZŁOTA</span>
                                             </div>
                                         <?php elseif(str_contains($material->slug, 'silver') || str_contains($material->slug, 'srebr')): ?>
-                                            <div class="w-28 h-16 rounded-md flex items-center justify-center relative overflow-hidden">
+                                            <div class="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden">
                                                 <div class="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-400 to-gray-500"></div>
                                                 <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70"></div>
-                                                <span class="relative z-10 font-medium text-white drop-shadow-md">SREBRNY</span>
+                                                <span class="relative z-10 font-medium text-white drop-shadow-md">FOLIA SREBRNA</span>
                                             </div>
                                         <?php elseif(str_contains($material->slug, 'waterproof') || str_contains($material->slug, 'wodoodporn')): ?>
-                                            <div class="w-28 h-16 bg-blue-50 rounded-md flex items-center justify-center relative overflow-hidden border border-blue-200">
+                                            <div class="w-full h-full bg-blue-50 rounded-md flex items-center justify-center relative overflow-hidden border border-blue-200">
                                                 <div class="absolute inset-0 bg-gradient-to-b from-white via-blue-50 to-blue-100 opacity-80"></div>
                                                 <div class="absolute top-0 left-0 right-0 h-2 bg-blue-400 opacity-30"></div>
                                                 <div class="w-full h-full flex flex-col items-center justify-center relative z-10">
@@ -193,53 +203,57 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z"></path>
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l-9-5 9-5 9 5-9 5z"></path>
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14v10"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l-9-5 9-5 9 5-9 5z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14v10"></path>
                                                     </svg>
-                                                    <span class="text-xs font-medium text-blue-700">WODOODPORNY</span>
+                                                    <span class="text-xs font-medium text-blue-700">PAPIER WODOODPORNY</span>
                                                 </div>
                                             </div>
                                         <?php elseif(str_contains($material->slug, 'transparent') || str_contains($material->slug, 'przezroczyst')): ?>
-                                            <div class="w-28 h-16 rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200">
+                                            <div class="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200">
                                                 <div class="absolute inset-0 bg-white bg-opacity-30 backdrop-blur-sm"></div>
                                                 <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-40"></div>
-                                                <div class="w-20 h-8 border border-dashed border-gray-300 rounded flex items-center justify-center bg-transparent relative z-10">
-                                                    <span class="text-xs font-medium text-gray-500">PRZEZROCZYSTY</span>
+                                                <div class="w-3/4 h-1/2 border border-dashed border-gray-300 rounded flex items-center justify-center bg-transparent relative z-10">
+                                                    <span class="text-xs font-medium text-gray-500">FOLIA PRZEZROCZYSTA</span>
                                                 </div>
                                             </div>
-                                        <?php else: ?>
-                                            <div class="w-28 h-16 bg-gray-100 rounded-md flex items-center justify-center">
-                                                <svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                                </svg>
-                                            </div>
-                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                </div>
-
-                                <div class="flex-grow space-y-1">
-                                    <span class="font-medium text-gray-900"><?php echo e($material->name); ?></span>
-                                    <p class="text-sm text-gray-500"><?php echo e(Str::limit($material->description, 80)); ?></p>
-                                </div>
-
-                                <div class="mt-3 flex items-center justify-between">
-                                    <div class="text-sm text-orange-600 font-medium">
-                                        <?php echo e(number_format($material->price_per_cm2 * 100, 2)); ?> zł / 100 cm²
-                                    </div>
-                                    <!--[if BLOCK]><![endif]--><?php if($material->is_waterproof): ?>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                            </svg>
-                                            Wodoodporny
-                                        </span>
-                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                </div>
-                            </div>
-                        </label>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                        <?php elseif(str_contains($material->slug, 'white') || str_contains($material->slug, 'biala')): ?>
+    <div class="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-200"></div>
+        <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70 animate-pulse"></div>
+        <div class="absolute -inset-full w-[400%] h-[200%]" style="background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.9) 40%, transparent 60%); transform: rotate(25deg); animation: shine 3s linear infinite;"></div>
+        <span class="relative z-10 font-medium text-gray-400">FOLIA BIAŁA</span>
+    </div>
+<?php else: ?>
+    <div class="w-full h-full bg-gray-100 rounded-md flex items-center justify-center">
+        <svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+    </div>
+<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
+
+                <div class="flex-grow space-y-1">
+                    <span class="font-medium text-gray-900"><?php echo e($material->name); ?></span>
+                    <p class="text-sm text-gray-500"><?php echo e(Str::limit($material->description, 80)); ?></p>
+                </div>
+
+                <div class="mt-3 flex items-center justify-between">
+                    <div class="text-sm text-orange-600 font-medium">
+                        <?php echo e(number_format($material->price_per_cm2 * 100, 2)); ?> zł / 100 cm²
+                    </div>
+                    <!--[if BLOCK]><![endif]--><?php if($material->is_waterproof): ?>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            Wodoodporny
+                        </span>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                </div>
+            </div>
+        </label>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+</div>
 
                 <div class="flex justify-between">
                     <button
@@ -394,100 +408,99 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
 
-                <!-- Laminat - ustawiony w jednej linii -->
-                <div class="space-y-4">
-                    <h4 class="font-semibold text-gray-900 text-lg text-center">Wybierz laminat (opcjonalnie)</h4>
-                    <p class="text-gray-500 text-sm text-center max-w-2xl mx-auto">
-                        Laminat zwiększa trwałość etykiety i chroni przed wilgocią, promieniowaniem UV oraz uszkodzeniami mechanicznymi.
-                    </p>
+                <!-- Laminat - poprawiony na mniejsze karty bez paska przewijania -->
+<div class="space-y-4">
+    <h4 class="font-semibold text-gray-900 text-lg text-center">Wybierz laminat (opcjonalnie)</h4>
+    <p class="text-gray-500 text-sm text-center max-w-2xl mx-auto">
+        Laminat zwiększa trwałość etykiety i chroni przed wilgocią, promieniowaniem UV oraz uszkodzeniami mechanicznymi.
+    </p>
 
-                    <div class="flex flex-nowrap overflow-x-auto gap-4 pb-4 px-2">
-                        <!-- Opcja bez laminatu -->
-                        <label class="relative cursor-pointer flex-shrink-0" style="min-width: 220px; max-width: 280px;">
-                            <input
-                                type="radio"
-                                wire:model.live="selectedLaminate"
-                                value=""
-                                class="sr-only peer"
-                            >
-                            <div class="p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full flex flex-col" style="min-height: 180px;">
-                                <div class="flex-shrink-0 mb-3 h-16 flex items-center justify-center">
-                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    <div class="flex flex-wrap justify-center gap-4 pb-2">
+        <!-- Opcja bez laminatu -->
+        <label class="relative cursor-pointer flex-shrink-0" style="min-width: 170px; max-width: 200px;">
+            <input
+                type="radio"
+                wire:model.live="selectedLaminate"
+                value=""
+                class="sr-only peer"
+            >
+            <div class="p-3 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full flex flex-col" style="min-height: 160px;">
+                <div class="flex-shrink-0 mb-2 h-14 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+
+                <div class="flex-grow">
+                    <div class="font-medium text-gray-900 mb-1 text-sm">Bez laminatu</div>
+                    <p class="text-xs text-gray-500">Standardowe wykończenie bez dodatkowej ochrony.</p>
+                </div>
+
+                <div class="mt-2 text-center">
+                    <span class="text-xs font-medium text-gray-500">Bez dopłaty</span>
+                </div>
+            </div>
+        </label>
+
+        <!-- Opcje laminatu -->
+        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $laminateOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <label class="relative cursor-pointer flex-shrink-0" style="min-width: 170px; max-width: 200px;">
+                <input
+                    type="radio"
+                    wire:model.live="selectedLaminate"
+                    value="<?php echo e($option->id); ?>"
+                    class="sr-only peer"
+                >
+                <div class="p-3 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full flex flex-col" style="min-height: 160px;">
+                    <div class="flex-shrink-0 mb-2 h-14 overflow-hidden rounded-lg relative">
+                        <!--[if BLOCK]><![endif]--><?php if($option->texture_image_path): ?>
+                            <img src="<?php echo e(asset($option->texture_image_path)); ?>" alt="<?php echo e($option->name); ?>" class="w-full h-full object-cover">
+                        <?php else: ?>
+                            <!-- Dynamiczne ikony dla różnych typów laminatu -->
+                            <!--[if BLOCK]><![endif]--><?php if(str_contains($option->slug, 'matte') || str_contains($option->slug, 'mat')): ?>
+                                <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
+                                    <div class="absolute top-2 left-2 w-8 h-8 bg-white rounded-full opacity-25"></div>
+                                    <span class="text-sm font-medium text-gray-800">MAT</span>
+                                </div>
+                            <?php elseif(str_contains($option->slug, 'glossy') || str_contains($option->slug, 'blysk')): ?>
+                                <div class="w-full h-full bg-gradient-to-br from-white to-blue-50 flex items-center justify-center relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70"></div>
+                                    <span class="text-sm font-medium text-gray-800 z-10">POŁYSK</span>
+                                </div>
+                            <?php elseif(str_contains($option->slug, 'soft-touch') || str_contains($option->slug, 'soft')): ?>
+                                <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center relative">
+                                    <div class="absolute inset-0 bg-black opacity-5 filter blur-sm"></div>
+                                    <span class="text-sm font-medium text-gray-800">SOFT</span>
+                                </div>
+                            <?php else: ?>
+                                <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                     </svg>
                                 </div>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                                <div class="flex-grow">
-                                    <div class="font-medium text-gray-900 mb-1">Bez laminatu</div>
-                                    <p class="text-sm text-gray-500">Standardowe wykończenie bez dodatkowej ochrony.</p>
-                                </div>
+                        <div class="absolute bottom-1 right-1 bg-blue-500 rounded-full p-1 shadow-sm">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
 
-                                <div class="mt-3 text-center">
-                                    <span class="text-sm font-medium text-gray-500">Bez dopłaty</span>
-                                </div>
-                            </div>
-                        </label>
+                    <div class="flex-grow">
+                        <div class="font-medium text-gray-900 mb-1 text-sm"><?php echo e($option->name); ?></div>
+                        <p class="text-xs text-gray-500"><?php echo e(Str::limit($option->description, 50)); ?></p>
+                    </div>
 
-                        <!-- Opcje laminatu -->
-                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $laminateOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <label class="relative cursor-pointer flex-shrink-0" style="min-width: 220px; max-width: 280px;">
-                                <input
-                                    type="radio"
-                                    wire:model.live="selectedLaminate"
-                                    value="<?php echo e($option->id); ?>"
-                                    class="sr-only peer"
-                                >
-                                <div class="p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50 h-full flex flex-col" style="min-height: 180px;">
-                                    <div class="flex-shrink-0 mb-3 h-16 overflow-hidden rounded-lg relative">
-                                        <!--[if BLOCK]><![endif]--><?php if($option->texture_image_path): ?>
-                                            <img src="<?php echo e(asset($option->texture_image_path)); ?>" alt="<?php echo e($option->name); ?>" class="w-full h-full object-cover">
-                                        <?php else: ?>
-                                            <!-- Dynamiczne ikony dla różnych typów laminatu -->
-                                            <!--[if BLOCK]><![endif]--><?php if(str_contains($option->slug, 'matte') || str_contains($option->slug, 'mat')): ?>
-                                                <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
-                                                    <div class="absolute top-2 left-2 w-8 h-8 bg-white rounded-full opacity-25"></div>
-                                                    <span class="text-sm font-medium text-gray-800">MAT</span>
-                                                </div>
-                                            <?php elseif(str_contains($option->slug, 'glossy') || str_contains($option->slug, 'blysk')): ?>
-                                                <div class="w-full h-full bg-gradient-to-br from-white to-blue-50 flex items-center justify-center relative overflow-hidden">
-                                                    <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-white to-transparent opacity-70"></div>
-                                                    <span class="text-sm font-medium text-gray-800 z-10">POŁYSK</span>
-                                                </div>
-                                            <?php elseif(str_contains($option->slug, 'soft-touch') || str_contains($option->slug, 'soft')): ?>
-                                                <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center relative">
-                                                    <div class="absolute inset-0 bg-black opacity-5 filter blur-sm"></div>
-                                                    <span class="text-sm font-medium text-gray-800">SOFT</span>
-                                                </div>
-                                            <?php else: ?>
-                                                <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                                                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                                    </svg>
-                                                </div>
-                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-                                        <!-- Ikonka efektu na laminacie -->
-                                        <div class="absolute bottom-1 right-1 bg-blue-500 rounded-full p-1 shadow-sm">
-                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex-grow">
-                                        <div class="font-medium text-gray-900 mb-1"><?php echo e($option->name); ?></div>
-                                        <p class="text-xs text-gray-500"><?php echo e(Str::limit($option->description, 60)); ?></p>
-                                    </div>
-
-                                    <div class="mt-3 text-center">
-                                        <span class="text-sm font-medium text-orange-600">+<?php echo e(number_format(($option->price_multiplier - 1) * 100, 0)); ?>%</span>
-                                    </div>
-                                </div>
-                            </label>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                    <div class="mt-2 text-center">
+                        <span class="text-xs font-medium text-orange-600">+<?php echo e(number_format(($option->price_multiplier - 1) * 100, 0)); ?>%</span>
                     </div>
                 </div>
+            </label>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+    </div>
+</div>
 
                 <!-- Przyciski Wstecz/Dalej w sekcji rozmiaru -->
                 <div class="flex justify-between">
