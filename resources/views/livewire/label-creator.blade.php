@@ -619,98 +619,173 @@
                         </div>
 
                         <!-- Prawa kolumna - podgląd obrazka z możliwością pozycjonowania -->
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center shadow-inner transform transition-all duration-300 hover:shadow-lg relative h-[300px]">
-                            @if($tempArtworkPath)
-                                <div class="relative w-full h-full min-h-[200px] flex items-center justify-center">
-                                    <div
-                                        x-data="{
-                                            dragging: false,
-                                            posX: @entangle('imagePositionX').defer || 50,
-                                            posY: @entangle('imagePositionY').defer || 50,
-                                            scale: @entangle('imageScale').defer || 100,
-                                            rotation: @entangle('imageRotation').defer || 0,
-                                            startDrag(e) {
-                                                if (e.target.classList.contains('img-control')) return;
-                                                this.dragging = true;
-                                                e.preventDefault();
-                                            },
-                                            drag(e) {
-                                                if (!this.dragging) return;
+<div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center shadow-inner transform transition-all duration-300 hover:shadow-lg relative h-[300px]">
+    <div class="relative w-full h-full min-h-[200px] flex items-center justify-center">
+        <div
+            x-data="{
+                dragging: false,
+                posX: @entangle('imagePositionX').defer || 50,
+                posY: @entangle('imagePositionY').defer || 50,
+                scale: @entangle('imageScale').defer || 100,
+                rotation: @entangle('imageRotation').defer || 0,
+                startDrag(e) {
+                    if (e.target.classList.contains('img-control')) return;
+                    this.dragging = true;
+                    e.preventDefault();
+                },
+                drag(e) {
+                    if (!this.dragging) return;
 
-                                                const container = e.currentTarget.getBoundingClientRect();
-                                                const x = (e.clientX - container.left) / container.width * 100;
-                                                const y = (e.clientY - container.top) / container.height * 100;
+                    const container = e.currentTarget.getBoundingClientRect();
+                    const x = (e.clientX - container.left) / container.width * 100;
+                    const y = (e.clientY - container.top) / container.height * 100;
 
-                                                this.posX = Math.min(Math.max(x, 0), 100);
-                                                this.posY = Math.min(Math.max(y, 0), 100);
-                                            },
-                                            endDrag() {
-                                                this.dragging = false;
-                                            },
-                                            updateScale(delta) {
-                                                this.scale = Math.min(Math.max(this.scale + delta, 20), 200);
-                                            },
-                                            updateRotation(delta) {
-                                                this.rotation = (this.rotation + delta) % 360;
-                                                if (this.rotation < 0) this.rotation += 360;
-                                            }
-                                        }"
-                                        @mousedown="startDrag"
-                                        @mousemove="drag"
-                                        @mouseup="endDrag"
-                                        @mouseleave="endDrag"
-                                        class="absolute inset-0 bg-checkerboard cursor-move"
-                                    >
-                                        <img src="/storage/{{ $tempArtworkPath }}"
-                                             alt="Podgląd grafiki"
-                                             class="absolute transform-gpu transition-transform duration-200"
-                                             :style="`
-                                                left: ${posX}%;
-                                                top: ${posY}%;
-                                                transform: translate(-50%, -50%) scale(${scale/100}) rotate(${rotation}deg);
-                                                max-width: 90%;
-                                                max-height: 90%;
-                                                object-fit: contain;
-                                             `"
-                                             onerror="this.onerror=null; this.src='/images/placeholder-image.png'; console.log('Błąd ładowania obrazka: ' + this.src);">
+                    this.posX = Math.min(Math.max(x, 0), 100);
+                    this.posY = Math.min(Math.max(y, 0), 100);
+                },
+                endDrag() {
+                    this.dragging = false;
+                },
+                updateScale(delta) {
+                    this.scale = Math.min(Math.max(this.scale + delta, 20), 200);
+                },
+                updateRotation(delta) {
+                    this.rotation = (this.rotation + delta) % 360;
+                    if (this.rotation < 0) this.rotation += 360;
+                }
+            }"
+            @mousedown="startDrag"
+            @mousemove="drag"
+            @mouseup="endDrag"
+            @mouseleave="endDrag"
+            class="absolute inset-0 bg-checkerboard cursor-move"
+        >
+            <!-- Wyświetlanie kształtu etykiety w zależności od wyboru użytkownika -->
+            <div class="absolute inset-0 flex items-center justify-center">
+                @php
+                    $shape = $shapes->firstWhere('id', $selectedShape);
+                    $shapeType = $shape ? $shape->slug : 'rectangle';
+                    $material = $materials->firstWhere('id', $selectedMaterial);
+                    $materialSlug = $material ? $material->slug : '';
 
-                                        <!-- Image positioning controls -->
-                                        <div class="absolute bottom-2 right-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 flex items-center space-x-2">
-                                            <button type="button" @click="updateScale(10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                </svg>
-                                            </button>
-                                            <button type="button" @click="updateScale(-10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
-                                                </svg>
-                                            </button>
-                                            <div class="w-px h-5 bg-gray-300 mx-1"></div>
-                                            <button type="button" @click="updateRotation(15)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
+                    // Określenie wymiarów
+                    if($useCustomSize) {
+                        $width = $customWidth;
+                        $height = $customHeight;
+                    } else {
+                        $size = $availableSizes->firstWhere('id', $selectedSize);
+                        $width = $size ? $size->width_mm : 50;
+                        $height = $size ? $size->height_mm : 50;
+                    }
 
-                                        <div class="absolute top-2 left-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 text-xs text-gray-700">
-                                            Przeciągnij aby ustawić | Użyj przycisków do skalowania i obracania
-                                        </div>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="text-center p-4">
-                                    <div class="text-gray-400 mb-2">
-                                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <p class="text-gray-500">Podgląd wybranego obrazka</p>
-                                </div>
-                            @endif
-                        </div>
+                    // Skalowanie do proporcji ekranu (max 80% kontenera)
+                    $containerSize = 240; // 80% z 300px
+                    $scale = min($containerSize / $width, $containerSize / $height);
+                    $displayWidth = $width * $scale;
+                    $displayHeight = $height * $scale;
+
+                    // Dodanie klas dla materiałów
+                    $materialClass = '';
+
+                    if(str_contains($materialSlug, 'white-matte') || str_contains($materialSlug, 'bialy-matowy')) {
+                        $materialClass = 'bg-gray-50';
+                    } elseif(str_contains($materialSlug, 'white-glossy') || str_contains($materialSlug, 'bialy-blysk')) {
+                        $materialClass = 'bg-blue-50';
+                    } elseif(str_contains($materialSlug, 'kraft')) {
+                        $materialClass = 'bg-amber-100';
+                    } elseif(str_contains($materialSlug, 'gold') || str_contains($materialSlug, 'zlot')) {
+                        $materialClass = 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600';
+                    } elseif(str_contains($materialSlug, 'silver') || str_contains($materialSlug, 'srebr')) {
+                        $materialClass = 'bg-gradient-to-br from-gray-200 via-gray-400 to-gray-500';
+                    } elseif(str_contains($materialSlug, 'white') || str_contains($materialSlug, 'biala')) {
+                        $materialClass = 'bg-white';
+                    } elseif(str_contains($materialSlug, 'transparent') || str_contains($materialSlug, 'przezroczyst')) {
+                        $materialClass = 'bg-white bg-opacity-30 border border-dashed border-gray-300';
+                    } elseif(str_contains($materialSlug, 'waterproof') || str_contains($materialSlug, 'wodoodporn')) {
+                        $materialClass = 'bg-blue-50';
+                    } else {
+                        $materialClass = 'bg-white';
+                    }
+                @endphp
+
+                <!-- Kształt etykiety -->
+                @if($shapeType == 'circle')
+                    <div class="rounded-full shadow-lg border border-gray-200 {{ $materialClass }}"
+                        style="width: {{ $displayWidth }}px; height: {{ $displayWidth }}px;">
                     </div>
+                @elseif($shapeType == 'oval')
+                    <div class="rounded-full shadow-lg border border-gray-200 {{ $materialClass }}"
+                        style="width: {{ $displayWidth }}px; height: {{ $displayHeight }}px;">
+                    </div>
+                @elseif($shapeType == 'square')
+                    <div class="rounded-lg shadow-lg border border-gray-200 {{ $materialClass }}"
+                        style="width: {{ $displayWidth }}px; height: {{ $displayWidth }}px;">
+                    </div>
+                @elseif($shapeType == 'star')
+                    <div class="shadow-lg {{ $materialClass }}"
+                        style="width: {{ $displayWidth }}px; height: {{ $displayHeight }}px; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);">
+                    </div>
+                @else
+                    <!-- Domyślny prostokąt -->
+                    <div class="rounded-lg shadow-lg border border-gray-200 {{ $materialClass }}"
+                        style="width: {{ $displayWidth }}px; height: {{ $displayHeight }}px;">
+                    </div>
+                @endif
+            </div>
+
+            <!-- Grafika nakładana na etykietę -->
+            @if($tempArtworkPath)
+                <img src="/storage/{{ $tempArtworkPath }}"
+                     alt="Podgląd grafiki"
+                     class="absolute transform-gpu transition-transform duration-200 opacity-90"
+                     :style="`
+                        left: ${posX}%;
+                        top: ${posY}%;
+                        transform: translate(-50%, -50%) scale(${scale/100}) rotate(${rotation}deg);
+                        max-width: 90%;
+                        max-height: 90%;
+                        object-fit: contain;
+                     `"
+                     onerror="this.onerror=null; this.src='/images/placeholder-image.png';">
+
+                <!-- Image positioning controls -->
+                <div class="absolute bottom-2 right-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 flex items-center space-x-2">
+                    <button type="button" @click="updateScale(10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </button>
+                    <button type="button" @click="updateScale(-10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
+                        </svg>
+                    </button>
+                    <div class="w-px h-5 bg-gray-300 mx-1"></div>
+                    <button type="button" @click="updateRotation(15)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="absolute top-2 left-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 text-xs text-gray-700">
+                    Przeciągnij aby ustawić | Użyj przycisków do skalowania i obracania
+                </div>
+            @else
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center p-4 bg-white/70 backdrop-blur-sm rounded-lg">
+                        <div class="text-gray-500 mb-2">
+                            <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-600">Dodaj grafikę, aby umieścić ją na etykiecie</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
 
                     <!-- Price Section -->
                     <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 text-center">
