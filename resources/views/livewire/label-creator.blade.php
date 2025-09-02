@@ -839,29 +839,69 @@
         </form>
     </div>
 
-    <!-- SKRYPT OBSŁUGUJĄCY POWRÓT Z PODGLĄDU 3D -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Sprawdź czy mamy parametr returnToCreator w URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const returnToCreator = urlParams.get('returnToCreator') === 'true';
+   <!-- SKRYPT OBSŁUGUJĄCY POWRÓT Z PODGLĄDU 3D -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sprawdź czy mamy parametr returnToCreator w URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnToCreator = urlParams.get('returnToCreator') === 'true';
 
-        if (returnToCreator) {
-            // Opóźnij wykonanie aby dać komponentowi Livewire czas na inicjalizację
-            setTimeout(() => {
-                // Wywołaj metodę Livewire do przywrócenia danych projektu
-                const component = window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+    if (returnToCreator) {
+        console.log("Wykryto powrót z podglądu 3D");
+
+        // Zwiększ opóźnienie, aby dać czas na pełne załadowanie komponentów
+        setTimeout(() => {
+            // Najpierw przywróć dane projektu
+            const component = window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+            if (component) {
                 component.call('restoreFromPreview');
+                console.log("Wywołano restoreFromPreview");
+            }
 
-                // Zmień krok na 4 (finalizacja)
-                if (window.Alpine) {
-                    const stepContainer = document.querySelector('[x-data]');
-                    if (stepContainer && stepContainer.__x) {
-                        stepContainer.__x.getUnobservedData().currentStep = 4;
+            // Bardziej niezawodne ustawienie kroku na 4
+            if (window.Alpine) {
+                // Znajdź element kreatora bezpośrednio po ID
+                const creatorElement = document.getElementById('label-creator');
+                if (creatorElement && creatorElement.__x) {
+                    console.log("Znaleziono element kreatora, ustawiam krok na 4");
+                    creatorElement.__x.getUnobservedData().currentStep = 4;
+                } else {
+                    // Alternatywnie, znajdź pierwszy element z Alpine data
+                    const allAlpineElements = document.querySelectorAll('[x-data]');
+                    for (const el of allAlpineElements) {
+                        if (el.__x && typeof el.__x.getUnobservedData === 'function') {
+                            const data = el.__x.getUnobservedData();
+                            if (data && 'currentStep' in data) {
+                                console.log("Znaleziono element Alpine z currentStep, ustawiam na 4");
+                                data.currentStep = 4;
+                                break;
+                            }
+                        }
                     }
                 }
-            }, 200);
-        }
-    });
-    </script>
+
+                // Dodatkowe zabezpieczenie - wywołaj event Alpine
+                try {
+                    window.dispatchEvent(new CustomEvent('setStep', { detail: { step: 4 } }));
+                    console.log("Wyemitowano event setStep");
+                } catch (e) {
+                    console.error("Błąd przy emitowaniu eventu:", e);
+                }
+            }
+
+            // Przewiń do sekcji kreatora etykiet
+            const creatorSection = document.getElementById('label-creator');
+            if (creatorSection) {
+                setTimeout(() => {
+                    creatorSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    console.log("Przewinięto do kreatora");
+                }, 500);
+            }
+        }, 800); // Zwiększone opóźnienie dla pewności
+    }
+});
+</script>
 </div>

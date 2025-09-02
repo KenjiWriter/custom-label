@@ -16,7 +16,7 @@ class LabelCreator extends Component
 {
     use WithFileUploads;
 
-    // Public properties for form data - DOKŁADNIE JAK MIAŁEŚ
+    // Public properties for form data
     public $selectedShape = null;
     public $selectedMaterial = null;
     public $selectedLaminate = '';
@@ -32,7 +32,7 @@ class LabelCreator extends Component
     public $imageScale = 100;    // Domyślnie 100% skala
     public $imageRotation = 0;   // Domyślnie bez rotacji
 
-    // Computed properties - DOKŁADNIE JAK MIAŁEŚ
+    // Computed properties
     public $calculatedPrice = 0;
     public $isConfigurationValid = false;
 
@@ -158,7 +158,6 @@ class LabelCreator extends Component
         }
     }
 
-    // TWOJA ORYGINALNA METODA updated() - PRZYWRÓCONA
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
@@ -216,7 +215,6 @@ class LabelCreator extends Component
         $this->checkConfiguration();
     }
 
-    // TWOJA ORYGINALNA METODA calculatePrice() - PRZYWRÓCONA
     public function calculatePrice()
     {
         if (!$this->selectedShape || !$this->selectedMaterial || !$this->quantity) {
@@ -266,7 +264,6 @@ class LabelCreator extends Component
         $this->calculatedPrice = $totalPrice * 1.23;
     }
 
-    // POPRAWIONA METODA checkConfiguration() - bezpieczne sprawdzenie availableSizes
     public function checkConfiguration()
     {
         $isValid = $this->selectedShape &&
@@ -292,7 +289,6 @@ class LabelCreator extends Component
         $this->isConfigurationValid = $isValid;
     }
 
-    // TWOJA ORYGINALNA METODA getAvailableSizesProperty() - PRZYWRÓCONA
     public function getAvailableSizesProperty()
     {
         if (!$this->selectedShape) {
@@ -364,7 +360,6 @@ class LabelCreator extends Component
         }
     }
 
-    // POPRAWIONA METODA saveProject() - Z MOJĄ ZMIANĄ DO OBRAZKA
     public function saveProject()
     {
         try {
@@ -392,7 +387,7 @@ class LabelCreator extends Component
                 'calculatedPrice' => $this->calculatedPrice
             ]);
 
-            // Prepare project data
+            // Prepare project data - POPRAWKA: dodajemy parametry pozycjonowania obrazka
             $projectData = [
                 'uuid' => (string) \Illuminate\Support\Str::uuid(),
                 'label_shape_id' => $this->selectedShape,
@@ -404,14 +399,11 @@ class LabelCreator extends Component
                 'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
                 'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
                 'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
+                'image_position_x' => $this->imagePositionX,
+                'image_position_y' => $this->imagePositionY,
+                'image_scale' => $this->imageScale,
+                'image_rotation' => $this->imageRotation,
             ];
-
-                $project = new LabelProject();
-
-                $project->image_position_x = $this->imagePositionX;
-                $project->image_position_y = $this->imagePositionY;
-                $project->image_scale = $this->imageScale;
-                $project->image_rotation = $this->imageRotation;
 
             // Sprawdź czy user jest zalogowany czy to gość
             if (auth()->check()) {
@@ -452,21 +444,25 @@ class LabelCreator extends Component
                 }
             }
 
-            logger('Project created successfully:', ['uuid' => $project->uuid]);
+            logger('Project created successfully:', ['uuid' => $project->uuid, 'id' => $project->id]);
 
-            // Generate preview URL
+            // Generate preview URL - upewnij się, że używasz właściwego parametru (uuid)
             $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
+
+            // Dodaj logowanie URL do debugowania
+            logger('Preview URL:', ['url' => $previewUrl]);
 
             // Redirect to preview
             return redirect()->to($previewUrl);
 
         } catch (\Exception $e) {
             logger('Error saving project: ' . $e->getMessage());
+            logger('Stack trace: ' . $e->getTraceAsString());
             session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
+            return null;
         }
     }
 
-    // TWOJA ORYGINALNA METODA render() - PRZYWRÓCONA
     public function render()
     {
         return view('livewire.label-creator', [

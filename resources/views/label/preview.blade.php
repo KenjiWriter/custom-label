@@ -298,6 +298,12 @@
                         Przejdź do płatności
                     </button>
 
+                    <!-- Przycisk do odświeżania obrazka -->
+                    <button onclick="window.reloadArtwork()"
+                            class="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 rounded-xl font-medium text-center transition-colors mb-3">
+                        Odśwież obrazek
+                    </button>
+
                     <!-- Zamieniony link na button z ID dla lepszej obsługi JavaScript -->
                     <button id="backToCreator"
                             class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors">
@@ -323,728 +329,805 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        // Rozszerzona obsługa powrotu do kreatora z podglądu 3D
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1. Zapisz dane projektu w localStorage
-            const projectId = '{{ $project->id }}';
-            localStorage.setItem('saved_project_id', projectId);
-            localStorage.setItem('saved_step', '4');
-            localStorage.setItem('saved_shape', '{{ $project->label_shape_id }}');
-            localStorage.setItem('saved_material', '{{ $project->label_material_id }}');
-            localStorage.setItem('saved_quantity', '{{ $project->quantity }}');
 
-            // Zapisz wymiary
-            @if($project->predefined_size_id)
-                localStorage.setItem('saved_size_type', 'predefined');
-                localStorage.setItem('saved_predefined_size', '{{ $project->predefined_size_id }}');
-            @else
-                localStorage.setItem('saved_size_type', 'custom');
-                localStorage.setItem('saved_width', '{{ $dimensions["width"] }}');
-                localStorage.setItem('saved_height', '{{ $dimensions["height"] }}');
-            @endif
 
-            // Zapisz laminat jeśli istnieje
-            @if($project->laminateOption)
-                localStorage.setItem('saved_laminate', '{{ $project->laminate_option_id }}');
-            @else
-                localStorage.removeItem('saved_laminate');
-            @endif
+@push('scripts')
+<script>
+    // Rozszerzona obsługa powrotu do kreatora z podglądu 3D
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Zapisz dane projektu w localStorage
+        const projectId = '{{ $project->id }}';
+        localStorage.setItem('saved_project_id', projectId);
+        localStorage.setItem('saved_step', '4');
+        localStorage.setItem('saved_shape', '{{ $project->label_shape_id }}');
+        localStorage.setItem('saved_material', '{{ $project->label_material_id }}');
+        localStorage.setItem('saved_quantity', '{{ $project->quantity }}');
 
-            // Zapisz dane pozycjonowania obrazu jeśli istnieją
-            @if(isset($project->image_position_x))
-                localStorage.setItem('saved_image_position_x', '{{ $project->image_position_x }}');
-                localStorage.setItem('saved_image_position_y', '{{ $project->image_position_y }}');
-                localStorage.setItem('saved_image_scale', '{{ $project->image_scale }}');
-                localStorage.setItem('saved_image_rotation', '{{ $project->image_rotation }}');
-            @endif
+        // Zapisz wymiary
+        @if($project->predefined_size_id)
+            localStorage.setItem('saved_size_type', 'predefined');
+            localStorage.setItem('saved_predefined_size', '{{ $project->predefined_size_id }}');
+        @else
+            localStorage.setItem('saved_size_type', 'custom');
+            localStorage.setItem('saved_width', '{{ $dimensions["width"] }}');
+            localStorage.setItem('saved_height', '{{ $dimensions["height"] }}');
+        @endif
 
-            // 2. Obsługa przycisku powrotu do kreatora
-            document.getElementById('backToCreator').addEventListener('click', function(e) {
-                e.preventDefault();
-                goBackToCreator();
-            });
+        // Zapisz laminat jeśli istnieje
+        @if($project->laminateOption)
+            localStorage.setItem('saved_laminate', '{{ $project->laminate_option_id }}');
+        @else
+            localStorage.removeItem('saved_laminate');
+        @endif
 
-            // 3. Zabezpieczenie przed utratą danych przy użyciu przycisku wstecz przeglądarki
-            window.history.pushState({page: 'preview', projectId: projectId}, '', window.location.href);
+        // Zapisz dane pozycjonowania obrazu jeśli istnieją
+        @if(isset($project->image_position_x))
+            localStorage.setItem('saved_image_position_x', '{{ $project->image_position_x }}');
+            localStorage.setItem('saved_image_position_y', '{{ $project->image_position_y }}');
+            localStorage.setItem('saved_image_scale', '{{ $project->image_scale }}');
+            localStorage.setItem('saved_image_rotation', '{{ $project->image_rotation }}');
+        @endif
 
-            window.addEventListener('popstate', function(event) {
-                // Przekieruj na kreator z zachowaniem parametrów
-                goBackToCreator();
-                // Zapobiegaj standardowej nawigacji
-                history.pushState(null, '', window.location.href);
-            });
+        // 2. Obsługa przycisku powrotu do kreatora
+        document.getElementById('backToCreator').addEventListener('click', function(e) {
+            e.preventDefault();
+            goBackToCreator();
         });
 
-        // Funkcja pomocnicza do powrotu do kreatora
-        function goBackToCreator() {
-    // Dodajemy parametr returnUrl, aby komponent kreatora wiedział, że wróciliśmy z podglądu 3D
-    window.location.href = '{{ route("home") }}?project={{ $project->id }}&step=4&fromPreview=true&returnToCreator=true';
-}
+        // 3. Zabezpieczenie przed utratą danych przy użyciu przycisku wstecz przeglądarki
+        window.history.pushState({page: 'preview', projectId: projectId}, '', window.location.href);
 
-        let scene, camera, renderer, controls, labelMesh;
-        let isAnimating = false;
-        let libraries3DLoaded = false;
+        window.addEventListener('popstate', function(event) {
+            // Przekieruj na kreator z zachowaniem parametrów
+            goBackToCreator();
+            // Zapobiegaj standardowej nawigacji
+            history.pushState(null, '', window.location.href);
+        });
 
-        // Project configuration from backend
-        const projectConfig = {
-            shape: '{{ $project->labelShape->slug }}',
-            material: '{{ $project->labelMaterial->slug }}',
-            dimensions: {
-                width: {{ $dimensions['width'] }},
-                height: {{ $dimensions['height'] }}
-            },
-            textureUrl: '{{ $project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : "" }}',
-            artworkUrl: '{{ $project->artwork_file_path ? (Str::startsWith($project->artwork_file_path, "http") ? $project->artwork_file_path : Storage::url($project->artwork_file_path)) : "" }}',
-            hasLaminate: {{ $project->laminateOption ? 'true' : 'false' }},
-            // Dodajemy dane pozycjonowania obrazu
-            imagePosition: {
-                x: {{ $project->image_position_x ?? 50 }},
-                y: {{ $project->image_position_y ?? 50 }},
-                scale: {{ $project->image_scale ?? 100 }},
-                rotation: {{ $project->image_rotation ?? 0 }}
-            },
-            debug: {
-                hasArtwork: {{ $project->artwork_file_path ? 'true' : 'false' }},
-                artworkPath: '{{ $project->artwork_file_path ?: "brak" }}'
-            }
+        // 4. Inicjalizacja podglądu 3D
+        initializePreview();
+    });
+
+    // Funkcja pomocnicza do powrotu do kreatora
+    function goBackToCreator() {
+        // Dodajemy fragment URL (#label-creator), aby skierować bezpośrednio do sekcji kreatora
+        window.location.href = '{{ route("home") }}?project={{ $project->id }}&step=4&fromPreview=true&returnToCreator=true#label-creator';
+    }
+
+    // Zmienne globalne
+    let scene, camera, renderer, controls, labelMesh;
+    let isAnimating = false;
+    let libraries3DLoaded = false;
+    let faceMesh; // Zmienna globalna dla referencji do siatki twarzy etykiety
+    let initializationAttempts = 0;
+    const MAX_INITIALIZATION_ATTEMPTS = 3;
+
+    // Project configuration from backend
+    const projectConfig = {
+    shape: '{{ $project->labelShape->slug }}',
+    material: '{{ $project->labelMaterial->slug }}',
+    dimensions: {
+        width: {{ $dimensions['width'] }},
+        height: {{ $dimensions['height'] }}
+    },
+    textureUrl: '{{ $project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : "" }}',
+    artworkUrl: '{{ $project->artwork_file_path ? (Str::startsWith($project->artwork_file_path, "http") ? $project->artwork_file_path : asset("storage/".$project->artwork_file_path)) : "" }}',
+    hasLaminate: {{ $project->laminateOption ? 'true' : 'false' }},
+    laminateType: '{{ $project->laminateOption->slug ?? "" }}', // DODAJ TĘ LINIĘ
+    // Dane pozycjonowania obrazu
+    imagePosition: {
+        x: {{ $project->image_position_x ?? 50 }},
+        y: {{ $project->image_position_y ?? 50 }},
+        scale: {{ $project->image_scale ?? 100 }},
+        rotation: {{ $project->image_rotation ?? 0 }}
+    },
+    debug: {
+        hasArtwork: {{ $project->artwork_file_path ? 'true' : 'false' }},
+        artworkPath: '{{ $project->artwork_file_path ?: "brak" }}'
+    }
+};
+
+    // Główna funkcja inicjalizująca podgląd
+    function initializePreview() {
+        console.log('🚀 Inicjalizacja podglądu 3D...');
+
+        // Generuj alternatywne ścieżki do obrazka
+        const timestamp = Date.now();
+        const directStorageUrl = '/storage/{{ $project->artwork_file_path }}?t=' + timestamp;
+
+        console.log('Dane obrazka:', {
+            url: projectConfig.artworkUrl,
+            directUrl: directStorageUrl,
+            hasArtwork: projectConfig.debug.hasArtwork,
+            path: projectConfig.debug.artworkPath
+        });
+
+        // Załaduj biblioteki 3D
+        loadLibraries();
+    }
+
+    // Funkcja ładująca biblioteki 3D
+    function loadLibraries() {
+        console.log('📚 Ładowanie bibliotek 3D...');
+
+        // Sprawdź, czy THREE już istnieje w globalnym obiekcie window
+        if (typeof window.THREE !== 'undefined') {
+            console.log('THREE.js już załadowany, przechodzę do inicjalizacji');
+            libraries3DLoaded = true;
+            initThreeJsScene();
+            return;
+        }
+
+        // Ładuj Three.js
+        const threeScript = document.createElement('script');
+        threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+
+        threeScript.onload = function() {
+            console.log('✅ THREE.js załadowany');
+
+            // Ładuj OrbitControls
+            const controlsScript = document.createElement('script');
+            controlsScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+
+            controlsScript.onload = function() {
+                console.log('✅ OrbitControls załadowany');
+                libraries3DLoaded = true;
+                setTimeout(() => {
+                    initThreeJsScene();
+                }, 200); // Małe opóźnienie dla pewności
+            };
+
+            controlsScript.onerror = function(error) {
+                console.error('❌ Błąd ładowania OrbitControls:', error);
+                retryInitialization('Nie można załadować kontrolera kamery');
+            };
+
+            document.head.appendChild(controlsScript);
         };
 
-        // Dodaj bezpośrednio po definicji projectConfig
-        // Wygeneruj alternatywny URL na wypadek problemów
-        const directStorageUrl = '/storage/{{ $project->artwork_file_path }}';
-        console.log('Config główny URL:', projectConfig.artworkUrl);
-        console.log('Alternatywny URL:', directStorageUrl);
+        threeScript.onerror = function(error) {
+            console.error('❌ Błąd ładowania THREE.js:', error);
+            retryInitialization('Nie można załadować biblioteki THREE.js');
+        };
 
-        // Funkcja testująca dostępność zasobu
-        function testImageURL(url) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => reject(new Error(`Nie można załadować obrazu: ${url}`));
-                img.src = url;
+        document.head.appendChild(threeScript);
+    }
+
+    // Funkcja inicjalizująca scenę Three.js
+    function initThreeJsScene() {
+        try {
+            console.log('🏗️ Inicjalizacja sceny 3D...');
+            const container = document.getElementById('label-3d-preview');
+
+            if (!container) {
+                throw new Error('Nie znaleziono kontenera podglądu 3D');
+            }
+
+            if (typeof THREE === 'undefined') {
+                throw new Error('THREE.js nie jest załadowany');
+            }
+
+            // 1. Inicjalizacja sceny
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fafc);
+
+            // 2. Kamera
+            camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.set(0, 0, 200);
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance"
             });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 0.8;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+
+            // 4. Kontroler kamery
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = true;
+            controls.enablePan = true;
+            controls.enableRotate = true;
+            controls.autoRotate = false;
+            controls.maxDistance = 500;
+            controls.minDistance = 50;
+
+            // 5. Oświetlenie
+            addLighting(scene);
+
+            // 6. Stwórz etykietę 3D
+            createLabel();
+
+            // 7. Ukryj spinner ładowania
+            document.getElementById('preview-loading').style.display = 'none';
+
+            // 8. Rozpocznij animację
+            isAnimating = true;
+            animate();
+
+            console.log('✅ Podgląd 3D zainicjalizowany pomyślnie');
+
+        } catch (error) {
+            console.error('❌ Błąd inicjalizacji sceny 3D:', error);
+            retryInitialization(error.message);
+        }
+    }
+
+    // Dodaj oświetlenie do sceny
+    function addLighting(scene) {
+        // Światło otoczenia
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        // Światło kierunkowe z przodu
+        const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        frontLight.position.set(0, 0, 100);
+        scene.add(frontLight);
+
+        // Światło z tyłu
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.1);
+        backLight.position.set(0, 0, -100);
+        scene.add(backLight);
+
+        // Światło z góry
+        const topLight = new THREE.DirectionalLight(0xffffff, 0.2);
+        topLight.position.set(0, 100, 0);
+        scene.add(topLight);
+    }
+
+    // Funkcja tworząca etykietę 3D
+    function createLabel() {
+        console.log('🏷️ Tworzenie etykiety 3D...');
+
+        const width = projectConfig.dimensions.width;
+        const height = projectConfig.dimensions.height;
+        const labelDepth = 2;
+
+        // 1. Tworzenie kształtu 2D
+        let shape = createLabelShape(projectConfig.shape, width, height);
+
+        // 2. Ustawienia ekstrudowania dla efektu 3D
+        const extrudeSettings = {
+            steps: 1,
+            depth: labelDepth,
+            bevelEnabled: true,
+            bevelThickness: 0.8,
+            bevelSize: 0.7,
+            bevelOffset: 0,
+            bevelSegments: 3
+        };
+
+        // 3. Stwórz geometrię 3D przez wyciągnięcie kształtu 2D
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+        // 4. Materiał etykiety zależny od wybranego typu
+        const labelMaterial = createLabelMaterial(projectConfig.material);
+
+        // 5. Stwórz siatkę etykiety
+        labelMesh = new THREE.Mesh(geometry, labelMaterial);
+        labelMesh.castShadow = true;
+        labelMesh.receiveShadow = true;
+        scene.add(labelMesh);
+
+        // 6. Jeśli jest obrazek, dodaj go do etykiety
+        if (projectConfig.debug.hasArtwork) {
+            addArtworkToLabel(shape, labelDepth);
         }
 
-        // AUTOMATYCZNIE POKAZUJ 2D FALLBACK PO 5 SEKUNDACH (ZWIĘKSZONY CZAS)
-        setTimeout(function() {
-            if (document.getElementById('preview-loading').style.display !== 'none') {
-                show2DFallback();
-            }
-        }, 5000);
-
-        // Try to load 3D libraries
-        function load3DLibraries() {
-            if (libraries3DLoaded) {
-                init3DPreview();
-                return;
-            }
-
-            // Load Three.js
-            const threeScript = document.createElement('script');
-            threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-            threeScript.onload = function() {
-                // Load OrbitControls
-                const controlsScript = document.createElement('script');
-                controlsScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
-                controlsScript.onload = function() {
-                    libraries3DLoaded = true;
-                    init3DPreview();
-                };
-                controlsScript.onerror = function() {
-                    show2DFallback();
-                };
-                document.head.appendChild(controlsScript);
-            };
-            threeScript.onerror = function() {
-                show2DFallback();
-            };
-            document.head.appendChild(threeScript);
+        // 7. Jeśli wybrano laminat, dodaj warstwę laminatu
+        if (projectConfig.hasLaminate) {
+            addLaminateLayer(geometry, labelDepth);
         }
 
-        function init3DPreview() {
-            try {
-                const container = document.getElementById('label-3d-preview');
-                if (!container || !window.THREE) {
-                    show2DFallback();
-                    return;
-                }
+        // 8. Dodaj miarki wymiarów
+        addRulers(scene, width, height, labelDepth);
+    }
 
-                // Scene setup
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xf8fafc);
+    // Tworzenie kształtu etykiety
+    function createLabelShape(shapeType, width, height) {
+        const shape = new THREE.Shape();
 
-                // Camera
-                camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
-                camera.position.set(0, 0, 200);
-
-                // Zmodyfikowany renderer
-                renderer = new THREE.WebGLRenderer({
-                    antialias: true,
-                    alpha: true,
-                    powerPreference: "high-performance"
-                });
-                renderer.setSize(container.offsetWidth, container.offsetHeight);
-                renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                // NOWE: dodaj korekcję tonalną i ustawienia gammy
-                renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 0.8; // zmniejsz ekspozycję
-                renderer.outputEncoding = THREE.sRGBEncoding;
-                container.appendChild(renderer.domElement);
-
-                // Controls - KLUCZOWE DLA OBRACANIA!
-                controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.05;
-                controls.enableZoom = true;
-                controls.enablePan = true;
-                controls.enableRotate = true;
-                controls.autoRotate = false;
-                controls.maxDistance = 500;
-                controls.minDistance = 50;
-
-                // ZMIENIONE OŚWIETLENIE - ŁAGODNIEJSZE BEZ EFEKTU ŚWIECENIA
-                // Łagodniejsze światło otoczenia
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                scene.add(ambientLight);
-
-                // Delikatne światło kierunkowe z przodu
-                const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
-                frontLight.position.set(0, 0, 100);
-                scene.add(frontLight);
-
-                // Bardzo słabe światło z tyłu
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.1);
-                backLight.position.set(0, 0, -100);
-                scene.add(backLight);
-
-                // Nowe światło pomocnicze z góry
-                const topLight = new THREE.DirectionalLight(0xffffff, 0.2);
-                topLight.position.set(0, 100, 0);
-                scene.add(topLight);
-
-                // CAŁKOWICIE NOWY KOD TWORZENIA ETYKIETY 3D
-                const width = projectConfig.dimensions.width;
-                const height = projectConfig.dimensions.height;
-                const labelDepth = 2; // ZMIENIONE Z 8 NA 2 - realistyczna grubość etykiety
-
-                // Tworzenie podstawowego kształtu 2D
-                let shape = new THREE.Shape();
-                if (projectConfig.shape === 'circle') {
-                    const radius = Math.max(width, height) / 2;
-                    shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
-                } else if (projectConfig.shape === 'oval') {
-                    const rx = width / 2;
-                    const ry = height / 2;
-                    const segments = 32;
-                    for (let i = 0; i <= segments; i++) {
-                        const theta = (i / segments) * Math.PI * 2;
-                        const x = rx * Math.cos(theta);
-                        const y = ry * Math.sin(theta);
-                        if (i === 0) shape.moveTo(x, y);
-                        else shape.lineTo(x, y);
-                    }
-                } else if (projectConfig.shape === 'star') {
-                    const outerRadius = Math.min(width, height) / 2;
-                    const innerRadius = outerRadius * 0.4;
-                    const points = 5;
-                    for (let i = 0; i < points * 2; i++) {
-                        const angle = (i * Math.PI) / points;
-                        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                        const x = radius * Math.cos(angle);
-                        const y = radius * Math.sin(angle);
-                        if (i === 0) shape.moveTo(x, y);
-                        else shape.lineTo(x, y);
-                    }
-                } else {
-                    // Prostokąt/kwadrat
-                    const halfWidth = width / 2;
-                    const halfHeight = height / 2;
-                    shape.moveTo(-halfWidth, -halfHeight);
-                    shape.lineTo(halfWidth, -halfHeight);
-                    shape.lineTo(halfWidth, halfHeight);
-                    shape.lineTo(-halfWidth, halfHeight);
-                }
-                shape.closePath();
-
-                // Ustawienia ekstrudowania - kluczowe dla dobrego wyglądu
-                const extrudeSettings = {
-                    steps: 1,
-                    depth: labelDepth,
-                    bevelEnabled: true,
-                    bevelThickness: 0.8,
-                    bevelSize: 0.7,
-                    bevelOffset: 0,
-                    bevelSegments: 3
-                };
-
-                // Stwórz geometrię 3D
-                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-
-                // Kolor materiału zależny od wybranego typu
-                let materialColor;
-                if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota')) {
-                    materialColor = 0xffd700; // Złoty
-                } else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
-                    materialColor = 0xe0e0e0; // Srebrny
-                } else {
-                    materialColor = 0xffffff; // Biały
-                }
-
-                // Parametry materiału zależne od typu
-                const roughness = projectConfig.material.includes('glossy') ? 0.1 : 0.7;
-                const metalness = projectConfig.material.includes('foil') ||
-                                 projectConfig.material.includes('folia') ? 0.8 : 0.1;
-
-                // Tworzenie jednolitego materiału dla całej etykiety
-                const labelMaterial = new THREE.MeshStandardMaterial({
-                    color: materialColor,
-                    roughness: roughness,
-                    metalness: metalness,
-                    side: THREE.DoubleSide
-                });
-
-                // Tworzenie siatki
-                labelMesh = new THREE.Mesh(geometry, labelMaterial);
-                labelMesh.castShadow = true;
-                labelMesh.receiveShadow = true;
-                scene.add(labelMesh);
-
-                // NOWA IMPLEMENTACJA NAKŁADANIA OBRAZKA NA ETYKIETĘ 3D
-                if (projectConfig.debug.hasArtwork) {
-                    console.log('🖼️ ULEPSZONA IMPLEMENTACJA NAKŁADANIA OBRAZKA');
-
-                    // Przygotowanie URL obrazków do próbowania
-                    const imageUrls = [
-                        projectConfig.artworkUrl,
-                        directStorageUrl,
-                        '/storage/' + projectConfig.debug.artworkPath,
-                        window.location.origin + '/storage/' + projectConfig.debug.artworkPath
-                    ].filter(url => url && url !== '/storage/' && url !== '/storage/brak');
-
-                    console.log('Dostępne adresy URL:', imageUrls);
-
-                    // 1. Stwórz geometrię dla "twarzy" etykiety
-                    const faceMesh = new THREE.Mesh(
-                        new THREE.ShapeGeometry(shape),
-                        new THREE.MeshBasicMaterial({
-                            color: 0xffffff,
-                            transparent: true,
-                            opacity: 0,
-                            side: THREE.DoubleSide,
-                            depthWrite: false,
-                            renderOrder: 1
-                        })
-                    );
-
-                    // Przesuwamy płaszczyznę twarzy tuż przed etykietę
-                    faceMesh.position.z = labelDepth / 2 + 0.01;
-                    scene.add(faceMesh);
-
-                    // 2. Stwórz teksturę i materiał dla obrazka
-                    const textureLoader = new THREE.TextureLoader();
-                    textureLoader.crossOrigin = 'Anonymous';
-
-                    // Funkcja do renderowania sceny
-                    function updateAndRender() {
-                        renderer.render(scene, camera);
-                    }
-
-                    // Funkcja do próbowania kolejnych URL
-                    function tryLoadTexture(urlIndex = 0) {
-                        if (urlIndex >= imageUrls.length) {
-                            console.error('❌ Nie można załadować obrazka z żadnego URL');
-                            // Utwórz teksturę awaryjną - czerwoną planszę
-                            const canvas = document.createElement('canvas');
-                            canvas.width = 256;
-                            canvas.height = 256;
-                            const ctx = canvas.getContext('2d');
-                            ctx.fillStyle = 'red';
-                            ctx.fillRect(0, 0, 256, 256);
-                            ctx.fillStyle = 'white';
-                            ctx.font = '20px Arial';
-                            ctx.fillText('Błąd ładowania', 60, 128);
-
-                            const errorTexture = new THREE.CanvasTexture(canvas);
-                            applyTextureToFace(errorTexture);
-                            return;
-                        }
-
-                        const url = imageUrls[urlIndex] + '?cache=' + Date.now();
-                        console.log(`Próba ${urlIndex + 1}/${imageUrls.length}: ${url}`);
-
-                        textureLoader.load(
-                            url,
-                            // Sukces
-                            function(texture) {
-                                console.log('✅ Załadowano obrazek pomyślnie!');
-                                applyTextureToFace(texture);
-                            },
-                            // Progress
-                            undefined,
-                            // Błąd
-                            function(error) {
-                                console.warn(`❌ Błąd ładowania z URL ${url}:`, error);
-                                setTimeout(() => tryLoadTexture(urlIndex + 1), 100);
-                            }
-                        );
-                    }
-
-                    // Funkcja nakładająca teksturę na twarz etykiety
-                    function applyTextureToFace(texture) {
-                        // Stwórz nowy materiał z teksturą
-                        const texturedMaterial = new THREE.MeshBasicMaterial({
-                            map: texture,
-                            transparent: true,
-                            side: THREE.DoubleSide,
-                            depthTest: true,
-                            depthWrite: false,
-                            renderOrder: 2
-                        });
-
-                        // Zastosuj transformację UV zgodnie z ustawieniami użytkownika
-                        texture.center.set(0.5, 0.5); // Punkt obrotu w środku tekstury
-
-                        // Przesunięcie - zakres 0-100 przekształcamy na offsety UV
-                        const offsetX = (projectConfig.imagePosition.x - 50) / 100;
-                        const offsetY = (projectConfig.imagePosition.y - 50) / -100; // Odwracamy oś Y
-                        texture.offset.set(offsetX, offsetY);
-
-                        // Skalowanie
-                        const scale = projectConfig.imagePosition.scale / 100;
-                        texture.repeat.set(1/scale, 1/scale);
-
-                        // Rotacja
-                        texture.rotation = projectConfig.imagePosition.rotation * Math.PI / 180;
-
-                        // Stwórz nową siatkę z geometrią twarzy i nowym materiałem
-                        const artworkMesh = new THREE.Mesh(
-                            new THREE.ShapeGeometry(shape),
-                            texturedMaterial
-                        );
-
-                        // Ustaw pozycję równoległą do twarzy etykiety, ale nieco bliżej kamery
-                        artworkMesh.position.z = labelDepth / 2 + 0.1;
-
-                        // Usuń starą siatkę twarzy i dodaj nową
-                        scene.remove(faceMesh);
-                        scene.add(artworkMesh);
-
-                        // Zapisz referencję do siatki dla przyszłych aktualizacji
-                        faceMesh = artworkMesh;
-
-                        // Wykonaj rendering
-                        updateAndRender();
-
-                        console.log('✅ Zastosowano teksturę do etykiety');
-                    }
-
-                    // Rozpocznij próby ładowania
-                    tryLoadTexture(0);
-
-                    // Dodaj funkcje pomocnicze
-                    window.debugArtwork = function() {
-                        console.log('Dostępne adresy URL:', imageUrls);
-                        console.log('Aktualna siatka twarzy:', faceMesh);
-
-                        // Zmień tymczasowo na czerwony kolor dla widoczności
-                        if (faceMesh.material) {
-                            const originalMaterial = faceMesh.material.clone();
-                            faceMesh.material.color.set(0xff0000);
-                            faceMesh.material.opacity = 0.7;
-                            faceMesh.material.transparent = true;
-                            faceMesh.material.map = null;
-                            faceMesh.material.needsUpdate = true;
-                            updateAndRender();
-
-                            // Przywróć po sekundzie
-                            setTimeout(() => {
-                                faceMesh.material = originalMaterial;
-                                updateAndRender();
-                            }, 1000);
-                        }
-                    };
-
-                    window.reloadArtwork = function() {
-                        console.log('🔄 Wymuszam ponowne ładowanie obrazka...');
-                        tryLoadTexture(0);
-                    };
-                }
-
-                // Add laminate layer if selected
-                if (projectConfig.hasLaminate) {
-                    const laminateGeometry = geometry.clone();
-                    laminateGeometry.scale(1.01, 1.01, 1); // Mniejsza różnica
-
-                    // PRZEZROCZYSTY LAMINAT MATOWY
-                    const laminateMaterial = new THREE.MeshLambertMaterial({
-                        color: 0xffffff,         // Biały zamiast niebieskiego
-                        transparent: true,
-                        opacity: 0.15,           // Bardzo przezroczysty
-                        side: THREE.DoubleSide
-                    });
-
-                    const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
-                    laminateMesh.position.z = 0.5; // Bliżej etykiety
-                    scene.add(laminateMesh);
-                }
-
-                // Dodajemy miarki pokazujące wymiary
-                addRulers(scene, projectConfig.dimensions.width, projectConfig.dimensions.height, labelDepth);
-
-                // Dodaj funkcję diagnostyczną
-                window.debugTextureLoading = function() {
-                    console.log('=== DIAGNOSTYKA ŁADOWANIA TEKSTUR ===');
-                    console.log('projectConfig:', projectConfig);
-
-                    if (labelMaterial) {
-                        console.log('Status materiału:', labelMaterial);
-                        console.log('Mapa tekstury:', labelMaterial.map);
-                    }
-
-                    // Pokazuje wszystkie dostępne ścieżki do obrazka
-                    const paths = [
-                        projectConfig.artworkUrl,
-                        '/storage/' + projectConfig.debug.artworkPath,
-                        window.location.origin + '/storage/' + projectConfig.debug.artworkPath
-                    ];
-                    console.log('Możliwe ścieżki:', paths);
-                };
-
-                // Uruchom diagnostykę po krótkiej chwili
-                setTimeout(window.debugTextureLoading, 2000);
-
-                // Hide loading, start render loop
-                document.getElementById('preview-loading').style.display = 'none';
-                isAnimating = true;
-                animate();
-
-            } catch (error) {
-                console.error('3D initialization error:', error);
-                show2DFallback();
+        if (shapeType === 'circle') {
+            const radius = Math.max(width, height) / 2;
+            shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
+        }
+        else if (shapeType === 'oval') {
+            const rx = width / 2;
+            const ry = height / 2;
+            const segments = 32;
+            for (let i = 0; i <= segments; i++) {
+                const theta = (i / segments) * Math.PI * 2;
+                const x = rx * Math.cos(theta);
+                const y = ry * Math.sin(theta);
+                if (i === 0) shape.moveTo(x, y);
+                else shape.lineTo(x, y);
             }
         }
-
-        // Funkcja dodająca miarki pokazujące wymiary
-        function addRulers(scene, width, height, depth) {
-            const rulerColor = 0x333333;
-            const rulerWidth = 0.5;
-            const labelOffset = 15; // Odległość miarki od etykiety
-
-            // Miarka szerokości (pozioma)
-            const widthGeometry = new THREE.BoxGeometry(width, rulerWidth, rulerWidth);
-            const widthMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
-            const widthRuler = new THREE.Mesh(widthGeometry, widthMaterial);
-            widthRuler.position.set(0, -height/2 - labelOffset, 0);
-            scene.add(widthRuler);
-
-            // Znaczniki i liczby szerokości
-            const tickSize = 2;
-            const tickSpacing = 10; // 10mm między znacznikami
-            const numTicks = Math.floor(width / tickSpacing);
-
-            for (let i = 0; i <= numTicks; i++) {
-                // Pomijamy środkowy znacznik aby uniknąć nakładania się z miarką wysokości
-                if (i === Math.floor(numTicks / 2) && i * tickSpacing === width / 2) continue;
-
-                const tickPos = -width/2 + i * tickSpacing;
-                const tickGeometry = new THREE.BoxGeometry(rulerWidth, tickSize, rulerWidth);
-                const tick = new THREE.Mesh(tickGeometry, widthMaterial);
-                tick.position.set(tickPos, -height/2 - labelOffset, 0);
-                scene.add(tick);
-
-                // Dodaj tekst z wymiarami
-                if (i % 2 === 0) { // Dodaj liczby co drugi znacznik dla czytelności
-                    addTextLabel(scene, `${i * tickSpacing}`,
-                        tickPos, -height/2 - labelOffset - tickSize - 3, 0);
-                }
-            }
-
-            // Tekst z wymiarami szerokości
-            addTextLabel(scene, `${width}mm`, 0, -height/2 - labelOffset - 10, 0, 1.5);
-
-            // Miarka wysokości (pionowa)
-            const heightGeometry = new THREE.BoxGeometry(rulerWidth, height, rulerWidth);
-            const heightMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
-            const heightRuler = new THREE.Mesh(heightGeometry, heightMaterial);
-            heightRuler.position.set(-width/2 - labelOffset, 0, 0);
-            scene.add(heightRuler);
-
-            // Znaczniki i liczby wysokości
-            const heightTicks = Math.floor(height / tickSpacing);
-
-            for (let i = 0; i <= heightTicks; i++) {
-                const tickPos = -height/2 + i * tickSpacing;
-                const tickGeometry = new THREE.BoxGeometry(tickSize, rulerWidth, rulerWidth);
-                const tick = new THREE.Mesh(tickGeometry, heightMaterial);
-                tick.position.set(-width/2 - labelOffset, tickPos, 0);
-                scene.add(tick);
-
-                // Dodaj tekst z wymiarami
-                if (i % 2 === 0) { // Dodaj liczby co drugi znacznik
-                    addTextLabel(scene, `${i * tickSpacing}`,
-                        -width/2 - labelOffset - tickSize - 3, tickPos, 0);
-                }
-            }
-
-            // Tekst z wymiarami wysokości
-            addTextLabel(scene, `${height}mm`, -width/2 - labelOffset - 15, 0, 0, 1.5, true);
-        }
-
-        // Funkcja pomocnicza do dodawania etykiet tekstowych
-        function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = 100;
-            canvas.height = 50;
-
-            // Ustaw właściwości tekstu
-            context.fillStyle = '#000000';
-            context.font = `${16 * size}px Arial`;
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(text, canvas.width/2, canvas.height/2);
-
-            // Stwórz teksturę
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-            const sprite = new THREE.Sprite(material);
-
-            // Skaluj i pozycjonuj
-            sprite.scale.set(10 * size, 5 * size, 1);
-            sprite.position.set(x, y, z);
-
-            // Obróć tekst jeśli potrzeba (dla pionowych pomiarów)
-            if (rotated) {
-                sprite.material.rotation = Math.PI / 2;
-            }
-
-            scene.add(sprite);
-            return sprite;
-        }
-
-        function createLabelGeometry(shape, width, height) {
-            let geometry;
-
-            switch(shape) {
-                case 'circle':
-                    geometry = new THREE.CircleGeometry(Math.max(width, height) / 2, 32);
-                    break;
-
-                case 'square':
-                    const size = Math.max(width, height);
-                    geometry = new THREE.PlaneGeometry(size, size);
-                    break;
-
-                case 'rectangle':
-                    geometry = new THREE.PlaneGeometry(width, height);
-                    break;
-
-                case 'oval':
-                    geometry = new THREE.CircleGeometry(1, 32);
-                    geometry.scale(width/2, height/2, 1);
-                    break;
-
-                case 'star':
-                    geometry = createStarGeometry();
-                    geometry.scale(width/100, height/100, 1);
-                    break;
-
-                default:
-                    geometry = new THREE.PlaneGeometry(width, height);
-            }
-
-            return geometry;
-        }
-
-        function createStarGeometry(extrude = false, depth = 0) {
-            const shape = new THREE.Shape();
-            const outerRadius = 50;
-            const innerRadius = 25;
+        else if (shapeType === 'star') {
+            const outerRadius = Math.min(width, height) / 2;
+            const innerRadius = outerRadius * 0.4;
             const points = 5;
-
             for (let i = 0; i < points * 2; i++) {
                 const angle = (i * Math.PI) / points;
                 const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-
-                if (i === 0) {
-                    shape.moveTo(x, y);
-                } else {
-                    shape.lineTo(x, y);
-                }
-            }
-
-            shape.closePath();
-
-            if (extrude) {
-                const extrudeSettings = {
-                    steps: 1,
-                    depth: depth,
-                    bevelEnabled: true,
-                    bevelThickness: 0.5,
-                    bevelSize: 0.5,
-                    bevelOffset: 0,
-                    bevelSegments: 3
-                };
-
-                return new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            } else {
-                return new THREE.ShapeGeometry(shape);
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
+                if (i === 0) shape.moveTo(x, y);
+                else shape.lineTo(x, y);
             }
         }
-
-        function animate() {
-            if (!isAnimating) return;
-
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
+        else {
+            // Prostokąt/kwadrat
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            shape.moveTo(-halfWidth, -halfHeight);
+            shape.lineTo(halfWidth, -halfHeight);
+            shape.lineTo(halfWidth, halfHeight);
+            shape.lineTo(-halfWidth, halfHeight);
         }
 
-        function show2DFallback() {
-            document.getElementById('preview-loading').style.display = 'none';
-            document.getElementById('preview-error').style.display = 'flex';
+        shape.closePath();
+        return shape;
+    }
+
+    function createLabelMaterial(materialType) {
+    console.log('🎨 Tworzenie materiału:', materialType);
+
+    // Podstawowa konfiguracja
+    let materialColor;
+    let roughness = 0.7;
+    let metalness = 0.1;
+    let envMapIntensity = 1.0;
+
+    // Folia złota
+    if (materialType.includes('gold') || materialType.includes('zlota')) {
+        materialColor = 0xffd700; // Złoty
+        roughness = 0.2;
+        metalness = 0.9;
+        envMapIntensity = 1.5;
+    }
+    // Folia srebrna
+    else if (materialType.includes('silver') || materialType.includes('srebrna')) {
+        materialColor = 0xf0f0f0; // Srebrny
+        roughness = 0.15;
+        metalness = 0.9;
+        envMapIntensity = 1.5;
+    }
+    // Papier błyszczący
+    else if (materialType.includes('glossy') || materialType.includes('blysk')) {
+        materialColor = 0xffffff; // Biały
+        roughness = 0.2;
+        metalness = 0.1;
+    }
+    // Papier kremowy
+    else if (materialType.includes('cream')) {
+        materialColor = 0xf5f0e0; // Kremowy
+        roughness = 0.8;
+        metalness = 0.0;
+    }
+    // Papier wodoodporny
+    else if (materialType.includes('waterproof') || materialType.includes('wodoodporn')) {
+        materialColor = 0xf8f8ff; // Prawie biały
+        roughness = 0.4;
+        metalness = 0.2;
+    }
+    // Papier biały matowy (domyślny)
+    else {
+        materialColor = 0xffffff; // Biały
+        roughness = 0.9;
+        metalness = 0.0;
+    }
+
+    // Stwórz materiał
+    const material = new THREE.MeshStandardMaterial({
+        color: materialColor,
+        roughness: roughness,
+        metalness: metalness,
+        side: THREE.DoubleSide,
+        envMapIntensity: envMapIntensity
+    });
+
+    // Dodaj mapę środowiska dla metalicznych materiałów
+    if (metalness > 0.5) {
+        createSimpleEnvMap(material);
+    }
+
+    return material;
+}
+
+// Prosta mapa środowiska dla metalicznych materiałów
+function createSimpleEnvMap(material) {
+    const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
+    const cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
+
+    const cubeTexture = new THREE.CubeTextureLoader().load([
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
+    ], function() {
+        material.envMap = cubeTexture;
+        material.needsUpdate = true;
+    });
+}
+
+    // Dodawanie obrazka do etykiety
+    function addArtworkToLabel(shape, labelDepth) {
+    console.log('🖼️ Dodawanie obrazka do etykiety...');
+
+    const timestamp = new Date().getTime();
+    const imageUrls = [
+        projectConfig.artworkUrl,
+        '/storage/' + projectConfig.debug.artworkPath,
+        window.location.origin + '/storage/' + projectConfig.debug.artworkPath,
+        `/storage/${projectConfig.debug.artworkPath}?t=${timestamp}`,
+        `/storage/temp/artworks/${projectConfig.debug.artworkPath.split('/').pop()}?t=${timestamp}`,
+        `/storage/artwork/${projectConfig.debug.artworkPath.split('/').pop()}?t=${timestamp}`
+    ].filter(url => url && url !== '/storage/' && url !== '/storage/brak');
+
+    console.log('📋 Dostępne URL do obrazka:', imageUrls);
+
+    // Stwórz placeholder dla obrazka - ZMIENIONE: bardziej przezroczysty placeholder
+    faceMesh = new THREE.Mesh(
+        new THREE.ShapeGeometry(shape),
+        new THREE.MeshBasicMaterial({
+            color: 0xffffff,  // Biały zamiast szarego
+            transparent: true,
+            opacity: 0.1,      // Bardziej przezroczysty
+            side: THREE.DoubleSide
+        })
+    );
+
+    // ZMIENIONE: Ustaw placeholder bliżej powierzchni etykiety
+    faceMesh.renderOrder = 1;
+    faceMesh.position.z = labelDepth / 2 + 0.02;
+    scene.add(faceMesh);
+
+    // Ładowanie tekstury
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'Anonymous';
+
+    tryLoadTexture(textureLoader, imageUrls, 0);
+}
+
+    // Funkcja próbująca załadować teksturę
+    function tryLoadTexture(loader, urls, urlIndex) {
+        if (urlIndex >= urls.length) {
+            console.warn('⚠️ Nie udało się załadować obrazka z żadnego URL');
+            createFallbackTexture();
+            return;
         }
 
-        function proceedToPayment() {
-            alert('Funkcja płatności będzie dostępna wkrótce!');
-        }
+        const url = urls[urlIndex] + (urls[urlIndex].includes('?') ? '&' : '?') + 'cache=' + new Date().getTime();
+        console.log(`🔄 Próba ${urlIndex + 1}/${urls.length}: ${url}`);
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (camera && renderer) {
-                const container = document.getElementById('label-3d-preview');
-                camera.aspect = container.offsetWidth / container.offsetHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.offsetWidth, container.offsetHeight);
+        loader.load(
+            url,
+            // Sukces
+            function(texture) {
+                console.log('✅ Załadowano obrazek pomyślnie!');
+                applyTextureToFace(texture);
+            },
+            // Postęp
+            function(xhr) {
+                console.log(`${url}: ${Math.round((xhr.loaded / xhr.total) * 100)}% załadowano`);
+            },
+            // Błąd
+            function(error) {
+                console.warn(`❌ Błąd ładowania z URL ${url}:`, error);
+                // Próbuj następny URL
+                setTimeout(() => tryLoadTexture(loader, urls, urlIndex + 1), 100);
             }
-        });
+        );
+    }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', async function() {
-            if (projectConfig.artworkUrl) {
-                try {
-                    const result = await testImageURL(projectConfig.artworkUrl);
-                    console.log('Test URL obrazka: SUKCES');
-                } catch (error) {
-                    console.error('Test URL obrazka: BŁĄD', error);
-                    // Spróbuj inne podejście
-                    console.log('Próba alternatywnego URL:', '/storage/' + projectConfig.debug.artworkPath);
-                }
+    // Tworzenie tekstury awaryjnej
+    function createFallbackTexture() {
+        console.log('⚠️ Tworzenie tekstury zastępczej...');
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Tło
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 512, 512);
+
+        // Ramka
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 10;
+        ctx.strokeRect(20, 20, 472, 472);
+
+        // Tekst
+        ctx.fillStyle = 'black';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Przykładowa etykieta', 256, 256);
+        ctx.fillText('(nie udało się załadować obrazka)', 256, 300);
+
+        // Zastosuj teksturę
+        const texture = new THREE.CanvasTexture(canvas);
+        applyTextureToFace(texture);
+    }
+
+    // Aplikuj teksturę do etykiety
+    function applyTextureToFace(texture) {
+    console.log('🎨 Aplikowanie tekstury do etykiety...');
+
+    // Upewnij się, że tekstura jest poprawnie zaktualizowana
+    texture.needsUpdate = true;
+    texture.encoding = THREE.sRGBEncoding;
+
+    // Nie odwracaj obrazka
+    texture.flipY = false;
+
+    // Zastosuj transformacje zgodnie z ustawieniami użytkownika
+    texture.center.set(0.5, 0.5);
+
+    const offsetX = (projectConfig.imagePosition.x - 50) / 100;
+    const offsetY = (projectConfig.imagePosition.y - 50) / -100;
+    texture.offset.set(offsetX, offsetY);
+
+    const scale = projectConfig.imagePosition.scale / 100;
+    // Użyj rzeczywistej skali, aby pokryć całą etykietę
+    texture.repeat.set(1/scale, 1/scale);
+
+    texture.rotation = projectConfig.imagePosition.rotation * Math.PI / 180;
+
+    // Stwórz materiał z teksturą - ZMIENIONE: Używamy MeshLambertMaterial dla lepszej integracji z efektami
+    const texturedMaterial = new THREE.MeshLambertMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthTest: false,
+        depthWrite: false
+    });
+    texturedMaterial.needsUpdate = true;
+
+    // ZMIENIONE: Stwórz geometrię z poprawnym mapowaniem UV
+    // dla dokładnego dopasowania do kształtu etykiety
+    const shapeGeometry = new THREE.ShapeGeometry(shape);
+    const uvAttribute = shapeGeometry.attributes.uv;
+
+    // Stwórz nową siatkę z poprawną geometrią i materiałem
+    const artworkMesh = new THREE.Mesh(shapeGeometry, texturedMaterial);
+
+    // ZMIENIONE: Przesuń teksturę nieco bliżej kamery, aby była widoczna nad etykietą
+    artworkMesh.renderOrder = 10;
+    artworkMesh.position.z = faceMesh.position.z + 0.05;
+
+    // Zastąp placeholder rzeczywistym obrazkiem
+    scene.remove(faceMesh);
+    scene.add(artworkMesh);
+    faceMesh = artworkMesh;
+
+    // Wymuszenie renderowania
+    renderer.render(scene, camera);
+
+    console.log('✓ Tekstura zastosowana pomyślnie');
+    console.log('📏 Pozycja tekstury:', { x: offsetX, y: offsetY, scale: scale, rotation: projectConfig.imagePosition.rotation });
+}
+
+    // Dodawanie warstwy laminatu
+function addLaminateLayer(geometry, labelDepth) {
+    console.log('🔍 Dodawanie laminatu:', projectConfig.laminateType);
+
+    // Klonuj geometrię etykiety, ale delikatnie większą
+    const laminateGeometry = geometry.clone();
+    laminateGeometry.scale(1.01, 1.01, 1);
+
+    let opacity = 0.15;
+    let shininess = 100;
+
+    // Laminat matowy
+    if (projectConfig.laminateType?.includes('matte')) {
+        opacity = 0.12;
+        shininess = 10;
+    }
+    // Laminat błyszczący
+    else if (projectConfig.laminateType?.includes('glossy')) {
+        opacity = 0.2;
+        shininess = 150;
+    }
+    // Laminat soft-touch
+    else if (projectConfig.laminateType?.includes('soft')) {
+        opacity = 0.1;
+        shininess = 5;
+    }
+
+    // Użyj MeshPhongMaterial dla lepszego efektu połysku
+    const laminateMaterial = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        specular: 0x111111,
+        shininess: shininess,
+        transparent: true,
+        opacity: opacity,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+
+    const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
+    laminateMesh.position.z = 0.5;
+    laminateMesh.renderOrder = 2;
+    scene.add(laminateMesh);
+
+    // Dla błyszczącego laminatu dodaj delikatny efekt "blasku"
+    if (projectConfig.laminateType?.includes('glossy')) {
+        addSimpleGlossEffect(laminateGeometry);
+    }
+}
+
+// Uproszczony efekt połysku dla laminatu
+function addSimpleGlossEffect(geometry) {
+    const glossMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.08,
+        side: THREE.FrontSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+
+    const glossMesh = new THREE.Mesh(geometry.clone(), glossMaterial);
+    glossMesh.position.z = 0.55;
+    glossMesh.renderOrder = 3;
+    scene.add(glossMesh);
+}
+
+    // Dodawanie miarek wymiarów
+    function addRulers(scene, width, height, depth) {
+        const rulerColor = 0x333333;
+        const rulerWidth = 0.5;
+        const labelOffset = 15;
+
+        // Miarka szerokości
+        const widthGeometry = new THREE.BoxGeometry(width, rulerWidth, rulerWidth);
+        const widthMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
+        const widthRuler = new THREE.Mesh(widthGeometry, widthMaterial);
+        widthRuler.position.set(0, -height/2 - labelOffset, 0);
+        scene.add(widthRuler);
+
+        // Miarka wysokości
+        const heightGeometry = new THREE.BoxGeometry(rulerWidth, height, rulerWidth);
+        const heightRuler = new THREE.Mesh(heightGeometry, widthMaterial);
+        heightRuler.position.set(-width/2 - labelOffset, 0, 0);
+        scene.add(heightRuler);
+
+        // Dodaj tekst z wymiarami
+        addTextLabel(scene, `${width}mm`, 0, -height/2 - labelOffset - 10, 0, 1.5);
+        addTextLabel(scene, `${height}mm`, -width/2 - labelOffset - 15, 0, 0, 1.5, true);
+    }
+
+    // Funkcja pomocnicza do dodawania etykiet tekstowych
+    function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 100;
+        canvas.height = 50;
+
+        context.fillStyle = '#000000';
+        context.font = `${16 * size}px Arial`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(text, canvas.width/2, canvas.height/2);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Sprite(material);
+
+        sprite.scale.set(10 * size, 5 * size, 1);
+        sprite.position.set(x, y, z);
+
+        if (rotated) {
+            sprite.material.rotation = Math.PI / 2;
+        }
+
+        scene.add(sprite);
+        return sprite;
+    }
+
+    // Funkcja renderująca scenę
+    function animate() {
+        if (!isAnimating) return;
+
+        requestAnimationFrame(animate);
+
+        if (controls) controls.update();
+        if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+
+    // Obsługa zmiany rozmiaru okna
+    window.addEventListener('resize', function() {
+        if (camera && renderer) {
+            const container = document.getElementById('label-3d-preview');
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+        }
+    });
+
+    // Funkcja do ponownej próby inicjalizacji
+    function retryInitialization(errorMessage) {
+        initializationAttempts++;
+        console.warn(`⚠️ Próba inicjalizacji ${initializationAttempts}/${MAX_INITIALIZATION_ATTEMPTS} nie powiodła się: ${errorMessage}`);
+
+        if (initializationAttempts < MAX_INITIALIZATION_ATTEMPTS) {
+            console.log(`🔄 Ponowna próba inicjalizacji za 1 sekundę...`);
+            setTimeout(initializePreview, 1000);
+        } else {
+            console.error('❌ Osiągnięto maksymalną liczbę prób inicjalizacji.');
+            const loadingEl = document.getElementById('preview-loading');
+            if (loadingEl) {
+                loadingEl.innerHTML = `
+                    <div class="text-center">
+                        <div class="bg-red-100 p-4 rounded-lg mb-4">
+                            <svg class="w-12 h-12 text-red-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <p class="text-red-700 font-semibold text-lg">Nie udało się załadować podglądu 3D</p>
+                        </div>
+                        <button onclick="window.location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            Odśwież stronę
+                        </button>
+                    </div>
+                `;
             }
+        }
+    }
 
-            isAnimating = true;
-            load3DLibraries();
-        });
+    // Funkcja do odświeżania obrazka
+    window.reloadArtwork = function() {
+        console.log('🔄 Odświeżanie obrazka...');
 
-        // Cleanup when leaving page
-        window.addEventListener('beforeunload', function() {
-            isAnimating = false;
-        });
-    </script>
-    @endpush
+        if (!scene || !projectConfig.debug.hasArtwork) {
+            console.warn('⚠️ Nie można odświeżyć obrazka - scena nie istnieje lub brak obrazka');
+            return;
+        }
+
+        // Usuń stary mesh obrazka
+        if (faceMesh && scene.children.includes(faceMesh)) {
+            scene.remove(faceMesh);
+        }
+
+        // Stwórz kształt etykiety
+        const shape = createLabelShape(
+            projectConfig.shape,
+            projectConfig.dimensions.width,
+            projectConfig.dimensions.height
+        );
+
+        // Dodaj nowy obrazek
+        addArtworkToLabel(shape, 2);
+    };
+
+    // Czyszczenie zasobów przy opuszczaniu strony
+    window.addEventListener('beforeunload', function() {
+        isAnimating = false;
+
+        // Zwolnij zasoby
+        if (renderer) {
+            renderer.dispose();
+            renderer.forceContextLoss();
+        }
+
+        if (scene) {
+            while(scene.children.length > 0) {
+                const object = scene.children[0];
+                scene.remove(object);
+            }
+        }
+    });
+</script>
+@endpush
 </x-layouts.app>
