@@ -379,9 +379,9 @@
 
         // Funkcja pomocnicza do powrotu do kreatora
         function goBackToCreator() {
-            // Przekieruj na stronę główną z parametrami
-            window.location.href = '{{ route("home") }}?project={{ $project->id }}&step=4&fromPreview=true';
-        }
+    // Dodajemy parametr returnUrl, aby komponent kreatora wiedział, że wróciliśmy z podglądu 3D
+    window.location.href = '{{ route("home") }}?project={{ $project->id }}&step=4&fromPreview=true&returnToCreator=true';
+}
 
         let scene, camera, renderer, controls, labelMesh;
         let isAnimating = false;
