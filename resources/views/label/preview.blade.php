@@ -646,8 +646,8 @@
     ctx.fillText('BACK', canvas.width/2, canvas.height/2 + 150);
 
     // Custom Labels - jeszcze bardziej subtelne
-    ctx.font = 'bold italic 120px Arial';
     ctx.fillStyle = '#303030';  // Jeszcze mniej widoczne
+    ctx.font = 'bold italic 120px Arial';
     ctx.fillText('Custom Labels', canvas.width/2, canvas.height - 150);
 
     // Przywróć normalny kontekst
@@ -668,8 +668,7 @@
         transparent: true,
         depthTest: true,
         depthWrite: false,
-        side: THREE.BackSide,
-        blending: THREE.NormalBlending // Normalny tryb mieszania dla subtelnego efektu
+        side: THREE.BackSide
     });
 
     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
