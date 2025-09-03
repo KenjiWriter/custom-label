@@ -229,31 +229,31 @@
         </svg>
     </div>
 @endif
-                    @endif
-                </div>
+                                    @endif
+                                </div>
 
-                <div class="flex-grow space-y-1">
-                    <span class="font-medium text-gray-900">{{ $material->name }}</span>
-                    <p class="text-sm text-gray-500">{{ Str::limit($material->description, 80) }}</p>
-                </div>
+                                <div class="flex-grow space-y-1">
+                                    <span class="font-medium text-gray-900">{{ $material->name }}</span>
+                                    <p class="text-sm text-gray-500">{{ Str::limit($material->description, 80) }}</p>
+                                </div>
 
-                <div class="mt-3 flex items-center justify-between">
-                    <div class="text-sm text-orange-600 font-medium">
-                        {{ number_format($material->price_per_cm2 * 100, 2) }} zł / 100 cm²
-                    </div>
-                    @if($material->is_waterproof)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            Wodoodporny
-                        </span>
-                    @endif
+                                <div class="mt-3 flex items-center justify-between">
+                                    <div class="text-sm text-orange-600 font-medium">
+                                        {{ number_format($material->price_per_cm2 * 100, 2) }} zł / 100 cm²
+                                    </div>
+                                    @if($material->is_waterproof)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                            Wodoodporny
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </label>
+                    @endforeach
                 </div>
-            </div>
-        </label>
-    @endforeach
-</div>
 
                 <div class="flex justify-between">
                     <button
@@ -830,78 +830,49 @@
                                 <div>Wybrany rozmiar: {{ $selectedSize ? 'ID: ' . $selectedSize : 'Nie wybrano' }}</div>
                                 <div>Dostępne rozmiary: {{ $availableSizes->count() }}</div>
                             @endif
-                            <div>Ilość: {{ $quantity }}</div>
-                            <div>Konfiguracja valid: {{ $isConfigurationValid ? 'TAK' : 'NIE' }}</div>
-                            <div>Cena: {{ number_format($calculatedPrice, 2) }} PLN</div>
                         </div>
                     </div>
                 @endif
+            </div>
         </form>
-    </div>
 
-   <!-- SKRYPT OBSŁUGUJĄCY POWRÓT Z PODGLĄDU 3D -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Sprawdź czy mamy parametr returnToCreator w URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const returnToCreator = urlParams.get('returnToCreator') === 'true';
+        <!-- SKRYPT OBSŁUGUJĄCY POWRÓT Z PODGLĄDU 3D -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Sprawdź czy mamy parametr returnToCreator w URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const returnToCreator = urlParams.get('returnToCreator') === 'true';
 
-    if (returnToCreator) {
-        console.log("Wykryto powrót z podglądu 3D");
+                if (returnToCreator) {
+                    // Opóźnij wykonanie aby dać komponentowi Livewire czas na inicjalizację
+                    setTimeout(() => {
+                        // Wywołaj metodę Livewire do przywrócenia danych projektu
+                        const component = window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                        component.call('restoreFromPreview');
 
-        // Zwiększ opóźnienie, aby dać czas na pełne załadowanie komponentów
-        setTimeout(() => {
-            // Najpierw przywróć dane projektu
-            const component = window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-            if (component) {
-                component.call('restoreFromPreview');
-                console.log("Wywołano restoreFromPreview");
-            }
-
-            // Bardziej niezawodne ustawienie kroku na 4
-            if (window.Alpine) {
-                // Znajdź element kreatora bezpośrednio po ID
-                const creatorElement = document.getElementById('label-creator');
-                if (creatorElement && creatorElement.__x) {
-                    console.log("Znaleziono element kreatora, ustawiam krok na 4");
-                    creatorElement.__x.getUnobservedData().currentStep = 4;
-                } else {
-                    // Alternatywnie, znajdź pierwszy element z Alpine data
-                    const allAlpineElements = document.querySelectorAll('[x-data]');
-                    for (const el of allAlpineElements) {
-                        if (el.__x && typeof el.__x.getUnobservedData === 'function') {
-                            const data = el.__x.getUnobservedData();
-                            if (data && 'currentStep' in data) {
-                                console.log("Znaleziono element Alpine z currentStep, ustawiam na 4");
-                                data.currentStep = 4;
-                                break;
+                        // Zmień krok na 4 (finalizacja)
+                        if (window.Alpine) {
+                            const stepContainer = document.querySelector('[x-data]');
+                            if (stepContainer && stepContainer.__x) {
+                                stepContainer.__x.getUnobservedData().currentStep = 4;
                             }
                         }
-                    }
-                }
 
-                // Dodatkowe zabezpieczenie - wywołaj event Alpine
-                try {
-                    window.dispatchEvent(new CustomEvent('setStep', { detail: { step: 4 } }));
-                    console.log("Wyemitowano event setStep");
-                } catch (e) {
-                    console.error("Błąd przy emitowaniu eventu:", e);
+                        // Przewiń do sekcji kreatora etykiet
+                        const creatorSection = document.getElementById('label-creator');
+                        if (creatorSection) {
+                            // Płynne przewijanie do sekcji kreatora z małym opóźnieniem,
+                            // aby dać czas na wyrenderowanie zawartości
+                            setTimeout(() => {
+                                creatorSection.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }, 300);
+                        }
+                    }, 300); // Zwiększono opóźnienie dla pewności załadowania komponentu
                 }
-            }
-
-            // Przewiń do sekcji kreatora etykiet
-            const creatorSection = document.getElementById('label-creator');
-            if (creatorSection) {
-                setTimeout(() => {
-                    creatorSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    console.log("Przewinięto do kreatora");
-                }, 500);
-            }
-        }, 800); // Zwiększone opóźnienie dla pewności
-    }
-});
-</script>
-</div>
+            });
+        </script>
+    </div> <!-- Zamknięcie div data-creator-section -->
+</div> <!-- Zamknięcie zewnętrznego div -->
