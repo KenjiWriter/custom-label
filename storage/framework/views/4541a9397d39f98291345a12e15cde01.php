@@ -598,100 +598,250 @@
         scene.add(topLight);
     }
 
-    // Funkcja tworząca etykietę 3D
     function createLabel() {
-        console.log('🏷️ Tworzenie etykiety 3D...');
+    console.log('🏷️ Tworzenie etykiety 3D...');
 
-        const width = projectConfig.dimensions.width;
-        const height = projectConfig.dimensions.height;
-        const labelDepth = 2;
+    const width = projectConfig.dimensions.width;
+    const height = projectConfig.dimensions.height;
+    const labelDepth = 0; // grubość etykiety - zostawiam realistycznie małą
 
-        // 1. Tworzenie kształtu 2D
-        let shape = createLabelShape(projectConfig.shape, width, height);
+    let shape = createLabelShape(projectConfig.shape, width, height);
 
-        // 2. Ustawienia ekstrudowania dla efektu 3D
-        const extrudeSettings = {
-            steps: 1,
-            depth: labelDepth,
-            bevelEnabled: true,
-            bevelThickness: 0.8,
-            bevelSize: 0.7,
-            bevelOffset: 0,
-            bevelSegments: 3
-        };
+    const extrudeSettings = {
+        steps: 1,
+        depth: labelDepth,
+        bevelEnabled: true,
+        bevelThickness: 0.01,
+        bevelSize: 0.01,
+        bevelOffset: 0,
+        bevelSegments: 1
+    };
 
-        // 3. Stwórz geometrię 3D przez wyciągnięcie kształtu 2D
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-        // 4. Materiał etykiety zależny od wybranego typu
-        const labelMaterial = createLabelMaterial(projectConfig.material);
+    const labelMaterial = createLabelMaterial(projectConfig.material);
 
-        // 5. Stwórz siatkę etykiety
-        labelMesh = new THREE.Mesh(geometry, labelMaterial);
-        labelMesh.castShadow = true;
-        labelMesh.receiveShadow = true;
-        scene.add(labelMesh);
+    labelMesh = new THREE.Mesh(geometry, labelMaterial);
+    labelMesh.castShadow = true;
+    labelMesh.receiveShadow = true;
+    scene.add(labelMesh);
 
-        // 6. Jeśli jest obrazek, dodaj go do etykiety
-        if (projectConfig.debug.hasArtwork) {
-            addArtworkToLabel(shape, labelDepth);
+    // Dodaj tylną stronę etykiety
+    createBackSide(shape, labelDepth);
+    function createBackSide(shape, labelDepth) {
+    // Tworzenie materiału z wzorem na tylnej stronie
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    // Tło
+    ctx.fillStyle = '#f2f2f2';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // Delikatny wzór kropek
+    ctx.fillStyle = '#e0e0e0';
+    for (let x = 0; x < 128; x += 8) {
+        for (let y = 0; y < 128; y += 8) {
+            ctx.beginPath();
+            ctx.arc(x + 4, y + 4, 1, 0, Math.PI * 2);
+            ctx.fill();
         }
-
-        // 7. Jeśli wybrano laminat, dodaj warstwę laminatu
-        if (projectConfig.hasLaminate) {
-            addLaminateLayer(geometry, labelDepth);
-        }
-
-        // 8. Dodaj miarki wymiarów
-        addRulers(scene, width, height, labelDepth);
     }
 
-    // Tworzenie kształtu etykiety
-    function createLabelShape(shapeType, width, height) {
-        const shape = new THREE.Shape();
+    // Dodaj delikatny napis "BACK SIDE" na środku
+    ctx.fillStyle = '#d0d0d0';
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.translate(64, 64);
+    ctx.rotate(Math.PI / 4); // Obrót o 45 stopni
+    ctx.fillText('BACK SIDE', 0, 0);
+    ctx.rotate(-Math.PI / 4);
 
-        if (shapeType === 'circle') {
-            const radius = Math.max(width, height) / 2;
-            shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
-        }
-        else if (shapeType === 'oval') {
-            const rx = width / 2;
-            const ry = height / 2;
-            const segments = 32;
-            for (let i = 0; i <= segments; i++) {
-                const theta = (i / segments) * Math.PI * 2;
-                const x = rx * Math.cos(theta);
-                const y = ry * Math.sin(theta);
-                if (i === 0) shape.moveTo(x, y);
-                else shape.lineTo(x, y);
-            }
-        }
-        else if (shapeType === 'star') {
-            const outerRadius = Math.min(width, height) / 2;
-            const innerRadius = outerRadius * 0.4;
-            const points = 5;
-            for (let i = 0; i < points * 2; i++) {
-                const angle = (i * Math.PI) / points;
-                const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                const x = radius * Math.cos(angle);
-                const y = radius * Math.sin(angle);
-                if (i === 0) shape.moveTo(x, y);
-                else shape.lineTo(x, y);
-            }
-        }
-        else {
-            // Prostokąt/kwadrat
-            const halfWidth = width / 2;
-            const halfHeight = height / 2;
-            shape.moveTo(-halfWidth, -halfHeight);
-            shape.lineTo(halfWidth, -halfHeight);
-            shape.lineTo(halfWidth, halfHeight);
-            shape.lineTo(-halfWidth, halfHeight);
-        }
+    // Stwórz teksturę
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(5, 5);
 
-        shape.closePath();
-        return shape;
+    const backMaterial = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.8,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+    });
+
+    const backGeometry = new THREE.ShapeGeometry(shape);
+    const backMesh = new THREE.Mesh(backGeometry, backMaterial);
+
+    backMesh.position.z = -labelDepth;
+    backMesh.renderOrder = 0;
+
+    scene.add(backMesh);
+
+    const edgeGeometry = new THREE.EdgesGeometry(backGeometry);
+    const edgeMaterial = new THREE.LineBasicMaterial({
+        color: 0x999999,
+        linewidth: 1
+    });
+    const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+    edges.position.z = -labelDepth;
+    edges.renderOrder = 1;
+    scene.add(edges);
+}
+    // Dodaj ścianki boczne etykiety
+    createSideWalls(shape, labelDepth);
+function createSideWalls(shape, labelDepth) {
+    const sideColor = 0xe5e5e5;  // Jaśniejszy szary kolor dla ścianek bocznych
+
+    const sideMaterial = new THREE.MeshStandardMaterial({
+        color: sideColor,
+        roughness: 0.7,
+        metalness: 0.05,
+        side: THREE.DoubleSide
+    });
+
+    // Pobierz punkty kształtu etykiety
+    const points = shape.getPoints();
+    const vertices = [];
+
+    // Tworzymy ścianki boczne
+    for (let i = 0; i < points.length; i++) {
+        const current = points[i];
+        const next = points[(i + 1) % points.length];
+
+        // Dodajemy wierzchołki dla ścianki (dwa trójkąty)
+        vertices.push(
+            // Pierwszy trójkąt
+            current.x, current.y, 0,
+            next.x, next.y, 0,
+            current.x, current.y, -labelDepth,
+
+            // Drugi trójkąt
+            next.x, next.y, 0,
+            next.x, next.y, -labelDepth,
+            current.x, current.y, -labelDepth
+        );
     }
+
+    // Tworzymy geometrię
+    const sideGeometry = new THREE.BufferGeometry();
+    sideGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    sideGeometry.computeVertexNormals();
+
+    // Tworzymy siatkę
+    const sideMesh = new THREE.Mesh(sideGeometry, sideMaterial);
+    sideMesh.renderOrder = 0;
+    scene.add(sideMesh);
+}
+    if (projectConfig.debug.hasArtwork) {
+        // KLUCZOWA ZMIANA: Inicjalizujemy faceMesh jako null, bezpośrednio ładujemy obrazek
+        faceMesh = null;
+        loadArtworkDirectly(shape, labelDepth);
+    }
+
+    if (projectConfig.hasLaminate) {
+        addLaminateLayer(geometry, labelDepth);
+    }
+
+    addRulers(scene, width, height, labelDepth);
+}
+
+// NOWA FUNKCJA: Bezpośrednie ładowanie obrazka bez złotego placeholdera
+function loadArtworkDirectly(shape, labelDepth) {
+    console.log('🖼️ Bezpośrednie ładowanie obrazka bez złotego placeholdera...');
+
+    // Ładowanie tekstury bezpośrednio
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'Anonymous';
+
+    const timestamp = new Date().getTime();
+    const imageUrls = [
+        projectConfig.artworkUrl,
+        '/storage/' + projectConfig.debug.artworkPath,
+        window.location.origin + '/storage/' + projectConfig.debug.artworkPath,
+        `/storage/${projectConfig.debug.artworkPath}?t=${timestamp}`,
+        `/storage/temp/artworks/${projectConfig.debug.artworkPath.split('/').pop()}?t=${timestamp}`,
+        `/storage/artwork/${projectConfig.debug.artworkPath.split('/').pop()}?t=${timestamp}`
+    ].filter(url => url && url !== '/storage/' && url !== '/storage/brak');
+
+    console.log('📋 Dostępne URL do obrazka:', imageUrls);
+    tryLoadTexture(textureLoader, imageUrls, 0);
+}
+
+function createBackSide(shape, labelDepth) {
+    const backMaterial = new THREE.MeshStandardMaterial({
+        color: 0xfafafa,
+        roughness: 0.8,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+    });
+
+    const backGeometry = new THREE.ShapeGeometry(shape);
+    const backMesh = new THREE.Mesh(backGeometry, backMaterial);
+
+    backMesh.position.z = -labelDepth;
+    backMesh.renderOrder = 0;
+
+    scene.add(backMesh);
+
+    const edgeGeometry = new THREE.EdgesGeometry(backGeometry);
+    const edgeMaterial = new THREE.LineBasicMaterial({
+        color: 0x999999,
+        linewidth: 1
+    });
+    const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+    edges.position.z = -labelDepth;
+    edges.renderOrder = 1;
+    scene.add(edges);
+}
+
+function createLabelShape(shapeType, width, height) {
+    const shape = new THREE.Shape();
+
+    if (shapeType === 'circle') {
+        const radius = Math.max(width, height) / 2;
+        shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
+    }
+    else if (shapeType === 'oval') {
+        const rx = width / 2;
+        const ry = height / 2;
+        const segments = 32;
+        for (let i = 0; i <= segments; i++) {
+            const theta = (i / segments) * Math.PI * 2;
+            const x = rx * Math.cos(theta);
+            const y = ry * Math.sin(theta);
+            if (i === 0) shape.moveTo(x, y);
+            else shape.lineTo(x, y);
+        }
+    }
+    else if (shapeType === 'star') {
+        const outerRadius = Math.min(width, height) / 2;
+        const innerRadius = outerRadius * 0.4;
+        const points = 5;
+        for (let i = 0; i < points * 2; i++) {
+            const angle = (i * Math.PI) / points;
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+            if (i === 0) shape.moveTo(x, y);
+            else shape.lineTo(x, y);
+        }
+    }
+    else {
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+        shape.moveTo(-halfWidth, -halfHeight);
+        shape.lineTo(halfWidth, -halfHeight);
+        shape.lineTo(halfWidth, halfHeight);
+        shape.lineTo(-halfWidth, halfHeight);
+    }
+
+    shape.closePath();
+    return shape;
+}
+
 
     function createLabelMaterial(materialType) {
     console.log('🎨 Tworzenie materiału:', materialType);
@@ -780,6 +930,13 @@ function createSimpleEnvMap(material) {
     function addArtworkToLabel(shape, labelDepth) {
     console.log('🖼️ Dodawanie obrazka do etykiety...');
 
+  faceMesh = null;
+
+    // Ładowanie tekstury
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'Anonymous';
+
+    // PRZYWRÓCONE RZECZYWISTE ADRESY URL
     const timestamp = new Date().getTime();
     const imageUrls = [
         projectConfig.artworkUrl,
@@ -791,27 +948,6 @@ function createSimpleEnvMap(material) {
     ].filter(url => url && url !== '/storage/' && url !== '/storage/brak');
 
     console.log('📋 Dostępne URL do obrazka:', imageUrls);
-
-    // Stwórz placeholder dla obrazka - ZMIENIONE: bardziej przezroczysty placeholder
-    faceMesh = new THREE.Mesh(
-        new THREE.ShapeGeometry(shape),
-        new THREE.MeshBasicMaterial({
-            color: 0xffffff,  // Biały zamiast szarego
-            transparent: true,
-            opacity: 0.1,      // Bardziej przezroczysty
-            side: THREE.DoubleSide
-        })
-    );
-
-    // ZMIENIONE: Ustaw placeholder bliżej powierzchni etykiety
-    faceMesh.renderOrder = 1;
-    faceMesh.position.z = labelDepth / 2 + 0.02;
-    scene.add(faceMesh);
-
-    // Ładowanie tekstury
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.crossOrigin = 'Anonymous';
-
     tryLoadTexture(textureLoader, imageUrls, 0);
 }
 
@@ -876,67 +1012,305 @@ function createSimpleEnvMap(material) {
         applyTextureToFace(texture);
     }
 
-    // Aplikuj teksturę do etykiety
     function applyTextureToFace(texture) {
-    console.log('🎨 Aplikowanie tekstury do etykiety...');
+    console.log('🎨 Aplikowanie efektu złota BEZPOŚREDNIO na teksturę...');
 
-    // Upewnij się, że tekstura jest poprawnie zaktualizowana
+    // Dostęp do zmiennych
+    const shape = createLabelShape(
+        projectConfig.shape,
+        projectConfig.dimensions.width,
+        projectConfig.dimensions.height
+    );
+
+    const labelDepth = 0;
+
+    // Sprawdź czy tekstura jest prawidłowa
+    if (!texture || !texture.image) {
+        console.error('❌ Tekstura jest nieprawidłowa!', texture);
+        createEmergencyTexture();
+        return;
+    }
+
+    console.log('📏 Wymiary tekstury:', texture.image.width, 'x', texture.image.height);
+
+    // Ustawienie orientacji obrazka
+    texture.flipY = true;
     texture.needsUpdate = true;
-    texture.encoding = THREE.sRGBEncoding;
 
-    // Nie odwracaj obrazka
-    texture.flipY = false;
-
-    // Zastosuj transformacje zgodnie z ustawieniami użytkownika
+    // Transformacja tekstury
     texture.center.set(0.5, 0.5);
-
     const offsetX = (projectConfig.imagePosition.x - 50) / 100;
     const offsetY = (projectConfig.imagePosition.y - 50) / -100;
     texture.offset.set(offsetX, offsetY);
-
-    const scale = projectConfig.imagePosition.scale / 100;
-    // Użyj rzeczywistej skali, aby pokryć całą etykietę
+    const scale = (projectConfig.imagePosition.scale / 100) * 0.9;
     texture.repeat.set(1/scale, 1/scale);
-
     texture.rotation = projectConfig.imagePosition.rotation * Math.PI / 180;
 
-    // Stwórz materiał z teksturą - ZMIENIONE: Używamy MeshLambertMaterial dla lepszej integracji z efektami
-    const texturedMaterial = new THREE.MeshLambertMaterial({
+    // Tworzymy powiększony kształt dla obrazka
+    const expandedShape = createExpandedShape(shape, 1.04);
+    const imageGeometry = new THREE.ShapeGeometry(expandedShape);
+    applyUVMapping(imageGeometry, projectConfig.dimensions.width * 1.04, projectConfig.dimensions.height * 1.04);
+
+    // KLUCZOWA ZMIANA: Tworzymy JEDEN materiał, który bezpośrednio aplikuje złoty/srebrny efekt na obrazek
+    let imageMaterial;
+
+    if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota') ||
+        projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
+
+        // Ustalamy kolor i parametry na podstawie typu materiału
+        const isGold = projectConfig.material.includes('gold') || projectConfig.material.includes('zlota');
+        const metalColor = isGold ? 0xffd700 : 0xf0f0f0; // złoty lub srebrny
+
+        // Tworzymy materiał, który łączy teksturę z efektem metalicznym
+        imageMaterial = new THREE.MeshPhongMaterial({
+            map: texture,           // Używamy oryginalnej tekstury jako bazę
+            color: metalColor,      // Dodajemy złoty/srebrny odcień
+            specular: isGold ? 0xffd700 : 0xffffff, // Kolor odbicia
+            shininess: 0,         // Wysoki połysk
+            combine: THREE.MultiplyOperation, // KLUCZOWE - mnoży kolor przez teksturę
+            reflectivity: 0.6,      // Intensywność odbić
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        // Dodajemy mapę środowiskową dla odbić
+        const cubeTexture = new THREE.CubeTextureLoader().load([
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
+        ]);
+        imageMaterial.envMap = cubeTexture;
+        imageMaterial.envMapIntensity = 1.0;
+    } else {
+        // Dla zwykłych materiałów - standardowy sposób
+        imageMaterial = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+    }
+
+    // Tworzymy siatkę z obrazkiem
+    const imageMesh = new THREE.Mesh(imageGeometry, imageMaterial);
+    imageMesh.renderOrder = 2000;
+    imageMesh.position.z = labelDepth / 2 + 0.7;
+
+    // Zastąp poprzedni mesh
+    scene.remove(faceMesh);
+    scene.add(imageMesh);
+    faceMesh = imageMesh;
+
+    // Wymuszenie renderowania
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
+
+    console.log('✅ Tekstura z efektem złota zastosowana BEZPOŚREDNIO na obrazku');
+}
+
+// Funkcja pomocnicza do mapowania UV
+function applyUVMapping(geometry, width, height) {
+    const positions = geometry.attributes.position;
+    const uvs = new Float32Array(positions.count * 2);
+
+    for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i);
+        const y = positions.getY(i);
+
+        const u = (x + width/2) / width;
+        const v = (y + height/2) / height;
+
+        uvs[i * 2] = u;
+        uvs[i * 2 + 1] = v;
+    }
+
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+}
+
+// NOWA FUNKCJA: Tworzenie materiału z efektem bezpośrednio na teksturze
+function createEffectMaterial(texture, materialType) {
+    // Bazowe parametry materiału
+    let color = 0xffffff;
+    let metalness = 0.0;
+    let roughness = 0.9;
+    let envMapIntensity = 1.0;
+
+    // Dostosowanie parametrów w zależności od typu materiału
+    if (materialType.includes('gold') || materialType.includes('zlota')) {
+        color = 0xffd700; // Złoty
+        metalness = 0.8;
+        roughness = 0.2;
+        envMapIntensity = 1.8;
+    }
+    else if (materialType.includes('silver') || materialType.includes('srebrna')) {
+        color = 0xf0f0f0; // Srebrny
+        metalness = 0.8;
+        roughness = 0.15;
+        envMapIntensity = 1.6;
+    }
+    else if (materialType.includes('glossy') || materialType.includes('blysk')) {
+        metalness = 0.1;
+        roughness = 0.2;
+        envMapIntensity = 1.2;
+    }
+    else if (materialType.includes('cream')) {
+        color = 0xf5f0e0; // Kremowy
+        metalness = 0.0;
+        roughness = 0.8;
+    }
+    else if (materialType.includes('waterproof')) {
+        metalness = 0.1;
+        roughness = 0.4;
+    }
+
+    // Tworzenie materiału z efektem
+    const material = new THREE.MeshStandardMaterial({
         map: texture,
+        color: color,
+        metalness: metalness,
+        roughness: roughness,
+        envMapIntensity: envMapIntensity,
         transparent: true,
-        side: THREE.DoubleSide,
-        depthTest: false,
-        depthWrite: false
+        side: THREE.DoubleSide
     });
-    texturedMaterial.needsUpdate = true;
 
-    // ZMIENIONE: Stwórz geometrię z poprawnym mapowaniem UV
-    // dla dokładnego dopasowania do kształtu etykiety
+    // Dla metalizowanych materiałów dodaj mapę środowiskową
+    if (metalness > 0.3) {
+        createEnvMapForMaterial(material);
+    }
+
+    return material;
+}
+
+// Funkcja dodająca mapę środowiskową do materiału
+function createEnvMapForMaterial(material) {
+    try {
+        // Próba załadowania cubemapy dla lepszych odbić
+        const cubeTexture = new THREE.CubeTextureLoader().load([
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
+            'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
+        ], function() {
+            material.envMap = cubeTexture;
+            material.needsUpdate = true;
+        });
+    } catch(error) {
+        console.warn('Nie można załadować mapy środowiskowej:', error);
+    }
+}
+
+// Nowa funkcja do tworzenia powiększonego kształtu (bez zmian)
+function createExpandedShape(originalShape, scaleFactor) {
+    // Dla prostych kształtów używamy oryginalnej funkcji tworzenia, ale ze zwiększonymi wymiarami
+    const shape = projectConfig.shape;
+    const width = projectConfig.dimensions.width * scaleFactor;
+    const height = projectConfig.dimensions.height * scaleFactor;
+
+    return createLabelShape(shape, width, height);
+}
+
+// Funkcja awaryjna (bez zmian)
+function createEmergencyTexture() {
+    console.log('🚨 Tworzenie awaryjnej tekstury testowej...');
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Wypełnienie kolorami dla łatwiejszej diagnostyki
+    ctx.fillStyle = '#ff0000';  // Czerwony kwadrat
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = '#00ff00';  // Zielony kwadrat
+    ctx.fillRect(256, 0, 256, 256);
+    ctx.fillStyle = '#0000ff';  // Niebieski kwadrat
+    ctx.fillRect(0, 256, 256, 256);
+    ctx.fillStyle = '#ffff00';  // Żółty kwadrat
+    ctx.fillRect(256, 256, 256, 256);
+
+    // Dodaj wyraźny tekst
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('TEST', 256, 256);
+    ctx.font = '24px Arial';
+    ctx.fillText('(Obrazek awaryjny)', 256, 300);
+
+    // Zastosuj teksturę
+    const texture = new THREE.CanvasTexture(canvas);
+
+    // Specjalna funkcja dla awaryjnej tekstury
+    applyEmergencyTexture(texture);
+}
+
+// Funkcja awaryjna (bez zmian)
+function applyEmergencyTexture(texture) {
+    const shape = createLabelShape(
+        projectConfig.shape,
+        projectConfig.dimensions.width,
+        projectConfig.dimensions.height
+    );
+
+    const labelDepth = 0;
+
+    texture.needsUpdate = true;
+
+    // Najprostszy możliwy materiał
+    const texturedMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: false,
+        depthTest: false,
+        side: THREE.DoubleSide
+    });
+
     const shapeGeometry = new THREE.ShapeGeometry(shape);
-    const uvAttribute = shapeGeometry.attributes.uv;
-
-    // Stwórz nową siatkę z poprawną geometrią i materiałem
     const artworkMesh = new THREE.Mesh(shapeGeometry, texturedMaterial);
+    artworkMesh.renderOrder = 10000;
+    artworkMesh.position.z = labelDepth / 2 + 0; // Minimalne przesunięcie
 
-    // ZMIENIONE: Przesuń teksturę nieco bliżej kamery, aby była widoczna nad etykietą
-    artworkMesh.renderOrder = 10;
-    artworkMesh.position.z = faceMesh.position.z + 0.05;
-
-    // Zastąp placeholder rzeczywistym obrazkiem
     scene.remove(faceMesh);
     scene.add(artworkMesh);
     faceMesh = artworkMesh;
 
-    // Wymuszenie renderowania
-    renderer.render(scene, camera);
-
-    console.log('✓ Tekstura zastosowana pomyślnie');
-    console.log('📏 Pozycja tekstury:', { x: offsetX, y: offsetY, scale: scale, rotation: projectConfig.imagePosition.rotation });
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
-    // Dodawanie warstwy laminatu
+// Odświeżanie obrazka (bez zmian)
+window.reloadArtwork = function() {
+    console.log('🔄 Odświeżanie obrazka...');
+
+    if (!scene) {
+        console.warn('⚠️ Nie można odświeżyć obrazka - scena nie istnieje');
+        return;
+    }
+
+    // Usuń stary mesh obrazka
+    if (faceMesh && scene.children.includes(faceMesh)) {
+        scene.remove(faceMesh);
+    }
+
+    // Utwórz obrazek testowy zamiast próbować ładować istniejący
+    createEmergencyTexture();
+
+    // Wymuś ponowne renderowanie
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
+
+    console.log('✅ Obrazek testowy zastosowany');
+};
+
+// ULEPSZONA funkcja dodawania warstwy laminatu
 function addLaminateLayer(geometry, labelDepth) {
-    console.log('🔍 Dodawanie laminatu:', projectConfig.laminateType);
+    console.log('🔍 Dodawanie laminatu z uwzględnieniem materiału:', projectConfig.laminateType);
 
     // Klonuj geometrię etykiety, ale delikatnie większą
     const laminateGeometry = geometry.clone();
@@ -944,51 +1318,66 @@ function addLaminateLayer(geometry, labelDepth) {
 
     let opacity = 0.15;
     let shininess = 100;
+    let blending = THREE.NormalBlending;
+    let specular = 0x111111;
 
     // Laminat matowy
     if (projectConfig.laminateType?.includes('matte')) {
         opacity = 0.12;
         shininess = 10;
+        specular = 0x050505;
+        blending = THREE.NormalBlending;
     }
     // Laminat błyszczący
     else if (projectConfig.laminateType?.includes('glossy')) {
-        opacity = 0.2;
+        opacity = 0.25;
         shininess = 150;
+        specular = 0x222222;
+        blending = THREE.AdditiveBlending;
     }
     // Laminat soft-touch
     else if (projectConfig.laminateType?.includes('soft')) {
-        opacity = 0.1;
+        opacity = 0.15;
         shininess = 5;
+        specular = 0x010101;
+        blending = THREE.MultiplyBlending;
     }
 
     // Użyj MeshPhongMaterial dla lepszego efektu połysku
     const laminateMaterial = new THREE.MeshPhongMaterial({
         color: 0xffffff,
-        specular: 0x111111,
+        specular: specular,
         shininess: shininess,
         transparent: true,
         opacity: opacity,
         side: THREE.DoubleSide,
-        depthWrite: false
+        depthWrite: false,
+        blending: blending
     });
 
     const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
     laminateMesh.position.z = 0.5;
-    laminateMesh.renderOrder = 2;
+    laminateMesh.renderOrder = 2500;  // Wyższy renderOrder - nad wszystkim
     scene.add(laminateMesh);
 
-    // Dla błyszczącego laminatu dodaj delikatny efekt "blasku"
+    // Dla błyszczącego laminatu dodaj wyraźniejszy efekt "blasku"
     if (projectConfig.laminateType?.includes('glossy')) {
-        addSimpleGlossEffect(laminateGeometry);
+        addEnhancedGlossEffect(laminateGeometry);
+    }
+
+    // Dla soft-touch dodaj efekt miękkości
+    if (projectConfig.laminateType?.includes('soft')) {
+        addSoftTouchEffect(laminateGeometry);
     }
 }
 
-// Uproszczony efekt połysku dla laminatu
-function addSimpleGlossEffect(geometry) {
+// NOWOŚĆ: Ulepszona funkcja efektu połysku
+function addEnhancedGlossEffect(geometry) {
+    // Główna warstwa blasku
     const glossMaterial = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.08,
+        opacity: 0.1,
         side: THREE.FrontSide,
         blending: THREE.AdditiveBlending,
         depthWrite: false
@@ -996,61 +1385,98 @@ function addSimpleGlossEffect(geometry) {
 
     const glossMesh = new THREE.Mesh(geometry.clone(), glossMaterial);
     glossMesh.position.z = 0.55;
-    glossMesh.renderOrder = 3;
+    glossMesh.renderOrder = 3000;
     scene.add(glossMesh);
+
+    // Dodatkowa warstwa z efektem lustrzanym
+    const specularMaterial = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        specular: 0x444444,
+        shininess: 200,
+        transparent: true,
+        opacity: 0.1,
+        side: THREE.FrontSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+
+    const specularMesh = new THREE.Mesh(geometry.clone(), specularMaterial);
+    specularMesh.position.z = 0.56;
+    specularMesh.renderOrder = 3001;
+    scene.add(specularMesh);
 }
 
-    // Dodawanie miarek wymiarów
-    function addRulers(scene, width, height, depth) {
-        const rulerColor = 0x333333;
-        const rulerWidth = 0.5;
-        const labelOffset = 15;
+// NOWOŚĆ: Funkcja dla efektu soft-touch
+function addSoftTouchEffect(geometry) {
+    // Efekt delikatnego zmatowienia
+    const softMaterial = new THREE.MeshStandardMaterial({
+        color: 0x222222,
+        roughness: 0.95,
+        metalness: 0.01,
+        transparent: true,
+        opacity: 0.05,
+        side: THREE.FrontSide,
+        blending: THREE.MultiplyBlending,
+        depthWrite: false
+    });
 
-        // Miarka szerokości
-        const widthGeometry = new THREE.BoxGeometry(width, rulerWidth, rulerWidth);
-        const widthMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
-        const widthRuler = new THREE.Mesh(widthGeometry, widthMaterial);
-        widthRuler.position.set(0, -height/2 - labelOffset, 0);
-        scene.add(widthRuler);
+    const softMesh = new THREE.Mesh(geometry.clone(), softMaterial);
+    softMesh.position.z = 0.55;
+    softMesh.renderOrder = 3000;
+    scene.add(softMesh);
+}
 
-        // Miarka wysokości
-        const heightGeometry = new THREE.BoxGeometry(rulerWidth, height, rulerWidth);
-        const heightRuler = new THREE.Mesh(heightGeometry, widthMaterial);
-        heightRuler.position.set(-width/2 - labelOffset, 0, 0);
-        scene.add(heightRuler);
+// Dodawanie miarek wymiarów (bez zmian)
+function addRulers(scene, width, height, depth) {
+    const rulerColor = 0x333333;
+    const rulerWidth = 0.5;
+    const labelOffset = 15;
 
-        // Dodaj tekst z wymiarami
-        addTextLabel(scene, `${width}mm`, 0, -height/2 - labelOffset - 10, 0, 1.5);
-        addTextLabel(scene, `${height}mm`, -width/2 - labelOffset - 15, 0, 0, 1.5, true);
+    // Miarka szerokości
+    const widthGeometry = new THREE.BoxGeometry(width, rulerWidth, rulerWidth);
+    const widthMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
+    const widthRuler = new THREE.Mesh(widthGeometry, widthMaterial);
+    widthRuler.position.set(0, -height/2 - labelOffset, 0);
+    scene.add(widthRuler);
+
+    // Miarka wysokości
+    const heightGeometry = new THREE.BoxGeometry(rulerWidth, height, rulerWidth);
+    const heightRuler = new THREE.Mesh(heightGeometry, widthMaterial);
+    heightRuler.position.set(-width/2 - labelOffset, 0, 0);
+    scene.add(heightRuler);
+
+    // Dodaj tekst z wymiarami
+    addTextLabel(scene, `${width}mm`, 0, -height/2 - labelOffset - 10, 0, 1.5);
+    addTextLabel(scene, `${height}mm`, -width/2 - labelOffset - 15, 0, 0, 1.5, true);
+}
+
+// Funkcja pomocnicza do dodawania etykiet tekstowych (bez zmian)
+function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 100;
+    canvas.height = 50;
+
+    context.fillStyle = '#000000';
+    context.font = `${16 * size}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(text, canvas.width/2, canvas.height/2);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+
+    sprite.scale.set(10 * size, 5 * size, 1);
+    sprite.position.set(x, y, z);
+
+    if (rotated) {
+        sprite.material.rotation = Math.PI / 2;
     }
 
-    // Funkcja pomocnicza do dodawania etykiet tekstowych
-    function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = 100;
-        canvas.height = 50;
-
-        context.fillStyle = '#000000';
-        context.font = `${16 * size}px Arial`;
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(text, canvas.width/2, canvas.height/2);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-        const sprite = new THREE.Sprite(material);
-
-        sprite.scale.set(10 * size, 5 * size, 1);
-        sprite.position.set(x, y, z);
-
-        if (rotated) {
-            sprite.material.rotation = Math.PI / 2;
-        }
-
-        scene.add(sprite);
-        return sprite;
-    }
+    scene.add(sprite);
+    return sprite;
+}
 
     // Funkcja renderująca scenę
     function animate() {
