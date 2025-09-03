@@ -561,28 +561,16 @@
         }
     }
 
-    // Dodaj oświetlenie do sceny
-    function addLighting(scene) {
-        // Światło otoczenia
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
+   function addLighting(scene) {
+    // Podstawowe światło otoczenia - zmniejszone aby nie przytłumiać efektów połysku
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+// Delikatniejsze światło kierunkowe z przodu
+    const mainLight = new THREE.DirectionalLight(0xffffff, 0.001); // zmniejszone z 0.7
+    mainLight.position.set(0, 0, 80);
+    scene.add(mainLight);
 
-        // Światło kierunkowe z przodu
-        const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
-        frontLight.position.set(0, 0, 100);
-        scene.add(frontLight);
-
-        // Światło z tyłu
-        const backLight = new THREE.DirectionalLight(0xffffff, 0.1);
-        backLight.position.set(0, 0, -100);
-        scene.add(backLight);
-
-        // Światło z góry
-        const topLight = new THREE.DirectionalLight(0xffffff, 0.2);
-        topLight.position.set(0, 100, 0);
-        scene.add(topLight);
-    }
-
+   }
     function createLabel() {
     console.log('🏷️ Tworzenie etykiety 3D...');
 
@@ -616,39 +604,103 @@
     function createBackSide(shape, labelDepth) {
     // Tworzenie materiału z wzorem na tylnej stronie
     const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 512; // Zwiększona rozdzielczość dla lepszego efektu
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Tło
-    ctx.fillStyle = '#f2f2f2';
-    ctx.fillRect(0, 0, 128, 128);
+    // Tło - ciemniejsze
+    const bgColor = '#121212'; // Prawie czarny
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, 512, 512);
 
-    // Delikatny wzór kropek
-    ctx.fillStyle = '#e0e0e0';
-    for (let x = 0; x < 128; x += 8) {
-        for (let y = 0; y < 128; y += 8) {
-            ctx.beginPath();
-            ctx.arc(x + 4, y + 4, 1, 0, Math.PI * 2);
-            ctx.fill();
+    // Casualowy wzór - losowe linie
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 0.5;
+
+    // Siatka linii
+    for (let i = 0; i < 20; i++) {
+        // Poziome linie
+        ctx.beginPath();
+        ctx.moveTo(0, i * 25);
+        ctx.lineTo(512, i * 25);
+        ctx.stroke();
+
+        // Pionowe linie
+        ctx.beginPath();
+        ctx.moveTo(i * 25, 0);
+        ctx.lineTo(i * 25, 512);
+        ctx.stroke();
+    }
+
+    // Wzór kropek - bardziej wyrazisty
+    ctx.fillStyle = '#3a3a3a';
+    for (let x = 0; x < 512; x += 20) {
+        for (let y = 0; y < 512; y += 20) {
+            if (Math.random() > 0.7) { // Losowe kropki
+                ctx.beginPath();
+                ctx.arc(x + 10, y + 10, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
-    // Dodaj delikatny napis "BACK SIDE" na środku
-    ctx.fillStyle = '#d0d0d0';
-    ctx.font = '10px Arial';
+    // Ukośne linie w tle
+    ctx.strokeStyle = '#252525';
+    ctx.lineWidth = 1;
+    for (let i = -512; i < 1024; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + 512, 512);
+        ctx.stroke();
+    }
+
+    // Dodaj wyraźny napis "TYŁ" oraz "BACK SIDE" na środku
+    ctx.save();
+    ctx.translate(256, 256);
+
+    // Duży półprzezroczysty napis po polsku
+    ctx.font = 'bold 80px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.translate(64, 64);
-    ctx.rotate(Math.PI / 4); // Obrót o 45 stopni
-    ctx.fillText('BACK SIDE', 0, 0);
-    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = 'rgba(80, 80, 80, 0.7)';
+    ctx.fillText('TYŁ', 0, -20);
 
-    // Stwórz teksturę
+    // Mniejszy napis po angielsku
+    ctx.font = 'bold 40px Arial';
+    ctx.fillStyle = 'rgba(80, 80, 80, 0.6)';
+    ctx.fillText('BACK SIDE', 0, 40);
+
+    // Dodaj dodatkowe napisy w różnych kierunkach dla efektu
+    ctx.rotate(Math.PI / 4);
+    ctx.font = 'bold 50px Arial';
+    ctx.fillStyle = 'rgba(60, 60, 60, 0.4)';
+    ctx.fillText('TYŁ', 0, 0);
+    ctx.restore();
+
+    // Mniejsze napisy "tył" rozrzucone po całym tle
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#2a2a2a';
+    for (let i = 0; i < 10; i++) {
+        const x = Math.random() * 412 + 50;
+        const y = Math.random() * 412 + 50;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate((Math.random() - 0.5) * 0.5); // Losowy lekki obrót
+        ctx.fillText('tył', 0, 0);
+        ctx.restore();
+    }
+
+    // Logo firmy lub znak wodny (opcjonalnie)
+    ctx.font = 'italic 24px Arial';
+    ctx.fillStyle = '#252525';
+    ctx.textAlign = 'center';
+    ctx.fillText('Custom Labels', 256, 460);
+
+    // Stwórz teksturę z mniejszą ilością powtórzeń dla lepszej widoczności wzoru
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(5, 5);
+    texture.repeat.set(1, 1); // Zmniejszone powtórzenia aby wzór był lepiej widoczny
 
     const backMaterial = new THREE.MeshStandardMaterial({
         map: texture,
@@ -665,9 +717,10 @@
 
     scene.add(backMesh);
 
+    // Dodaj subtelną krawędź dla lepszego efektu 3D
     const edgeGeometry = new THREE.EdgesGeometry(backGeometry);
     const edgeMaterial = new THREE.LineBasicMaterial({
-        color: 0x999999,
+        color: 0x333333, // Ciemniejsza krawędź pasująca do tła
         linewidth: 1
     });
     const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
@@ -1037,61 +1090,65 @@ function createSimpleEnvMap(material) {
     applyUVMapping(imageGeometry, projectConfig.dimensions.width * 1.04, projectConfig.dimensions.height * 1.04);
 
     // KLUCZOWA ZMIANA: Tworzymy JEDEN materiał, który bezpośrednio aplikuje złoty/srebrny efekt na obrazek
-    let imageMaterial;
+let imageMaterial;
 
-    if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota') ||
-        projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
+if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota') ||
+    projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
 
-        // Ustalamy kolor i parametry na podstawie typu materiału
-        const isGold = projectConfig.material.includes('gold') || projectConfig.material.includes('zlota');
-        const metalColor = isGold ? 0xffd700 : 0xf0f0f0; // złoty lub srebrny
+    // Ustalamy kolor i parametry na podstawie typu materiału
+    const isGold = projectConfig.material.includes('gold') || projectConfig.material.includes('zlota');
 
-        // Tworzymy materiał, który łączy teksturę z efektem metalicznym
-        imageMaterial = new THREE.MeshPhongMaterial({
-            map: texture,           // Używamy oryginalnej tekstury jako bazę
-            color: metalColor,      // Dodajemy złoty/srebrny odcień
-            specular: isGold ? 0xffd700 : 0xffffff, // Kolor odbicia
-            shininess: 0,         // Wysoki połysk
-            combine: THREE.MultiplyOperation, // KLUCZOWE - mnoży kolor przez teksturę
-            reflectivity: 0.6,      // Intensywność odbić
-            transparent: true,
-            side: THREE.DoubleSide
-        });
+    // Bardziej realistyczny złoty kolor - klasyczny kolor złota
+    const metalColor = isGold ? 0xd4af37 : 0xf0f0f0; // Prawdziwe złoto lub srebrny
 
-        // Dodajemy mapę środowiskową dla odbić
-        const cubeTexture = new THREE.CubeTextureLoader().load([
-            'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
-            'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
-            'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
-            'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
-            'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
-            'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
-        ]);
-        imageMaterial.envMap = cubeTexture;
-        imageMaterial.envMapIntensity = 1.0;
-    } else {
-        // Dla zwykłych materiałów - standardowy sposób
-        imageMaterial = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
+    // Tworzymy materiał, który łączy teksturę z efektem metalicznym - BEZ efektu pulsowania
+    imageMaterial = new THREE.MeshPhongMaterial({
+        map: texture,           // Zachowujemy oryginalną teksturę jako bazę
+        color: metalColor,      // Klasyczny złoty kolor
+        specular: isGold ? 0xfff7d6 : 0xffffff, // Cieplejszy odcień dla złota
+        shininess: 70,          // Wyższy połysk dla metalicznego wyglądu
+        combine: THREE.MixOperation, // Lepszy sposób mieszania koloru i tekstury
+        reflectivity: 0.6,      // Stabilna wartość bez przesady
+        transparent: true,
+        side: THREE.DoubleSide
+    });
+
+    // Dodajemy mapę środowiskową dla stałych odbić (nie pulsujących)
+    const cubeTexture = new THREE.CubeTextureLoader().load([
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
+        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
+    ]);
+    imageMaterial.envMap = cubeTexture;
+    imageMaterial.envMapIntensity = 0.8; // Zmniejszona wartość dla stabilnego wyglądu
+
+    // Dodajemy statyczną warstwę efektu złota (bez animacji)
+    if (isGold) {
+        setTimeout(() => {
+            const expandedShape = createExpandedShape(shape, 1.02);
+            const glowGeometry = new THREE.ShapeGeometry(expandedShape);
+            applyUVMapping(glowGeometry, projectConfig.dimensions.width * 1.02, projectConfig.dimensions.height * 1.02);
+
+            // Statyczna warstwa blasku (bez animacji)
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                map: texture,
+                color: 0xffdf80,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                opacity: 4.1,  // Mniejsza wartość dla subtelnego efektu
+                side: THREE.FrontSide
+            });
+
+            const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+            glowMesh.position.z = labelDepth / 2 + 0.8;
+            glowMesh.renderOrder = 2001;
+            scene.add(glowMesh);
+        }, 200);
     }
-
-    // Tworzymy siatkę z obrazkiem
-    const imageMesh = new THREE.Mesh(imageGeometry, imageMaterial);
-    imageMesh.renderOrder = 2000;
-    imageMesh.position.z = labelDepth / 2 + 0.7;
-
-    // Zastąp poprzedni mesh
-    scene.remove(faceMesh);
-    scene.add(imageMesh);
-    faceMesh = imageMesh;
-
-    // Wymuszenie renderowania
-    if (renderer && scene && camera) {
-        renderer.render(scene, camera);
-    }
+}
 
     console.log('✅ Tekstura z efektem złota zastosowana BEZPOŚREDNIO na obrazku');
 }
