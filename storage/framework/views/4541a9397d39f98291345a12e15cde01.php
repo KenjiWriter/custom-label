@@ -591,7 +591,7 @@
 
     const width = projectConfig.dimensions.width;
     const height = projectConfig.dimensions.height;
-    const labelDepth = 0; // grubość etykiety - zostawiam realistycznie małą
+    const labelDepth = 0.2; // grubość etykiety - zostawiam realistycznie małą
 
     let shape = createLabelShape(projectConfig.shape, width, height);
 
@@ -617,131 +617,82 @@
     // Dodaj tylną stronę etykiety
     createBackSide(shape, labelDepth);
     function createBackSide(shape, labelDepth) {
-    // Tworzenie materiału z wzorem na tylnej stronie
-    const canvas = document.createElement('canvas');
-    canvas.width = 512; // Zwiększona rozdzielczość dla lepszego efektu
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
+    console.log('🏷️ Implementacja tylnej strony z subtelnym tekstem');
 
-    // Tło - ciemniejsze
-    const bgColor = '#121212'; // Prawie czarny
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, 512, 512);
-
-    // Casualowy wzór - losowe linie
-    ctx.strokeStyle = '#333333';
-    ctx.lineWidth = 0.5;
-
-    // Siatka linii
-    for (let i = 0; i < 20; i++) {
-        // Poziome linie
-        ctx.beginPath();
-        ctx.moveTo(0, i * 25);
-        ctx.lineTo(512, i * 25);
-        ctx.stroke();
-
-        // Pionowe linie
-        ctx.beginPath();
-        ctx.moveTo(i * 25, 0);
-        ctx.lineTo(i * 25, 512);
-        ctx.stroke();
-    }
-
-    // Wzór kropek - bardziej wyrazisty
-    ctx.fillStyle = '#3a3a3a';
-    for (let x = 0; x < 512; x += 20) {
-        for (let y = 0; y < 512; y += 20) {
-            if (Math.random() > 0.7) { // Losowe kropki
-                ctx.beginPath();
-                ctx.arc(x + 10, y + 10, 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    }
-
-    // Ukośne linie w tle
-    ctx.strokeStyle = '#252525';
-    ctx.lineWidth = 1;
-    for (let i = -512; i < 1024; i += 40) {
-        ctx.beginPath();
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i + 512, 512);
-        ctx.stroke();
-    }
-
-    // Dodaj wyraźny napis "TYŁ" oraz "BACK SIDE" na środku
-    ctx.save();
-    ctx.translate(256, 256);
-
-    // Duży półprzezroczysty napis po polsku
-    ctx.font = 'bold 80px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(80, 80, 80, 0.7)';
-    ctx.fillText('TYŁ', 0, -20);
-
-    // Mniejszy napis po angielsku
-    ctx.font = 'bold 40px Arial';
-    ctx.fillStyle = 'rgba(80, 80, 80, 0.6)';
-    ctx.fillText('BACK SIDE', 0, 40);
-
-    // Dodaj dodatkowe napisy w różnych kierunkach dla efektu
-    ctx.rotate(Math.PI / 4);
-    ctx.font = 'bold 50px Arial';
-    ctx.fillStyle = 'rgba(60, 60, 60, 0.4)';
-    ctx.fillText('TYŁ', 0, 0);
-    ctx.restore();
-
-    // Mniejsze napisy "tył" rozrzucone po całym tle
-    ctx.font = '20px Arial';
-    ctx.fillStyle = '#2a2a2a';
-    for (let i = 0; i < 10; i++) {
-        const x = Math.random() * 412 + 50;
-        const y = Math.random() * 412 + 50;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate((Math.random() - 0.5) * 0.5); // Losowy lekki obrót
-        ctx.fillText('tył', 0, 0);
-        ctx.restore();
-    }
-
-    // Logo firmy lub znak wodny (opcjonalnie)
-    ctx.font = 'italic 24px Arial';
-    ctx.fillStyle = '#252525';
-    ctx.textAlign = 'center';
-    ctx.fillText('Custom Labels', 256, 460);
-
-    // Stwórz teksturę z mniejszą ilością powtórzeń dla lepszej widoczności wzoru
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 1); // Zmniejszone powtórzenia aby wzór był lepiej widoczny
-
-    const backMaterial = new THREE.MeshStandardMaterial({
-        map: texture,
-        roughness: 0.8,
-        metalness: 0.1,
-        side: THREE.DoubleSide
+    // 1. Tworzymy nieprzezroczyste ciemne tło
+    const backGeometry = new THREE.ShapeGeometry(shape);
+    const backMaterial = new THREE.MeshBasicMaterial({
+        color: 0x242424,  // Ciemny szary/czarny
+        side: THREE.BackSide,
+        transparent: false,
+        depthTest: true,
+        depthWrite: true
     });
 
-    const backGeometry = new THREE.ShapeGeometry(shape);
     const backMesh = new THREE.Mesh(backGeometry, backMaterial);
-
-    backMesh.position.z = -labelDepth;
-    backMesh.renderOrder = 0;
-
+    backMesh.position.z = -labelDepth/2;
+    backMesh.renderOrder = 5000; // Bardzo wysoki priorytet renderowania
     scene.add(backMesh);
 
-    // Dodaj subtelną krawędź dla lepszego efektu 3D
-    const edgeGeometry = new THREE.EdgesGeometry(backGeometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({
-        color: 0x333333, // Ciemniejsza krawędź pasująca do tła
-        linewidth: 1
+    // 2. Tworzymy cały tekst jako jedną teksturę zamiast osobnych sprite'ów
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1024;
+    canvas.height = 1024;
+
+    // KLUCZOWA ZMIANA: Odbicie lustrzane podczas rysowania tekstu
+    ctx.save();
+    ctx.scale(-1, 1); // Odbicie lustrzane w poziomie
+    ctx.translate(-canvas.width, 0); // Przesunięcie z powrotem
+
+    // ZMIENIONY KOLOR - tylko nieznacznie jaśniejszy od tła
+    ctx.fillStyle = '#353535';  // Tylko delikatnie jaśniejszy od #242424
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Usunięte cienie dla bardziej subtelnego efektu
+
+    // TYŁ - bardzo duży tekst
+    ctx.font = 'bold 300px Arial';
+    ctx.fillText('TYŁ', canvas.width/2, canvas.height/2 - 200);
+
+    // BACK - też duży tekst
+    ctx.font = 'bold 250px Arial';
+    ctx.fillText('BACK', canvas.width/2, canvas.height/2 + 150);
+
+    // Custom Labels - jeszcze bardziej subtelne
+    ctx.font = 'bold italic 120px Arial';
+    ctx.fillStyle = '#303030';  // Jeszcze mniej widoczne
+    ctx.fillText('Custom Labels', canvas.width/2, canvas.height - 150);
+
+    // Przywróć normalny kontekst
+    ctx.restore();
+
+    // Stwórz teksturę z całego canvasa
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    // Zastosuj teksturę na tylnej stronie
+    const textGeometry = new THREE.PlaneGeometry(
+        projectConfig.dimensions.width * 0.9,
+        projectConfig.dimensions.height * 0.9
+    );
+
+    const textMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: true,
+        depthWrite: false,
+        side: THREE.BackSide,
+        blending: THREE.NormalBlending // Normalny tryb mieszania dla subtelnego efektu
     });
-    const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-    edges.position.z = -labelDepth;
-    edges.renderOrder = 1;
-    scene.add(edges);
+
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.position.z = -labelDepth/2 - 0.05; // Tuż za tylną ścianką
+    textMesh.renderOrder = 5001; // Jeszcze wyższy priorytet
+
+    scene.add(textMesh);
+    console.log('✅ Dodano subtelne napisy na tylnej stronie');
 }
     // Dodaj ścianki boczne etykiety
     createSideWalls(shape, labelDepth);
@@ -821,33 +772,6 @@ function loadArtworkDirectly(shape, labelDepth) {
 
     console.log('📋 Dostępne URL do obrazka:', imageUrls);
     tryLoadTexture(textureLoader, imageUrls, 0);
-}
-
-function createBackSide(shape, labelDepth) {
-    const backMaterial = new THREE.MeshStandardMaterial({
-        color: 0xfafafa,
-        roughness: 0.8,
-        metalness: 0.1,
-        side: THREE.DoubleSide
-    });
-
-    const backGeometry = new THREE.ShapeGeometry(shape);
-    const backMesh = new THREE.Mesh(backGeometry, backMaterial);
-
-    backMesh.position.z = -labelDepth;
-    backMesh.renderOrder = 0;
-
-    scene.add(backMesh);
-
-    const edgeGeometry = new THREE.EdgesGeometry(backGeometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({
-        color: 0x999999,
-        linewidth: 1
-    });
-    const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-    edges.position.z = -labelDepth;
-    edges.renderOrder = 1;
-    scene.add(edges);
 }
 
 function createLabelShape(shapeType, width, height) {
@@ -1124,8 +1048,8 @@ if (projectConfig.material.includes('gold') || projectConfig.material.includes('
         shininess: 70,          // Wyższy połysk dla metalicznego wyglądu
         combine: THREE.MixOperation, // Lepszy sposób mieszania koloru i tekstury
         reflectivity: 0.6,      // Stabilna wartość bez przesady
-        transparent: true,
-        side: THREE.DoubleSide
+        transparent: false,
+        side: THREE.FrontSide
     });
 
     // Dodajemy mapę środowiskową dla stałych odbić (nie pulsujących)
