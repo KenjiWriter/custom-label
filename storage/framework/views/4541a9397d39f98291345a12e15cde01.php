@@ -531,18 +531,18 @@
             camera.position.set(0, 0, 200);
 
             // 3. Renderer
-            renderer = new THREE.WebGLRenderer({
-                antialias: true,
-                alpha: true,
-                powerPreference: "high-performance"
-            });
-            renderer.setSize(container.offsetWidth, container.offsetHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 0.8;
-            renderer.outputEncoding = THREE.sRGBEncoding;
-            container.appendChild(renderer.domElement);
+renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+    powerPreference: "high-performance"
+});
+renderer.setSize(container.offsetWidth, container.offsetHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.8;
+renderer.outputEncoding = THREE.sRGBEncoding;
+container.appendChild(renderer.domElement);
 
             // 4. Kontroler kamery
             controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -577,15 +577,32 @@
     }
 
    function addLighting(scene) {
-    // Podstawowe światło otoczenia - zmniejszone aby nie przytłumiać efektów połysku
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    // Ambient light for base illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
-// Delikatniejsze światło kierunkowe z przodu
-    const mainLight = new THREE.DirectionalLight(0xffffff, 0.001); // zmniejszone z 0.7
-    mainLight.position.set(0, 0, 80);
+
+    // Main directional light
+    const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    mainLight.position.set(50, 50, 100);
+    mainLight.castShadow = true;
     scene.add(mainLight);
 
-   }
+    // Additional point lights for better reflections on metallic surfaces
+    const pointLight1 = new THREE.PointLight(0xffffff, 0.6);
+    pointLight1.position.set(200, 200, 200);
+    scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(0xffaa88, 0.5); // Warm light
+    pointLight2.position.set(-150, 50, 100);
+    scene.add(pointLight2);
+
+    // Subtle blue backlight for dimension
+    const backLight = new THREE.PointLight(0xaaddff, 0.4);
+    backLight.position.set(0, 0, -200);
+    scene.add(backLight);
+}
+
+
     function createLabel() {
     console.log('🏷️ Tworzenie etykiety 3D...');
 
@@ -755,6 +772,11 @@ function createSideWalls(shape, labelDepth) {
 function loadArtworkDirectly(shape, labelDepth) {
     console.log('🖼️ Bezpośrednie ładowanie obrazka bez złotego placeholdera...');
 
+    // Remove any existing face mesh first
+    if (faceMesh && scene.children.includes(faceMesh)) {
+        scene.remove(faceMesh);
+    }
+
     // Ładowanie tekstury bezpośrednio
     const textureLoader = new THREE.TextureLoader();
     textureLoader.crossOrigin = 'Anonymous';
@@ -822,66 +844,110 @@ function createLabelShape(shapeType, width, height) {
     function createLabelMaterial(materialType) {
     console.log('🎨 Tworzenie materiału:', materialType);
 
-    // Podstawowa konfiguracja
+    // Base configuration
     let materialColor;
     let roughness = 0.7;
     let metalness = 0.1;
     let envMapIntensity = 1.0;
+    let clearcoat = 0;
+    let clearcoatRoughness = 0;
 
-    // Folia złota
+    // Gold foil
     if (materialType.includes('gold') || materialType.includes('zlota')) {
-        materialColor = 0xffd700; // Złoty
-        roughness = 0.2;
-        metalness = 0.9;
-        envMapIntensity = 1.5;
-    }
-    // Folia srebrna
-    else if (materialType.includes('silver') || materialType.includes('srebrna')) {
-        materialColor = 0xf0f0f0; // Srebrny
+        materialColor = 0xd4af37; // More realistic gold color
         roughness = 0.15;
-        metalness = 0.9;
-        envMapIntensity = 1.5;
+        metalness = 0.95;
+        envMapIntensity = 2.0;
+        clearcoat = 0.5; // Add clearcoat for extra shine
+        clearcoatRoughness = 0.1;
     }
-    // Papier błyszczący
+    // Silver foil
+    else if (materialType.includes('silver') || materialType.includes('srebrna')) {
+        materialColor = 0xe8e8e8; // More realistic silver color
+        roughness = 0.1;
+        metalness = 0.95;
+        envMapIntensity = 2.0;
+        clearcoat = 0.3;
+        clearcoatRoughness = 0.05;
+    }
+    // Rest of the existing material types...
     else if (materialType.includes('glossy') || materialType.includes('blysk')) {
-        materialColor = 0xffffff; // Biały
+        materialColor = 0xffffff;
         roughness = 0.2;
         metalness = 0.1;
     }
-    // Papier kremowy
     else if (materialType.includes('cream')) {
-        materialColor = 0xf5f0e0; // Kremowy
+        materialColor = 0xf5f0e0;
         roughness = 0.8;
         metalness = 0.0;
     }
-    // Papier wodoodporny
     else if (materialType.includes('waterproof') || materialType.includes('wodoodporn')) {
-        materialColor = 0xf8f8ff; // Prawie biały
+        materialColor = 0xf8f8ff;
         roughness = 0.4;
         metalness = 0.2;
     }
-    // Papier biały matowy (domyślny)
     else {
-        materialColor = 0xffffff; // Biały
+        materialColor = 0xffffff;
         roughness = 0.9;
         metalness = 0.0;
     }
 
-    // Stwórz materiał
-    const material = new THREE.MeshStandardMaterial({
-        color: materialColor,
-        roughness: roughness,
-        metalness: metalness,
-        side: THREE.DoubleSide,
-        envMapIntensity: envMapIntensity
-    });
-
-    // Dodaj mapę środowiska dla metalicznych materiałów
+    // Use MeshPhysicalMaterial instead of MeshStandardMaterial for metallic options
+    let material;
     if (metalness > 0.5) {
-        createSimpleEnvMap(material);
+        material = new THREE.MeshPhysicalMaterial({
+            color: materialColor,
+            roughness: roughness,
+            metalness: metalness,
+            side: THREE.DoubleSide,
+            envMapIntensity: envMapIntensity,
+            clearcoat: clearcoat,
+            clearcoatRoughness: clearcoatRoughness,
+            reflectivity: 1.0
+        });
+    } else {
+        material = new THREE.MeshStandardMaterial({
+            color: materialColor,
+            roughness: roughness,
+            metalness: metalness,
+            side: THREE.DoubleSide,
+            envMapIntensity: envMapIntensity
+        });
+    }
+
+    // Add environment map for metallic materials
+    if (metalness > 0.3) {
+        createEnhancedEnvMap(material);
     }
 
     return material;
+}
+
+function createEnhancedEnvMap(material) {
+    // HDR environment map for more realistic reflections
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+
+    // Try to load a high quality HDR map first
+    new THREE.CubeTextureLoader()
+        .setPath('https://threejs.org/examples/textures/cube/skyboxsun25deg/')
+        .load(
+            ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'],
+            function(cubeTexture) {
+                cubeTexture.encoding = THREE.sRGBEncoding;
+                material.envMap = cubeTexture;
+                material.needsUpdate = true;
+
+                // For physical materials, add more complex reflection mapping
+                if (material.type === 'MeshPhysicalMaterial') {
+                    const envMap = pmremGenerator.fromCubemap(cubeTexture).texture;
+                    material.envMap = envMap;
+                    material.needsUpdate = true;
+                }
+
+                pmremGenerator.dispose();
+            }
+        );
 }
 
 // Prosta mapa środowiska dla metalicznych materiałów
@@ -989,9 +1055,8 @@ function createSimpleEnvMap(material) {
     }
 
     function applyTextureToFace(texture) {
-    console.log('🎨 Aplikowanie efektu złota BEZPOŚREDNIO na teksturę...');
+    console.log('🎨 Aplikowanie tekstury z dokładnym pozycjonowaniem...');
 
-    // Dostęp do zmiennych
     const shape = createLabelShape(
         projectConfig.shape,
         projectConfig.dimensions.width,
@@ -1000,95 +1065,180 @@ function createSimpleEnvMap(material) {
 
     const labelDepth = 0;
 
-    // Sprawdź czy tekstura jest prawidłowa
+    // Check if texture is valid
     if (!texture || !texture.image) {
         console.error('❌ Tekstura jest nieprawidłowa!', texture);
         createEmergencyTexture();
         return;
     }
 
-    console.log('📏 Wymiary tekstury:', texture.image.width, 'x', texture.image.height);
+    // Get image dimensions for proper positioning
+    const imgWidth = texture.image.width;
+    const imgHeight = texture.image.height;
+    const imgAspect = imgWidth / imgHeight;
+    const labelWidth = projectConfig.dimensions.width;
+    const labelHeight = projectConfig.dimensions.height;
+    const labelAspect = labelWidth / labelHeight;
 
-    // Ustawienie orientacji obrazka
-    texture.flipY = true;
-    texture.needsUpdate = true;
-
-    // Transformacja tekstury
-    texture.center.set(0.5, 0.5);
-    const offsetX = (projectConfig.imagePosition.x - 50) / 100;
-    const offsetY = (projectConfig.imagePosition.y - 50) / -100;
-    texture.offset.set(offsetX, offsetY);
-    const scale = (projectConfig.imagePosition.scale / 100) * 0.9;
-    texture.repeat.set(1/scale, 1/scale);
-    texture.rotation = projectConfig.imagePosition.rotation * Math.PI / 180;
-
-    // Tworzymy powiększony kształt dla obrazka
-    const expandedShape = createExpandedShape(shape, 1.04);
-    const imageGeometry = new THREE.ShapeGeometry(expandedShape);
-    applyUVMapping(imageGeometry, projectConfig.dimensions.width * 1.04, projectConfig.dimensions.height * 1.04);
-
-    // KLUCZOWA ZMIANA: Tworzymy JEDEN materiał, który bezpośrednio aplikuje złoty/srebrny efekt na obrazek
-let imageMaterial;
-
-if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota') ||
-    projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
-
-    // Ustalamy kolor i parametry na podstawie typu materiału
-    const isGold = projectConfig.material.includes('gold') || projectConfig.material.includes('zlota');
-
-    // Bardziej realistyczny złoty kolor - klasyczny kolor złota
-    const metalColor = isGold ? 0xd4af37 : 0xf0f0f0; // Prawdziwe złoto lub srebrny
-
-    // Tworzymy materiał, który łączy teksturę z efektem metalicznym - BEZ efektu pulsowania
-    imageMaterial = new THREE.MeshPhongMaterial({
-        map: texture,           // Zachowujemy oryginalną teksturę jako bazę
-        color: metalColor,      // Klasyczny złoty kolor
-        specular: isGold ? 0xfff7d6 : 0xffffff, // Cieplejszy odcień dla złota
-        shininess: 70,          // Wyższy połysk dla metalicznego wyglądu
-        combine: THREE.MixOperation, // Lepszy sposób mieszania koloru i tekstury
-        reflectivity: 0.6,      // Stabilna wartość bez przesady
-        transparent: false,
-        side: THREE.FrontSide
+    console.log('📐 Wymiary:', {
+        image: `${imgWidth}x${imgHeight} (aspect: ${imgAspect.toFixed(2)})`,
+        label: `${labelWidth}x${labelHeight} (aspect: ${labelAspect.toFixed(2)})`,
+        position: projectConfig.imagePosition
     });
 
-    // Dodajemy mapę środowiskową dla stałych odbić (nie pulsujących)
-    const cubeTexture = new THREE.CubeTextureLoader().load([
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
-    ]);
-    imageMaterial.envMap = cubeTexture;
-    imageMaterial.envMapIntensity = 0.8; // Zmniejszona wartość dla stabilnego wyglądu
+    // Basic setup for the texture
+    texture.flipY = true;
+    texture.needsUpdate = true;
+    texture.encoding = THREE.sRGBEncoding;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-    // Dodajemy statyczną warstwę efektu złota (bez animacji)
-    if (isGold) {
+    // IMPORTANT: Set center to 0.5, 0.5 which is the middle of the texture
+    texture.center.set(0.5, 0.5);
+
+    // Apply user-defined rotation (from the configurator)
+    const rotationRad = (projectConfig.imagePosition.rotation || 0) * Math.PI / 180;
+    texture.rotation = rotationRad;
+
+    // Calculate scale based on user selection and aspect ratios
+    // Convert scale from percentage to factor (100% = 1.0)
+    const userScaleFactor = (projectConfig.imagePosition.scale || 100) / 100;
+
+    // Calculate scale while maintaining aspect ratio
+    let scaleX, scaleY;
+
+    // For scaling, we need to consider both the user's scale preference
+    // and the aspect ratio differences between image and label
+    if (imgAspect > labelAspect) {
+        // Image is wider than label (relative to heights)
+        scaleX = 1 / (userScaleFactor * (imgAspect / labelAspect));
+        scaleY = 1 / userScaleFactor;
+    } else {
+        // Image is taller than label (relative to widths)
+        scaleX = 1 / userScaleFactor;
+        scaleY = 1 / (userScaleFactor * (labelAspect / imgAspect));
+    }
+
+    // Apply the calculated scale
+    texture.repeat.set(scaleX, scaleY);
+
+    // IMPORTANT: Apply position AFTER setting scale and rotation
+    // Convert from percentage (0-100) to offset (-0.5 to 0.5)
+    // The negative Y is because THREE.js Y is inverted compared to DOM
+    const offsetX = (projectConfig.imagePosition.x - 50) / 100;
+    const offsetY = (projectConfig.imagePosition.y - 50) / -100;
+
+    // Apply offset - this is the key part that was likely causing the position mismatch
+    texture.offset.set(offsetX, offsetY);
+
+    console.log('🧮 Calculated positioning:', {
+        offset: { x: offsetX, y: offsetY },
+        scale: { x: scaleX, y: scaleY },
+        rotation: rotationRad
+    });
+
+    // Create geometry and set up UV mapping
+    const imageGeometry = new THREE.ShapeGeometry(shape);
+    applyUVMapping(imageGeometry, labelWidth, labelHeight);
+
+    // Remove any existing face mesh
+    if (faceMesh && scene.children.includes(faceMesh)) {
+        scene.remove(faceMesh);
+    }
+
+    // Create material based on type (gold, silver, etc.) - rest of material creation is unchanged
+    let imageMaterial;
+    if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota')) {
+        // Gold material (keep your existing code)
+        imageMaterial = new THREE.MeshPhysicalMaterial({
+            map: texture,
+            color: 0xffd700,
+            metalness: 0.85,
+            roughness: 0.15,
+            reflectivity: 0.8,
+            clearcoat: 0.6,
+            clearcoatRoughness: 0.05,
+            emissive: 0x996515,
+            emissiveIntensity: 0.15,
+            transparent: true,
+            side: THREE.FrontSide
+        });
+
+        // Rest of your code for environment maps, etc.
+        const cubeTextureLoader = new THREE.CubeTextureLoader();
+        cubeTextureLoader.setPath('https://threejs.org/examples/textures/cube/skyboxsun25deg/');
+        cubeTextureLoader.load(
+            ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'],
+            function(envMap) {
+                envMap.encoding = THREE.sRGBEncoding;
+                imageMaterial.envMap = envMap;
+                imageMaterial.envMapIntensity = 1.5;
+                imageMaterial.needsUpdate = true;
+            }
+        );
+
+        // Create additional gold glow layer
         setTimeout(() => {
-            const expandedShape = createExpandedShape(shape, 1.02);
-            const glowGeometry = new THREE.ShapeGeometry(expandedShape);
-            applyUVMapping(glowGeometry, projectConfig.dimensions.width * 1.02, projectConfig.dimensions.height * 1.02);
-
-            // Statyczna warstwa blasku (bez animacji)
+            const glowGeometry = new THREE.ShapeGeometry(shape);
             const glowMaterial = new THREE.MeshBasicMaterial({
-                map: texture,
-                color: 0xffdf80,
+                color: 0xffd700,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
-                opacity: 4.1,  // Mniejsza wartość dla subtelnego efektu
+                opacity: 0.1,
                 side: THREE.FrontSide
             });
 
             const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
-            glowMesh.position.z = labelDepth / 2 + 0.8;
-            glowMesh.renderOrder = 2001;
+            glowMesh.position.z = 0.55;
+            glowMesh.renderOrder = 9999;
             scene.add(glowMesh);
-        }, 200);
+        }, 100);
     }
-}
+    // Keep rest of material types as-is
+    else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
+        // Your existing silver material code...
+        imageMaterial = new THREE.MeshPhysicalMaterial({
+            map: texture,
+            color: 0xe8e8e8,
+            metalness: 0.9,
+            roughness: 0.1,
+            reflectivity: 0.9,
+            clearcoat: 0.5,
+            clearcoatRoughness: 0.03,
+            transparent: true,
+            side: THREE.FrontSide
+        });
 
-    console.log('✅ Tekstura z efektem złota zastosowana BEZPOŚREDNIO na obrazku');
+        // Your existing environment map code...
+        const cubeTextureLoader = new THREE.CubeTextureLoader();
+        cubeTextureLoader.setPath('https://threejs.org/examples/textures/cube/skyboxsun25deg/');
+        cubeTextureLoader.load(
+            ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'],
+            function(envMap) {
+                envMap.encoding = THREE.sRGBEncoding;
+                imageMaterial.envMap = envMap;
+                imageMaterial.envMapIntensity = 1.2;
+                imageMaterial.needsUpdate = true;
+            }
+        );
+    } else {
+        // Your existing standard material code...
+        imageMaterial = new THREE.MeshStandardMaterial({
+            map: texture,
+            color: 0xffffff,
+            roughness: 0.2,
+            metalness: 0.0,
+            transparent: true,
+            side: THREE.FrontSide
+        });
+    }
+
+    // Create and position mesh
+    faceMesh = new THREE.Mesh(imageGeometry, imageMaterial);
+    faceMesh.position.z = 0.6;
+    faceMesh.renderOrder = 10000;
+    scene.add(faceMesh);
+
+    console.log('✅ Tekstura zaaplikowana z dokładnym pozycjonowaniem z kreatora');
 }
 
 // Funkcja pomocnicza do mapowania UV
