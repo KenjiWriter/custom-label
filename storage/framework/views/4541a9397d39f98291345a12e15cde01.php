@@ -1164,31 +1164,105 @@ function createSimpleEnvMap(material) {
 
         createSimpleEnvMap(imageMaterial);
     }
-    else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebr')) {
-        imageMaterial = new THREE.MeshPhysicalMaterial({
-            map: newTexture,
-            color: 0xe8e8e8,
-            metalness: 0.9,
-            roughness: 0.1,
-            reflectivity: 0.9,
-            clearcoat: 0.5,
-            clearcoatRoughness: 0.03,
-            transparent: true,
-            side: THREE.FrontSide
-        });
+  else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebr')) {
+    imageMaterial = new THREE.MeshPhysicalMaterial({
+        map: newTexture,
+        color: 0xe0e0e0, // bardziej jasny srebrny
+        metalness: 0.4,
+        roughness: 0.2,
+        reflectivity: 0.85,
+        clearcoat: 0.7,
+        clearcoatRoughness: 0.03,
+        emissive: 0xb0b0b0, // jasny szary akcent
+        emissiveIntensity: 0.36,
+        transparent: true,
+        side: THREE.FrontSide
+    });
 
-        createSimpleEnvMap(imageMaterial);
-    }
-    else {
-        imageMaterial = new THREE.MeshStandardMaterial({
-            map: newTexture,
-            color: 0xffffff,
-            roughness: 0.2,
-            metalness: 0.0,
-            transparent: true,
-            side: THREE.FrontSide
-        });
-    }
+    createSimpleEnvMap(imageMaterial);
+// DODAJ: shader tylko lekko "przesrebrzający", nie wybielający!
+    imageMaterial.onBeforeCompile = shader => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <map_fragment>',
+        `
+        #ifdef USE_MAP
+            vec4 texelColor = texture2D( map, vUv );
+            // PRZYCIEMNIENIE I METALICZNY AKCENT: subtelnie dodaj chłodną tonację bez wybielania
+            vec3 silverTint = vec3(0.74, 0.87, 0.72); // bardziej szary, mniej jasny
+            // Najpierw lekko przyciemnij oryginał
+            texelColor.rgb = texelColor.rgb * 0.43;
+            // Dodaj bardzo subtelną, metaliczną „domieszkę” srebra
+            texelColor.rgb = mix(texelColor.rgb, silverTint, 0.11);
+            diffuseColor.rgb *= texelColor.rgb;
+        #endif
+        `
+    );
+};
+
+   }
+else if (projectConfig.material.includes('white-matte') || projectConfig.material.includes('bialy-matowy')) {
+    imageMaterial = new THREE.MeshStandardMaterial({
+        map: newTexture,
+        color: 0xf4f4f0, // naturalny, lekko szary odcień białego papieru
+        metalness: 0.8,
+        roughness: 1,
+        transparent: false,
+        side: THREE.FrontSide
+    });
+}
+else if (projectConfig.material.includes('white-glossy') || projectConfig.material.includes('bialy-blysk')) {
+    imageMaterial = new THREE.MeshPhysicalMaterial({
+        map: newTexture,
+        color: 0xffffff,
+        metalness: 0.04,
+        roughness: 0.18,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.08,
+        reflectivity: 0.5,
+        transparent: false,
+        side: THREE.FrontSide
+    });
+}
+else if (projectConfig.material.includes('cream') || projectConfig.material.includes('kremowy')) {
+    imageMaterial = new THREE.MeshStandardMaterial({
+        map: newTexture,
+        color: 0xf5ecd7, // ciepły kremowy
+        metalness: 0.0,
+        roughness: 0.85,
+        transparent: false,
+        side: THREE.FrontSide
+    });
+}
+else if (projectConfig.material.includes('kraft')) {
+    imageMaterial = new THREE.MeshStandardMaterial({
+        map: newTexture,
+        color: 0xa67c52, // kraftowy brąz
+        metalness: 0.0,
+        roughness: 0.92,
+        transparent: false,
+        side: THREE.FrontSide
+    });
+}
+else if (projectConfig.material.includes('waterproof') || projectConfig.material.includes('wodoodporn')) {
+    imageMaterial = new THREE.MeshStandardMaterial({
+        map: newTexture,
+        color: 0xf7fbfd, // lekko niebieskawy biały, "czysty"
+        metalness: 0.08,
+        roughness: 0.38,
+        transparent: false,
+        side: THREE.FrontSide
+    });
+}
+else {
+    imageMaterial = new THREE.MeshStandardMaterial({
+        map: newTexture,
+        color: 0xfafafa, // neutralny jasny
+        metalness: 0.0,
+        roughness: 0.9,
+        transparent: false,
+        side: THREE.FrontSide
+    });
+}
 
     // 3. NAJWAŻNIEJSZE: Transformacje tekstury dokładnie jak w kreatorze
 
