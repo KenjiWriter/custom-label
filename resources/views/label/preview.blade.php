@@ -1758,12 +1758,6 @@ function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
         });
     }
 });
-
-// routes/web.php
-Route::get('/set-project/{id}', function($id) {
-    session(['project_id' => $id]);
-    return response()->json(['ok' => true]);
-});
 </script>
 @endpush
 </x-layouts.app>
