@@ -34,4 +34,12 @@ Route::view('profile', 'profile')
     return view('checkout', compact('project'));
 })->name('checkout');
 
+Route::get('/login', function() {
+    return view('login-page');
+})->name('login');
+
+Route::get('/register', function() {
+    return view('login-page');
+})->name('register');
+
 require __DIR__.'/auth.php';
