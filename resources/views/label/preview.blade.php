@@ -293,10 +293,10 @@
 
                 <!-- Actions -->
                 <div class="space-y-3">
-                    <button onclick="proceedToPayment()"
-                            class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105">
-                        Przejdź do płatności
-                    </button>
+
+                    <button id="goToCheckoutBtn" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105">
+    Przejdź do płatności
+</button>
 
                     <!-- Przycisk do odświeżania obrazka -->
                     <button onclick="window.reloadArtwork()"
@@ -1750,6 +1750,20 @@ function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
             }
         }
     });
+    document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('goToCheckoutBtn');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            window.location.href = "{{ route('checkout') }}";
+        });
+    }
+});
+
+// routes/web.php
+Route::get('/set-project/{id}', function($id) {
+    session(['project_id' => $id]);
+    return response()->json(['ok' => true]);
+});
 </script>
 @endpush
 </x-layouts.app>

@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Livewire\LabelCreator;
 use App\Http\Controllers\LabelPreviewController;
 use Illuminate\Support\Facades\Route;
+use App\Models\LabelProject;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -21,5 +22,16 @@ Route::view('dashboard', 'dashboard')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+    Route::get('/checkout', function () {
+    $projectId = session('project_id');
+    $project = null;
+    if ($projectId) {
+        $project = LabelProject::find($projectId);
+    } else {
+        $project = LabelProject::latest()->first();
+    }
+    return view('checkout', compact('project'));
+})->name('checkout');
 
 require __DIR__.'/auth.php';
