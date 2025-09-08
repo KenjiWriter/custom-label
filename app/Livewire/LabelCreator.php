@@ -442,6 +442,7 @@ class LabelCreator extends Component
                 } catch (\Exception $e) {
                     logger('Błąd przy zapisie ścieżki do artwork:', ['error' => $e->getMessage()]);
                 }
+
             }
 
             logger('Project created successfully:', ['uuid' => $project->uuid, 'id' => $project->id]);

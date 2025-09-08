@@ -413,8 +413,8 @@
     textureUrl: '{{ $project->labelMaterial->texture_image_path ? asset($project->labelMaterial->texture_image_path) : "" }}',
     artworkUrl: '{{ $project->artwork_file_path ? (Str::startsWith($project->artwork_file_path, "http") ? $project->artwork_file_path : asset("storage/".$project->artwork_file_path)) : "" }}',
     hasLaminate: {{ $project->laminateOption ? 'true' : 'false' }},
-    laminateType: '{{ $project->laminateOption->slug ?? "" }}', // DODAJ TĘ LINIĘ
-    // Dane pozycjonowania obrazu
+    laminateType: '{{ $project->laminateOption->slug ?? "" }}',
+    // MODIFIED: Explicitly add all image positioning parameters with exact values from database
     imagePosition: {
         x: {{ $project->image_position_x ?? 50 }},
         y: {{ $project->image_position_y ?? 50 }},
@@ -422,10 +422,19 @@
         rotation: {{ $project->image_rotation ?? 0 }}
     },
     debug: {
+        // Keep existing debug properties
         hasArtwork: {{ $project->artwork_file_path ? 'true' : 'false' }},
-        artworkPath: '{{ $project->artwork_file_path ?: "brak" }}'
+        artworkPath: '{{ $project->artwork_file_path ?? "brak" }}',
     }
 };
+
+// Add debug logging to verify values are correctly loaded
+console.log('📐 Pozycja obrazka z bazy danych:', {
+    x: {{ $project->image_position_x ?? 50 }},
+    y: {{ $project->image_position_y ?? 50 }},
+    scale: {{ $project->image_scale ?? 100 }},
+    rotation: {{ $project->image_rotation ?? 0 }}
+});
 
     // Główna funkcja inicjalizująca podgląd
     function initializePreview() {
@@ -560,6 +569,8 @@ container.appendChild(renderer.domElement);
             retryInitialization(error.message);
         }
     }
+
+
 
    function addLighting(scene) {
     // Ambient light for base illumination
@@ -937,20 +948,30 @@ function createEnhancedEnvMap(material) {
 
 // Prosta mapa środowiska dla metalicznych materiałów
 function createSimpleEnvMap(material) {
-    const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
-    const cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
+    try {
+        // Set a timeout to prevent infinite loading
+        const loadingTimeout = setTimeout(() => {
+            console.warn('⚠️ Environment map loading timed out');
+            material.needsUpdate = true;
+        }, 5000);
 
-    const cubeTexture = new THREE.CubeTextureLoader().load([
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/px.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nx.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/py.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/ny.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/pz.jpg',
-        'https://threejs.org/examples/textures/cube/skyboxsun25deg/nz.jpg'
-    ], function() {
-        material.envMap = cubeTexture;
-        material.needsUpdate = true;
-    });
+        // Simple environment map with error handling
+        const loader = new THREE.CubeTextureLoader();
+        loader.setPath('https://threejs.org/examples/textures/cube/skyboxsun25deg/');
+        loader.load([
+            'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'
+        ], function(envMap) {
+            clearTimeout(loadingTimeout);
+            material.envMap = envMap;
+            material.envMapIntensity = 1.5;
+            material.needsUpdate = true;
+        }, undefined, function(error) {
+            clearTimeout(loadingTimeout);
+            console.error('Failed to load environment map:', error);
+        });
+    } catch(error) {
+        console.error('Error in createSimpleEnvMap:', error);
+    }
 }
 
     // Dodawanie obrazka do etykiety
@@ -1040,24 +1061,9 @@ function createSimpleEnvMap(material) {
     }
 
     function applyTextureToFace(texture) {
-    console.log('🎨 Aplikowanie tekstury z dokładnym pozycjonowaniem...');
+    console.log('🎨 Naprawianie pozycjonowania obrazka...');
 
-    const shape = createLabelShape(
-        projectConfig.shape,
-        projectConfig.dimensions.width,
-        projectConfig.dimensions.height
-    );
-
-    const labelDepth = 0;
-
-    // Check if texture is valid
-    if (!texture || !texture.image) {
-        console.error('❌ Tekstura jest nieprawidłowa!', texture);
-        createEmergencyTexture();
-        return;
-    }
-
-    // Get image dimensions for proper positioning
+    // Get image dimensions and aspect ratios
     const imgWidth = texture.image.width;
     const imgHeight = texture.image.height;
     const imgAspect = imgWidth / imgHeight;
@@ -1065,77 +1071,69 @@ function createSimpleEnvMap(material) {
     const labelHeight = projectConfig.dimensions.height;
     const labelAspect = labelWidth / labelHeight;
 
-    console.log('📐 Wymiary:', {
-        image: `${imgWidth}x${imgHeight} (aspect: ${imgAspect.toFixed(2)})`,
-        label: `${labelWidth}x${labelHeight} (aspect: ${labelAspect.toFixed(2)})`,
-        position: projectConfig.imagePosition
+    // Position values from creator
+    const userScale = (projectConfig.imagePosition.scale || 100) / 100;
+    const rotationDeg = projectConfig.imagePosition.rotation || 0;
+    const rotationRad = rotationDeg * Math.PI / 180;
+
+    // Position X and Y as percentage (0-100) from center
+    const posX = projectConfig.imagePosition.x || 50;
+    const posY = projectConfig.imagePosition.y || 50;
+
+    console.log('📊 Wartości z kreatora:', {
+        posX, posY, userScale, rotationDeg,
+        imgSize: `${imgWidth}x${imgHeight}`,
+        labelSize: `${labelWidth}x${labelHeight}`
     });
 
-    // Basic setup for the texture
-    texture.flipY = true;
-    texture.needsUpdate = true;
-    texture.encoding = THREE.sRGBEncoding;
-    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const shape = createLabelShape(
+        projectConfig.shape,
+        projectConfig.dimensions.width,
+        projectConfig.dimensions.height
+    );
 
-    // IMPORTANT: Set center to 0.5, 0.5 which is the middle of the texture
-    texture.center.set(0.5, 0.5);
-
-    // Apply user-defined rotation (from the configurator)
-    const rotationRad = (projectConfig.imagePosition.rotation || 0) * Math.PI / 180;
-    texture.rotation = rotationRad;
-
-    // Calculate scale based on user selection and aspect ratios
-    // Convert scale from percentage to factor (100% = 1.0)
-    const userScaleFactor = (projectConfig.imagePosition.scale || 100) / 100;
-
-    // Calculate scale while maintaining aspect ratio
-    let scaleX, scaleY;
-
-    // For scaling, we need to consider both the user's scale preference
-    // and the aspect ratio differences between image and label
-    if (imgAspect > labelAspect) {
-        // Image is wider than label (relative to heights)
-        scaleX = 1 / (userScaleFactor * (imgAspect / labelAspect));
-        scaleY = 1 / userScaleFactor;
-    } else {
-        // Image is taller than label (relative to widths)
-        scaleX = 1 / userScaleFactor;
-        scaleY = 1 / (userScaleFactor * (labelAspect / imgAspect));
-    }
-
-    // Apply the calculated scale
-    texture.repeat.set(scaleX, scaleY);
-
-    // IMPORTANT: Apply position AFTER setting scale and rotation
-    // Convert from percentage (0-100) to offset (-0.5 to 0.5)
-    // The negative Y is because THREE.js Y is inverted compared to DOM
-    const offsetX = (projectConfig.imagePosition.x - 50) / 100;
-    const offsetY = (projectConfig.imagePosition.y - 50) / -100;
-
-    // Apply offset - this is the key part that was likely causing the position mismatch
-    texture.offset.set(offsetX, offsetY);
-
-    console.log('🧮 Calculated positioning:', {
-        offset: { x: offsetX, y: offsetY },
-        scale: { x: scaleX, y: scaleY },
-        rotation: rotationRad
-    });
-
-    // Create geometry and set up UV mapping
-    const imageGeometry = new THREE.ShapeGeometry(shape);
-    applyUVMapping(imageGeometry, labelWidth, labelHeight);
-
-    // Remove any existing face mesh
+    // Remove existing mesh
     if (faceMesh && scene.children.includes(faceMesh)) {
         scene.remove(faceMesh);
     }
 
-    // Create material based on type (gold, silver, etc.) - rest of material creation is unchanged
+    // Create a new texture from the image
+    const newTexture = new THREE.Texture(texture.image);
+    newTexture.needsUpdate = true;
+    newTexture.encoding = THREE.sRGBEncoding;
+    newTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    // Create geometry
+    const imageGeometry = new THREE.ShapeGeometry(shape);
+
+    // CAŁKOWICIE NOWE PODEJŚCIE DO MAPOWANIA UV:
+    // 1. Najpierw tworzymy standardowe mapowanie UV (0-1)
+    const positions = imageGeometry.attributes.position;
+    const uvs = new Float32Array(positions.count * 2);
+
+    for (let i = 0; i < positions.count; i++) {
+        // Get vertex position
+        const x = positions.getX(i);
+        const y = positions.getY(i);
+
+        // Standard mapping (0-1 across the label)
+        const u = (x + labelWidth/2) / labelWidth;
+        const v = (y + labelHeight/2) / labelHeight;
+
+        // Store basic UVs
+        uvs[i * 2] = u;
+        uvs[i * 2 + 1] = v;
+    }
+
+    imageGeometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+    // 2. Tworzymy materiał z teksturą i przekazujemy mu transformacje
     let imageMaterial;
+
+    // Wybór materiału w zależności od typu etykiety
     if (projectConfig.material.includes('gold') || projectConfig.material.includes('zlota')) {
-        // Gold material (keep your existing code)
         imageMaterial = new THREE.MeshPhysicalMaterial({
-            map: texture,
+            map: newTexture,
             color: 0xffd700,
             metalness: 0.85,
             roughness: 0.15,
@@ -1148,41 +1146,11 @@ function createSimpleEnvMap(material) {
             side: THREE.FrontSide
         });
 
-        // Rest of your code for environment maps, etc.
-        const cubeTextureLoader = new THREE.CubeTextureLoader();
-        cubeTextureLoader.setPath('https://threejs.org/examples/textures/cube/skyboxsun25deg/');
-        cubeTextureLoader.load(
-            ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'],
-            function(envMap) {
-                envMap.encoding = THREE.sRGBEncoding;
-                imageMaterial.envMap = envMap;
-                imageMaterial.envMapIntensity = 1.5;
-                imageMaterial.needsUpdate = true;
-            }
-        );
-
-        // Create additional gold glow layer
-        setTimeout(() => {
-            const glowGeometry = new THREE.ShapeGeometry(shape);
-            const glowMaterial = new THREE.MeshBasicMaterial({
-                color: 0xffd700,
-                blending: THREE.AdditiveBlending,
-                transparent: true,
-                opacity: 0.1,
-                side: THREE.FrontSide
-            });
-
-            const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
-            glowMesh.position.z = 0.55;
-            glowMesh.renderOrder = 9999;
-            scene.add(glowMesh);
-        }, 100);
+        createSimpleEnvMap(imageMaterial);
     }
-    // Keep rest of material types as-is
-    else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebrna')) {
-        // Your existing silver material code...
+    else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebr')) {
         imageMaterial = new THREE.MeshPhysicalMaterial({
-            map: texture,
+            map: newTexture,
             color: 0xe8e8e8,
             metalness: 0.9,
             roughness: 0.1,
@@ -1193,22 +1161,11 @@ function createSimpleEnvMap(material) {
             side: THREE.FrontSide
         });
 
-        // Your existing environment map code...
-        const cubeTextureLoader = new THREE.CubeTextureLoader();
-        cubeTextureLoader.setPath('https://threejs.org/examples/textures/cube/skyboxsun25deg/');
-        cubeTextureLoader.load(
-            ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'],
-            function(envMap) {
-                envMap.encoding = THREE.sRGBEncoding;
-                imageMaterial.envMap = envMap;
-                imageMaterial.envMapIntensity = 1.2;
-                imageMaterial.needsUpdate = true;
-            }
-        );
-    } else {
-        // Your existing standard material code...
+        createSimpleEnvMap(imageMaterial);
+    }
+    else {
         imageMaterial = new THREE.MeshStandardMaterial({
-            map: texture,
+            map: newTexture,
             color: 0xffffff,
             roughness: 0.2,
             metalness: 0.0,
@@ -1217,13 +1174,48 @@ function createSimpleEnvMap(material) {
         });
     }
 
-    // Create and position mesh
+    // 3. NAJWAŻNIEJSZE: Transformacje tekstury dokładnie jak w kreatorze
+
+    // Centrujemy teksturę
+    newTexture.center.set(0.5, 0.5);
+
+    // Stosujemy rotację
+    newTexture.rotation = rotationRad;
+
+    // Obliczamy skalę zachowując proporcje obrazka
+    let scaleX, scaleY;
+
+    if (imgAspect > labelAspect) {
+        // Obraz szerszy niż etykieta
+        scaleY = 1 / userScale;
+        scaleX = (labelAspect / imgAspect) / userScale;
+    } else {
+        // Obraz wyższy niż etykieta
+        scaleX = 1 / userScale;
+        scaleY = (imgAspect / labelAspect) / userScale;
+    }
+
+    // Stosujemy skalę
+    newTexture.repeat.set(scaleX, scaleY);
+
+    // Obliczamy offset (przesunięcie) na podstawie pozycji procentowej
+    const offsetX = (posX - 50) / 100;
+    const offsetY = (50 - posY) / 100;  // Odwracamy Y, bo w THREE.js Y rośnie w górę
+
+    // Stosujemy offset
+    newTexture.offset.set(offsetX, offsetY);
+
+    // Tworzymy siatkę i dodajemy do sceny
     faceMesh = new THREE.Mesh(imageGeometry, imageMaterial);
     faceMesh.position.z = 0.6;
     faceMesh.renderOrder = 10000;
     scene.add(faceMesh);
 
-    console.log('✅ Tekstura zaaplikowana z dokładnym pozycjonowaniem z kreatora');
+    console.log('✅ Pozycjonowanie obrazka naprawione', {
+        offset: { x: offsetX, y: offsetY },
+        scale: { x: scaleX, y: scaleY },
+        rotation: rotationRad
+    });
 }
 
 // Funkcja pomocnicza do mapowania UV
