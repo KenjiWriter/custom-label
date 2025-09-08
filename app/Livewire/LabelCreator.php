@@ -27,10 +27,10 @@ class LabelCreator extends Component
     public $quantity = 100;
     public $artworkFile = null;
     public $tempArtworkPath = null;
-    public $imagePositionX = 50; // Domyślnie wycentrowany w poziomie
-    public $imagePositionY = 50; // Domyślnie wycentrowany w pionie
-    public $imageScale = 100;    // Domyślnie 100% skala
-    public $imageRotation = 0;   // Domyślnie bez rotacji
+    public $imagePositionX = 50;
+public $imagePositionY = 50;
+public $imageScale = 100;
+public $imageRotation = 0;
 
     // Computed properties
     public $calculatedPrice = 0;
@@ -164,6 +164,8 @@ class LabelCreator extends Component
         $this->calculatePrice();
         $this->checkConfiguration();
     }
+
+
 
     public function updatedUseCustomSize($value)
     {
@@ -361,116 +363,118 @@ class LabelCreator extends Component
     }
 
     public function saveProject()
-    {
-        try {
-            // Sprawdź konfigurację przed walidacją
-            $this->checkConfiguration();
+{
+    try {
+        // Sprawdź konfigurację przed walidacją
+        $this->checkConfiguration();
 
-            if (!$this->isConfigurationValid) {
-                session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
-                return;
-            }
+        if (!$this->isConfigurationValid) {
+            session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
+            return;
+        }
 
-            // Walidacja z dostosowanymi regułami
-            $validatedData = $this->validate();
+        // Walidacja z dostosowanymi regułami
+        $validatedData = $this->validate();
 
-            // Debug info
-            logger('Saving project with data:', [
-                'selectedShape' => $this->selectedShape,
-                'selectedMaterial' => $this->selectedMaterial,
-                'useCustomSize' => $this->useCustomSize,
-                'customWidth' => $this->customWidth,
-                'customHeight' => $this->customHeight,
-                'selectedSize' => $this->selectedSize,
-                'selectedLaminate' => $this->selectedLaminate,
-                'quantity' => $this->quantity,
-                'calculatedPrice' => $this->calculatedPrice
-            ]);
+        // Debug info
+        logger('Saving project with data:', [
+            'selectedShape' => $this->selectedShape,
+            'selectedMaterial' => $this->selectedMaterial,
+            'useCustomSize' => $this->useCustomSize,
+            'customWidth' => $this->customWidth,
+            'customHeight' => $this->customHeight,
+            'selectedSize' => $this->selectedSize,
+            'selectedLaminate' => $this->selectedLaminate,
+            'quantity' => $this->quantity,
+            'calculatedPrice' => $this->calculatedPrice,
+            'imagePositionX' => $this->imagePositionX,
+            'imagePositionY' => $this->imagePositionY,
+            'imageScale' => $this->imageScale,
+            'imageRotation' => $this->imageRotation,
+        ]);
 
-            // Prepare project data - POPRAWKA: dodajemy parametry pozycjonowania obrazka
-            $projectData = [
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
-                'label_shape_id' => $this->selectedShape,
-                'label_material_id' => $this->selectedMaterial,
-                'quantity' => $this->quantity,
-                'calculated_price' => $this->calculatedPrice,
-                'status' => 'preview',
-                'laminate_option_id' => $this->selectedLaminate ?: null,
-                'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
-                'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
-                'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
-                'image_position_x' => $this->imagePositionX,
-                'image_position_y' => $this->imagePositionY,
-                'image_scale' => $this->imageScale,
-                'image_rotation' => $this->imageRotation,
-            ];
+        // Przygotuj dane projektu, w tym pozycjonowanie obrazka
+        $projectData = [
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'label_shape_id' => $this->selectedShape,
+            'label_material_id' => $this->selectedMaterial,
+            'quantity' => $this->quantity,
+            'calculated_price' => $this->calculatedPrice,
+            'status' => 'preview',
+            'laminate_option_id' => $this->selectedLaminate ?: null,
+            'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
+            'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
+            'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
+            'image_position_x' => $this->imagePositionX,
+            'image_position_y' => $this->imagePositionY,
+            'image_scale' => $this->imageScale,
+            'image_rotation' => $this->imageRotation,
+        ];
 
-            // Sprawdź czy user jest zalogowany czy to gość
-            if (auth()->check()) {
-                $projectData['user_id'] = auth()->id();
-            } else {
-                $projectData['session_id'] = session()->getId();
-            }
+        // Sprawdź czy user jest zalogowany czy to gość
+        if (auth()->check()) {
+            $projectData['user_id'] = auth()->id();
+        } else {
+            $projectData['session_id'] = session()->getId();
+        }
 
-            // Create label project
-            $project = LabelProject::create($projectData);
+        // Create label project
+        $project = LabelProject::create($projectData);
 
-            // Handle file upload if present
-            if ($this->artworkFile) {
-                $path = $this->artworkFile->store('artwork', 'public');
-                $project->update(['artwork_file_path' => $path]);
-            }
+        // Handle file upload if present
+        if ($this->artworkFile) {
+            $path = $this->artworkFile->store('artwork', 'public');
+            $project->update(['artwork_file_path' => $path]);
+        }
 
-            // Handle artwork from tempArtworkPath if exists
-            if ($this->tempArtworkPath) {
-                try {
-                    // Sprawdź czy plik istnieje
-                    if (!Storage::disk('public')->exists($this->tempArtworkPath)) {
-                        logger('Ostrzeżenie: Plik nie istnieje:', ['path' => $this->tempArtworkPath]);
-                    }
-
-                    // Zapisz ścieżkę bez 'public/' na początku
-                    $project->update(['artwork_file_path' => $this->tempArtworkPath]);
-
-                    // Wyraźne logowanie dla debugowania
-                    $fullUrl = Storage::url($this->tempArtworkPath);
-                    logger('Zapisano ścieżkę do artwork:', [
-                        'tempPath' => $this->tempArtworkPath,
-                        'fullUrl' => $fullUrl,
-                        'fileExists' => Storage::disk('public')->exists($this->tempArtworkPath)
-                    ]);
-                } catch (\Exception $e) {
-                    logger('Błąd przy zapisie ścieżki do artwork:', ['error' => $e->getMessage()]);
+        // Handle artwork from tempArtworkPath if exists
+        if ($this->tempArtworkPath) {
+            try {
+                // Sprawdź czy plik istnieje
+                if (!\Storage::disk('public')->exists($this->tempArtworkPath)) {
+                    logger('Ostrzeżenie: Plik nie istnieje:', ['path' => $this->tempArtworkPath]);
                 }
 
+                // Zapisz ścieżkę bez 'public/' na początku
+                $project->update(['artwork_file_path' => $this->tempArtworkPath]);
+
+                // Wyraźne logowanie dla debugowania
+                $fullUrl = \Storage::url($this->tempArtworkPath);
+                logger('Zapisano ścieżkę do artwork:', [
+                    'tempPath' => $this->tempArtworkPath,
+                    'fullUrl' => $fullUrl,
+                    'fileExists' => \Storage::disk('public')->exists($this->tempArtworkPath)
+                ]);
+            } catch (\Exception $e) {
+                logger('Błąd przy zapisie ścieżki do artwork:', ['error' => $e->getMessage()]);
             }
-
-            logger('Project created successfully:', ['uuid' => $project->uuid, 'id' => $project->id]);
-
-            // Generate preview URL - upewnij się, że używasz właściwego parametru (uuid)
-            $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
-
-            // Dodaj logowanie URL do debugowania
-            logger('Preview URL:', ['url' => $previewUrl]);
-
-            // Redirect to preview
-            return redirect()->to($previewUrl);
-
-        } catch (\Exception $e) {
-            logger('Error saving project: ' . $e->getMessage());
-            logger('Stack trace: ' . $e->getTraceAsString());
-            session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
-            return null;
         }
-    }
 
-    public function render()
-    {
-        return view('livewire.label-creator', [
-            'shapes' => LabelShape::active()->orderBy('sort_order')->get(),
-            'materials' => LabelMaterial::active()->orderBy('sort_order')->get(),
-            'laminateOptions' => LaminateOption::active()->orderBy('sort_order')->get(),
-            'availableSizes' => $this->availableSizes,
-        ]);
+        logger('Project created successfully:', ['uuid' => $project->uuid, 'id' => $project->id]);
+
+        // Generate preview URL - upewnij się, że używasz właściwego parametru (uuid)
+        $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
+
+        // Dodaj logowanie URL do debugowania
+        logger('Preview URL:', ['url' => $previewUrl]);
+
+        // Redirect to preview
+        return redirect()->to($previewUrl);
+
+    } catch (\Exception $e) {
+        logger('Error saving project: ' . $e->getMessage());
+        logger('Stack trace: ' . $e->getTraceAsString());
+        session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
+        return null;
     }
 }
+
+public function render()
+{
+    return view('livewire.label-creator', [
+        'shapes' => \App\Models\LabelShape::active()->orderBy('sort_order')->get(),
+        'materials' => \App\Models\LabelMaterial::active()->orderBy('sort_order')->get(),
+        'laminateOptions' => \App\Models\LaminateOption::active()->orderBy('sort_order')->get(),
+        'availableSizes' => $this->availableSizes,
+    ]);
+}}

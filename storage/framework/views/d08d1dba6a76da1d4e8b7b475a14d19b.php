@@ -183,15 +183,7 @@
                             </div>
                         </div>
                         <!-- Promo Code Section -->
-                        <div class="mt-8">
-                            <h3 class="text-lg font-semibold mb-3">Promo Code</h3>
-                            <div class="flex">
-                                <input id="promoInput" type="text" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-3 focus:ring-orange-500 focus:border-orange-500 text-lg" placeholder="Enter promo code">
-                                <button type="button" id="applyPromoBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-r-lg font-semibold">Apply</button>
-                            </div>
-                            <div id="promoInfo" class="text-green-600 text-sm mt-2 hidden">Kod rabatowy zastosowany!</div>
-                            <div id="promoError" class="text-red-600 text-sm mt-2 hidden">Nieprawidłowy kod rabatowy.</div>
-                        </div>
+
                     </form>
                 </div>
                 <!-- Order Summary -->
@@ -247,6 +239,28 @@
             </div>
         </div>
     </div>
+     <!-- Success Popup -->
+    <div id="paymentSuccessPopup" class="fixed inset-0 bg-transparent flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl px-10 py-12 flex flex-col items-center border-4 border-orange-500 max-w-xs w-full animate-pop">
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-full w-20 h-20 flex items-center justify-center mb-6 shadow-lg">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-opacity="0.2" stroke-width="4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12l3 3 5-5" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-orange-600 mb-2 text-center">Płatność zakończona!</h2>
+            <p class="text-gray-700 text-center mb-6">Dziękujemy za złożenie zamówienia.<br>Potwierdzenie wysłaliśmy na Twój e-mail.</p>
+            <button id="closeSuccessPopup" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-xl text-lg transition-all duration-200 shadow">Zamknij</button>
+        </div>
+    </div>
+    <style>
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: pop 0.4s cubic-bezier(.4,2,.6,1) }
+    </style>
 <?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -335,6 +349,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// Pay Now popup logic
+    document.querySelectorAll('.bg-gradient-to-r.from-orange-500').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            document.getElementById('paymentSuccessPopup').classList.remove('hidden');
+        });
+    });
+    document.getElementById('closeSuccessPopup').onclick = function() {
+        document.getElementById('paymentSuccessPopup').classList.add('hidden');
+    };
+
 </script>
 <?php $__env->stopPush(); ?>
  <?php echo $__env->renderComponent(); ?>
