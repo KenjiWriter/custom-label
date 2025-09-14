@@ -658,7 +658,13 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                     this.posX = Math.min(Math.max(x, 0), 100);
                     this.posY = Math.min(Math.max(y, 0), 100);
-                },
+                localStorage.setItem('imagePosition', JSON.stringify({
+        x: this.posX,
+        y: this.posY,
+        scale: this.scale,
+        rotation: this.rotation
+    }));
+},
                 endDrag() {
                     this.dragging = false;
                 },
@@ -668,7 +674,13 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 updateRotation(delta) {
                     this.rotation = (this.rotation + delta) % 360;
                     if (this.rotation < 0) this.rotation += 360;
-                }
+                localStorage.setItem('imagePosition', JSON.stringify({
+        x: this.posX,
+        y: this.posY,
+        scale: this.scale,
+        rotation: this.rotation
+    }));
+},
             }"
             @mousedown="startDrag"
             @mousemove="drag"

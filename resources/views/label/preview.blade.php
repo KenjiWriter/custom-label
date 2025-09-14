@@ -384,6 +384,38 @@
             history.pushState(null, '', window.location.href);
         });
 
+        window.addEventListener('storage', (event) => {
+    if (event.key === 'imagePosition' && event.newValue) {
+        try {
+            const newPos = JSON.parse(event.newValue);
+            if (newPos) {
+                projectConfig.imagePosition = newPos;
+                if (scene && faceMesh) {
+                    scene.remove(faceMesh);
+                    const shape = createLabelShape(projectConfig.shape, projectConfig.dimensions.width, projectConfig.dimensions.height);
+                    addArtworkToLabel(shape, 2);
+                    console.log('✔ Zaktualizowano obraz 3D z nową pozycją');
+                }
+            }
+        } catch(e) {
+            console.error('Błąd parsowania imagePosition:', e);
+        }
+    }
+});
+
+try {
+    const localPos = localStorage.getItem('imagePosition');
+    if (localPos) {
+        const pos = JSON.parse(localPos);
+        if (pos) {
+            projectConfig.imagePosition = pos;
+            console.log('💡 Załadowano imagePosition z localStorage na starcie:', pos);
+        }
+    }
+} catch(e) {
+    console.error('Nie można sparsować imagePosition z localStorage', e);
+}
+
         // 4. Inicjalizacja podglądu 3D
         initializePreview();
     });
@@ -1103,6 +1135,10 @@ function createSimpleEnvMap(material) {
     newTexture.encoding = THREE.sRGBEncoding;
     newTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
+    // Dodaj flip Y na teksturze...
+newTexture.flipY = false; // To wymusza ‘naturalne’ mapowanie bez odbicia w three.js.
+
+
     // Create geometry
     const imageGeometry = new THREE.ShapeGeometry(shape);
 
@@ -1118,7 +1154,7 @@ function createSimpleEnvMap(material) {
 
         // Standard mapping (0-1 across the label)
         const u = (x + labelWidth/2) / labelWidth;
-        const v = (y + labelHeight/2) / labelHeight;
+        const v = 1 - (y + labelHeight/2) / labelHeight;
 
         // Store basic UVs
         uvs[i * 2] = u;
