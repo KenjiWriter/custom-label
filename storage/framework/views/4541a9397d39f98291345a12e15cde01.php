@@ -1114,15 +1114,17 @@ function createSimpleEnvMap(material) {
     // Get image dimensions and aspect ratios
     const imgWidth = texture.image.width;
     const imgHeight = texture.image.height;
-    const imgAspect = imgWidth / imgHeight;
-    const labelWidth = projectConfig.dimensions.width;
     const labelHeight = projectConfig.dimensions.height;
+    const labelWidth = projectConfig.dimensions.width;
+    const imgAspect = imgWidth / imgHeight;
     const labelAspect = labelWidth / labelHeight;
 
     // Position values from creator
     const userScale = (projectConfig.imagePosition.scale || 100) / 100;
     const rotationDeg = projectConfig.imagePosition.rotation || 0;
     const rotationRad = rotationDeg * Math.PI / 180;
+
+
 
     // Position X and Y as percentage (0-100) from center
     const posX = projectConfig.imagePosition.x || 50;
@@ -1153,6 +1155,7 @@ function createSimpleEnvMap(material) {
 
     // Dodaj flip Y na teksturze...
 newTexture.flipY = false; // To wymusza ‘naturalne’ mapowanie bez odbicia w three.js.
+
 
 
     // Create geometry
@@ -1324,12 +1327,15 @@ else {
     // Stosujemy skalę
     newTexture.repeat.set(scaleX, scaleY);
 
-    // Obliczamy offset (przesunięcie) na podstawie pozycji procentowej
-    const offsetX = (posX - 50) / 100;
-    const offsetY = (50 - posY) / 100;  // Odwracamy Y, bo w THREE.js Y rośnie w górę
+    // Po obliczeniu scaleX i scaleY:
+const percentX = posX / 100; // np. 0 = skrajnie lewo, 1 = skrajnie prawo
+const percentY = posY / 100; // 0 = dół, 1 = góra (pamiętaj o flipY jeśli potrzeba)
 
-    // Stosujemy offset
-    newTexture.offset.set(offsetX, offsetY);
+const offsetX = percentX - 0.5 * scaleX;
+const offsetY = (1 - percentY) - 0.5 * scaleY;
+
+// WAŻNE: Ustaw offset po repeat, aby repeat był już ustawiony!
+newTexture.offset.set(offsetX, offsetY);
 
     // Tworzymy siatkę i dodajemy do sceny
     faceMesh = new THREE.Mesh(imageGeometry, imageMaterial);
