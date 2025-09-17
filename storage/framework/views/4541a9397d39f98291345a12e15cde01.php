@@ -39,6 +39,22 @@
                         <p class="text-gray-600 text-sm">
                             Użyj myszki aby obracać etykietę. Kółko myszy do powiększania/pomniejszania.
                         </p>
+                        <button id="toggleRotationBtn" style="
+    background-color: #FF6600;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(255,106,0,0.1);
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background-color 0.2s;
+">
+    Zatrzymaj obrót
+</button>
+
                     </div>
 
                     <!-- 3D Canvas Container -->
@@ -145,6 +161,7 @@
                                                     $shapeClass = 'rounded-2xl';
                                             }
                                         ?>
+
 
                                         <!-- DUŻA ZŁOTA OWALNA ETYKIETA -->
                                         <div class="relative mx-auto <?php echo e($materialEffects); ?>"
@@ -346,6 +363,13 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
+    const toggleRotationBtn = document.getElementById('toggleRotationBtn');
+toggleRotationBtn.addEventListener('click', () => {
+    rotationEnabled = !rotationEnabled;
+    toggleRotationBtn.textContent = rotationEnabled ? "Zatrzymaj obrót" : "Wznów obrót";
+    toggleRotationBtn.style.backgroundColor = rotationEnabled ? "#FF6600" : "#888888";
+});
+
     // Rozszerzona obsługa powrotu do kreatora z podglądu 3D
     document.addEventListener('DOMContentLoaded', function() {
         // 1. Zapisz dane projektu w localStorage
@@ -550,6 +574,8 @@ console.log('📐 Pozycja obrazka z bazy danych:', {
         document.head.appendChild(threeScript);
     }
 
+
+
     // Funkcja inicjalizująca scenę Three.js
     function initThreeJsScene() {
         try {
@@ -567,6 +593,11 @@ console.log('📐 Pozycja obrazka z bazy danych:', {
             // 1. Inicjalizacja sceny
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf8fafc);
+
+labelGroup = new THREE.Group();
+rulersGroup = new THREE.Group();
+scene.add(labelGroup);
+scene.add(rulersGroup);
 
             // 2. Kamera
             camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
@@ -588,14 +619,43 @@ container.appendChild(renderer.domElement);
 
             // 4. Kontroler kamery
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.enableZoom = true;
-            controls.enablePan = true;
-            controls.enableRotate = true;
-            controls.autoRotate = false;
-            controls.maxDistance = 500;
-            controls.minDistance = 50;
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.enableZoom = true;
+controls.enablePan = true;
+controls.enableRotate = true;
+controls.autoRotate = false;
+controls.maxDistance = 800;
+controls.minDistance = 50;
+controls.target.copy(labelGroup.position);
+controls.update();
+
+controls.addEventListener('start', () => {
+    rotationEnabled = false;
+});
+
+controls.addEventListener('end', () => {
+    rotationEnabled = true;
+});
+
+
+            renderer.domElement.addEventListener('pointerdown', (event) => {
+  if (event.button === 0) {    // Lewy przycisk myszy
+    rotationEnabled = false;    // Zatrzymaj automatyczny obrót
+  }
+});
+
+renderer.domElement.addEventListener('pointerup', (event) => {
+  if (event.button === 0) {    // Lewy przycisk myszy
+    rotationEnabled = true;     // Wznów automatyczny obrót
+  }
+});
+
+// Dla bezpieczeństwa gdy kursor wyjdzie z obszaru
+renderer.domElement.addEventListener('pointerleave', () => {
+  rotationEnabled = true;
+});
+
 
             // 5. Oświetlenie
             addLighting(scene);
@@ -673,7 +733,7 @@ container.appendChild(renderer.domElement);
     labelMesh = new THREE.Mesh(geometry, labelMaterial);
     labelMesh.castShadow = true;
     labelMesh.receiveShadow = true;
-    scene.add(labelMesh);
+labelGroup.add(labelMesh);
 
     // Dodaj tylną stronę etykiety
     createBackSide(shape, labelDepth);
@@ -693,7 +753,7 @@ container.appendChild(renderer.domElement);
     const backMesh = new THREE.Mesh(backGeometry, backMaterial);
     backMesh.position.z = -labelDepth/2;
     backMesh.renderOrder = 5000; // Bardzo wysoki priorytet renderowania
-    scene.add(backMesh);
+labelGroup.add(backMesh);
 
     // 2. Tworzymy cały tekst jako jedną teksturę zamiast osobnych sprite'ów
     const canvas = document.createElement('canvas');
@@ -751,7 +811,7 @@ container.appendChild(renderer.domElement);
     textMesh.position.z = -labelDepth/2 - 0.05; // Tuż za tylną ścianką
     textMesh.renderOrder = 5001; // Jeszcze wyższy priorytet
 
-    scene.add(textMesh);
+labelGroup.add(textMesh);
     console.log('✅ Dodano subtelne napisy na tylnej stronie');
 }
     // Dodaj ścianki boczne etykiety
@@ -797,7 +857,7 @@ function createSideWalls(shape, labelDepth) {
     // Tworzymy siatkę
     const sideMesh = new THREE.Mesh(sideGeometry, sideMaterial);
     sideMesh.renderOrder = 0;
-    scene.add(sideMesh);
+labelGroup.add(sideMesh);
 }
     if (projectConfig.debug.hasArtwork) {
         // KLUCZOWA ZMIANA: Inicjalizujemy faceMesh jako null, bezpośrednio ładujemy obrazek
@@ -935,6 +995,8 @@ function createLabelShape(shapeType, width, height) {
         roughness = 0.9;
         metalness = 0.0;
     }
+
+
 
     // Use MeshPhysicalMaterial instead of MeshStandardMaterial for metallic options
     let material;
@@ -1124,8 +1186,6 @@ function createSimpleEnvMap(material) {
     const rotationDeg = projectConfig.imagePosition.rotation || 0;
     const rotationRad = rotationDeg * Math.PI / 180;
 
-
-
     // Position X and Y as percentage (0-100) from center
     const posX = projectConfig.imagePosition.x || 50;
     const posY = projectConfig.imagePosition.y || 50;
@@ -1154,28 +1214,22 @@ function createSimpleEnvMap(material) {
     newTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
     // Dodaj flip Y na teksturze...
-newTexture.flipY = false; // To wymusza ‘naturalne’ mapowanie bez odbicia w three.js.
-
-
+    newTexture.flipY = false; // To wymusza ‘naturalne’ mapowanie bez odbicia w three.js.
 
     // Create geometry
     const imageGeometry = new THREE.ShapeGeometry(shape);
 
     // CAŁKOWICIE NOWE PODEJŚCIE DO MAPOWANIA UV:
-    // 1. Najpierw tworzymy standardowe mapowanie UV (0-1)
     const positions = imageGeometry.attributes.position;
     const uvs = new Float32Array(positions.count * 2);
 
     for (let i = 0; i < positions.count; i++) {
-        // Get vertex position
         const x = positions.getX(i);
         const y = positions.getY(i);
 
-        // Standard mapping (0-1 across the label)
-        const u = (x + labelWidth/2) / labelWidth;
-        const v = 1 - (y + labelHeight/2) / labelHeight;
+        const u = (x + labelWidth / 2) / labelWidth;
+        const v = 1 - (y + labelHeight / 2) / labelHeight;
 
-        // Store basic UVs
         uvs[i * 2] = u;
         uvs[i * 2 + 1] = v;
     }
@@ -1202,171 +1256,129 @@ newTexture.flipY = false; // To wymusza ‘naturalne’ mapowanie bez odbicia w 
         });
 
         createSimpleEnvMap(imageMaterial);
+    } else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebr')) {
+        imageMaterial = new THREE.MeshPhysicalMaterial({
+            map: newTexture,
+            color: 0xe0e0e0,
+            metalness: 0.4,
+            roughness: 0.2,
+            reflectivity: 0.85,
+            clearcoat: 0.7,
+            clearcoatRoughness: 0.03,
+            emissive: 0xb0b0b0,
+            emissiveIntensity: 0.36,
+            transparent: true,
+            side: THREE.FrontSide
+        });
+
+        createSimpleEnvMap(imageMaterial);
+        imageMaterial.onBeforeCompile = shader => {
+            shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <map_fragment>',
+                `
+                #ifdef USE_MAP
+                    vec4 texelColor = texture2D( map, vUv );
+                    vec3 silverTint = vec3(0.74, 0.87, 0.72);
+                    texelColor.rgb = texelColor.rgb * 0.43;
+                    texelColor.rgb = mix(texelColor.rgb, silverTint, 0.11);
+                    diffuseColor.rgb *= texelColor.rgb;
+                #endif
+                `
+            );
+        };
+    } else if (projectConfig.material.includes('white-matte') || projectConfig.material.includes('bialy-matowy')) {
+        imageMaterial = new THREE.MeshStandardMaterial({
+            map: newTexture,
+            color: 0xf4f4f0,
+            metalness: 0.8,
+            roughness: 1,
+            transparent: false,
+            side: THREE.FrontSide
+        });
+    } else if (projectConfig.material.includes('white-glossy') || projectConfig.material.includes('bialy-blysk')) {
+        imageMaterial = new THREE.MeshPhysicalMaterial({
+            map: newTexture,
+            color: 0xffffff,
+            metalness: 0.04,
+            roughness: 0.18,
+            clearcoat: 0.5,
+            clearcoatRoughness: 0.08,
+            reflectivity: 0.5,
+            transparent: false,
+            side: THREE.FrontSide
+        });
+    } else if (projectConfig.material.includes('cream') || projectConfig.material.includes('kremowy')) {
+        imageMaterial = new THREE.MeshStandardMaterial({
+            map: newTexture,
+            color: 0xf5ecd7,
+            metalness: 0.0,
+            roughness: 0.85,
+            transparent: false,
+            side: THREE.FrontSide
+        });
+    } else if (projectConfig.material.includes('kraft')) {
+        imageMaterial = new THREE.MeshStandardMaterial({
+            map: newTexture,
+            color: 0xa67c52,
+            metalness: 0.0,
+            roughness: 0.92,
+            transparent: false,
+            side: THREE.FrontSide
+        });
+    } else if (projectConfig.material.includes('waterproof') || projectConfig.material.includes('wodoodporn')) {
+        imageMaterial = new THREE.MeshStandardMaterial({
+            map: newTexture,
+            color: 0xf7fbfd,
+            metalness: 0.08,
+            roughness: 0.38,
+            transparent: false,
+            side: THREE.FrontSide
+        });
+    } else {
+        imageMaterial = new THREE.MeshStandardMaterial({
+            map: newTexture,
+            color: 0xfafafa,
+            metalness: 0.0,
+            roughness: 0.9,
+            transparent: false,
+            side: THREE.FrontSide
+        });
     }
-  else if (projectConfig.material.includes('silver') || projectConfig.material.includes('srebr')) {
-    imageMaterial = new THREE.MeshPhysicalMaterial({
-        map: newTexture,
-        color: 0xe0e0e0, // bardziej jasny srebrny
-        metalness: 0.4,
-        roughness: 0.2,
-        reflectivity: 0.85,
-        clearcoat: 0.7,
-        clearcoatRoughness: 0.03,
-        emissive: 0xb0b0b0, // jasny szary akcent
-        emissiveIntensity: 0.36,
-        transparent: true,
-        side: THREE.FrontSide
-    });
 
-    createSimpleEnvMap(imageMaterial);
-// DODAJ: shader tylko lekko "przesrebrzający", nie wybielający!
-    imageMaterial.onBeforeCompile = shader => {
-    shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <map_fragment>',
-        `
-        #ifdef USE_MAP
-            vec4 texelColor = texture2D( map, vUv );
-            // PRZYCIEMNIENIE I METALICZNY AKCENT: subtelnie dodaj chłodną tonację bez wybielania
-            vec3 silverTint = vec3(0.74, 0.87, 0.72); // bardziej szary, mniej jasny
-            // Najpierw lekko przyciemnij oryginał
-            texelColor.rgb = texelColor.rgb * 0.43;
-            // Dodaj bardzo subtelną, metaliczną „domieszkę” srebra
-            texelColor.rgb = mix(texelColor.rgb, silverTint, 0.11);
-            diffuseColor.rgb *= texelColor.rgb;
-        #endif
-        `
-    );
-};
-
-   }
-else if (projectConfig.material.includes('white-matte') || projectConfig.material.includes('bialy-matowy')) {
-    imageMaterial = new THREE.MeshStandardMaterial({
-        map: newTexture,
-        color: 0xf4f4f0, // naturalny, lekko szary odcień białego papieru
-        metalness: 0.8,
-        roughness: 1,
-        transparent: false,
-        side: THREE.FrontSide
-    });
-}
-else if (projectConfig.material.includes('white-glossy') || projectConfig.material.includes('bialy-blysk')) {
-    imageMaterial = new THREE.MeshPhysicalMaterial({
-        map: newTexture,
-        color: 0xffffff,
-        metalness: 0.04,
-        roughness: 0.18,
-        clearcoat: 0.5,
-        clearcoatRoughness: 0.08,
-        reflectivity: 0.5,
-        transparent: false,
-        side: THREE.FrontSide
-    });
-}
-else if (projectConfig.material.includes('cream') || projectConfig.material.includes('kremowy')) {
-    imageMaterial = new THREE.MeshStandardMaterial({
-        map: newTexture,
-        color: 0xf5ecd7, // ciepły kremowy
-        metalness: 0.0,
-        roughness: 0.85,
-        transparent: false,
-        side: THREE.FrontSide
-    });
-}
-else if (projectConfig.material.includes('kraft')) {
-    imageMaterial = new THREE.MeshStandardMaterial({
-        map: newTexture,
-        color: 0xa67c52, // kraftowy brąz
-        metalness: 0.0,
-        roughness: 0.92,
-        transparent: false,
-        side: THREE.FrontSide
-    });
-}
-else if (projectConfig.material.includes('waterproof') || projectConfig.material.includes('wodoodporn')) {
-    imageMaterial = new THREE.MeshStandardMaterial({
-        map: newTexture,
-        color: 0xf7fbfd, // lekko niebieskawy biały, "czysty"
-        metalness: 0.08,
-        roughness: 0.38,
-        transparent: false,
-        side: THREE.FrontSide
-    });
-}
-else {
-    imageMaterial = new THREE.MeshStandardMaterial({
-        map: newTexture,
-        color: 0xfafafa, // neutralny jasny
-        metalness: 0.0,
-        roughness: 0.9,
-        transparent: false,
-        side: THREE.FrontSide
-    });
-}
-
-    // 3. NAJWAŻNIEJSZE: Transformacje tekstury dokładnie jak w kreatorze
-
-    // Centrujemy teksturę
+    // Transformacje tekstury
     newTexture.center.set(0.5, 0.5);
-
-    // Stosujemy rotację
     newTexture.rotation = rotationRad;
 
-    // Obliczamy skalę zachowując proporcje obrazka
     let scaleX, scaleY;
 
     if (imgAspect > labelAspect) {
-        // Obraz szerszy niż etykieta
         scaleY = 1 / userScale;
         scaleX = (labelAspect / imgAspect) / userScale;
     } else {
-        // Obraz wyższy niż etykieta
         scaleX = 1 / userScale;
         scaleY = (imgAspect / labelAspect) / userScale;
     }
 
-    // Stosujemy skalę
     newTexture.repeat.set(scaleX, scaleY);
 
-    // Po obliczeniu scaleX i scaleY:
-const percentX = posX / 100; // np. 0 = skrajnie lewo, 1 = skrajnie prawo
-const percentY = posY / 100; // 0 = dół, 1 = góra (pamiętaj o flipY jeśli potrzeba)
+    const percentX = posX / 100;
+    const percentY = posY / 100;
 
-const offsetX = percentX - 0.5 * scaleX;
-const offsetY = (1 - percentY) - 0.5 * scaleY;
+    const offsetX = percentX - 0.5 * scaleX;
+    const offsetY = (1 - percentY) - 0.5 * scaleY;
 
-// WAŻNE: Ustaw offset po repeat, aby repeat był już ustawiony!
-newTexture.offset.set(offsetX, offsetY);
+    newTexture.offset.set(offsetX, offsetY);
 
-    // Tworzymy siatkę i dodajemy do sceny
     faceMesh = new THREE.Mesh(imageGeometry, imageMaterial);
     faceMesh.position.z = 0.6;
     faceMesh.renderOrder = 10000;
-    scene.add(faceMesh);
+labelGroup.add(faceMesh);
 
-    console.log('✅ Pozycjonowanie obrazka naprawione', {
+    console.log('✅ Pozycjonowanie obrazka naprawione:', {
         offset: { x: offsetX, y: offsetY },
         scale: { x: scaleX, y: scaleY },
         rotation: rotationRad
     });
-}
-
-// Funkcja pomocnicza do mapowania UV
-function applyUVMapping(geometry, width, height) {
-    const positions = geometry.attributes.position;
-    const uvs = new Float32Array(positions.count * 2);
-
-    for (let i = 0; i < positions.count; i++) {
-        const x = positions.getX(i);
-        const y = positions.getY(i);
-
-        const u = (x + width/2) / width;
-        const v = (y + height/2) / height;
-
-        uvs[i * 2] = u;
-        uvs[i * 2 + 1] = v;
-    }
-
-    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 }
 
 // NOWA FUNKCJA: Tworzenie materiału z efektem bezpośrednio na teksturze
@@ -1597,7 +1609,7 @@ function addLaminateLayer(geometry, labelDepth) {
     const laminateMesh = new THREE.Mesh(laminateGeometry, laminateMaterial);
     laminateMesh.position.z = 0.5;
     laminateMesh.renderOrder = 2500;  // Wyższy renderOrder - nad wszystkim
-    scene.add(laminateMesh);
+labelGroup.add(laminateMesh);
 
     // Dla błyszczącego laminatu dodaj wyraźniejszy efekt "blasku"
     if (projectConfig.laminateType?.includes('glossy')) {
@@ -1625,7 +1637,7 @@ function addEnhancedGlossEffect(geometry) {
     const glossMesh = new THREE.Mesh(geometry.clone(), glossMaterial);
     glossMesh.position.z = 0.55;
     glossMesh.renderOrder = 3000;
-    scene.add(glossMesh);
+labelGroup.add(glossMesh);
 
     // Dodatkowa warstwa z efektem lustrzanym
     const specularMaterial = new THREE.MeshPhongMaterial({
@@ -1642,7 +1654,7 @@ function addEnhancedGlossEffect(geometry) {
     const specularMesh = new THREE.Mesh(geometry.clone(), specularMaterial);
     specularMesh.position.z = 0.56;
     specularMesh.renderOrder = 3001;
-    scene.add(specularMesh);
+labelGroup.add(specularMesh);
 }
 
 // NOWOŚĆ: Funkcja dla efektu soft-touch
@@ -1676,13 +1688,12 @@ function addRulers(scene, width, height, depth) {
     const widthMaterial = new THREE.MeshBasicMaterial({ color: rulerColor });
     const widthRuler = new THREE.Mesh(widthGeometry, widthMaterial);
     widthRuler.position.set(0, -height/2 - labelOffset, 0);
-    scene.add(widthRuler);
-
+rulersGroup.add(widthRuler);
     // Miarka wysokości
     const heightGeometry = new THREE.BoxGeometry(rulerWidth, height, rulerWidth);
     const heightRuler = new THREE.Mesh(heightGeometry, widthMaterial);
     heightRuler.position.set(-width/2 - labelOffset, 0, 0);
-    scene.add(heightRuler);
+    rulersGroup.add(heightRuler);
 
     // Dodaj tekst z wymiarami
     addTextLabel(scene, `${width}mm`, 0, -height/2 - labelOffset - 10, 0, 1.5);
@@ -1736,6 +1747,41 @@ function addTextLabel(scene, text, x, y, z, size = 1, rotated = false) {
             renderer.setSize(container.offsetWidth, container.offsetHeight);
         }
     });
+
+
+
+    // Flaga sterująca automatycznym obrotem
+let rotationEnabled = true;
+
+// Obsługa OrbitControls: zatrzymaj obrót jak użytkownik trzyma lewy przycisk myszy
+renderer.domElement.addEventListener('mousedown', (event) => {
+    if (event.button === 0) { // Lewy przycisk myszy
+        rotationEnabled = false;
+    }
+});
+
+// Wznów automatyczny obrót po puszczeniu lewego przycisku myszy
+renderer.domElement.addEventListener('mouseup', (event) => {
+    if (event.button === 0) {
+        rotationEnabled = true;
+    }
+});
+
+// Opcjonalnie można dodać też obsługę wyjścia kursora (mouseleave) aby wznowić obrót, na wypadek gubienia eventów
+renderer.domElement.addEventListener('mouseleave', () => {
+    rotationEnabled = true;
+});
+
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (rotationEnabled && labelGroup) {
+        labelGroup.rotation.y += 0.003;
+    }
+    renderer.render(scene, camera);
+}
+
+
 
     // Funkcja do ponownej próby inicjalizacji
     function retryInitialization(errorMessage) {

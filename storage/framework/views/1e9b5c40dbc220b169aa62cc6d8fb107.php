@@ -645,29 +645,46 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 scale: <?php if ((object) ('imageScale') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageScale'->value()); ?>')<?php echo e('imageScale'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageScale'); ?>')<?php endif; ?>.defer || 100,
                 rotation: <?php if ((object) ('imageRotation') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageRotation'->value()); ?>')<?php echo e('imageRotation'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageRotation'); ?>')<?php endif; ?>.defer || 0,
                 startDrag(e) {
-                    if (e.target.classList.contains('img-control')) return;
-                    this.dragging = true;
-                    e.preventDefault();
-                },
-                drag(e) {
-                    if (!this.dragging) return;
-
-                    const container = e.currentTarget.getBoundingClientRect();
-                    const x = (e.clientX - container.left) / container.width * 100;
-                    const y = (e.clientY - container.top) / container.height * 100;
-
-                    this.posX = Math.min(Math.max(x, 0), 100);
-                    this.posY = Math.min(Math.max(y, 0), 100);
-                localStorage.setItem('imagePosition', JSON.stringify({
+    if (e.target.classList.contains('img-control')) return;
+    this.dragging = true;
+    this.altMode = e.altKey;   // Dodaj tryb obracania
+    this.startX = e.clientX;
+    this.startY = e.clientY;
+    this.initRotation = this.rotation;
+    this.initPosX = this.posX;
+    this.initPosY = this.posY;
+    e.preventDefault();
+},
+drag(e) {
+    if (!this.dragging) return;
+    if (this.altMode) {
+        // Obracanie wokół środka container
+        const container = e.currentTarget.getBoundingClientRect();
+        const centerX = container.left + container.width / 2;
+        const centerY = container.top + container.height / 2;
+        const angleStart = Math.atan2(this.startY - centerY, this.startX - centerX);
+        const angleNow = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        this.rotation = this.initRotation + ((angleNow - angleStart) * 180 / Math.PI);
+    } else {
+        // Standardowy drag dla pozycjonowania
+        const container = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - container.left) / container.width * 100;
+        const y = (e.clientY - container.top) / container.height * 100;
+        this.posX = Math.min(Math.max(x, 0), 100);
+        this.posY = Math.min(Math.max(y, 0), 100);
+    }
+    localStorage.setItem('imagePosition', JSON.stringify({
         x: this.posX,
         y: this.posY,
         scale: this.scale,
         rotation: this.rotation
     }));
 },
-                endDrag() {
-                    this.dragging = false;
-                },
+endDrag() {
+    this.dragging = false;
+    this.altMode = false;
+},
+
                 updateScale(delta) {
                     this.scale = Math.min(Math.max(this.scale + delta, 20), 200);
                 },
@@ -776,25 +793,60 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                      `"
                      onerror="this.onerror=null; this.src='/images/placeholder-image.png';">
 
-                <!-- Image positioning controls -->
-                <div class="absolute bottom-2 right-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 flex items-center space-x-2">
-                    <button type="button" @click="updateScale(10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </button>
-                    <button type="button" @click="updateScale(-10)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
-                        </svg>
-                    </button>
-                    <div class="w-px h-5 bg-gray-300 mx-1"></div>
-                    <button type="button" @click="updateRotation(15)" class="img-control p-1 bg-orange-100 rounded hover:bg-orange-200 text-orange-800">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                    </button>
-                </div>
+                <!-- Panel sterowania skalą i obrotem -->
+<div class="absolute z-50 bottom-4 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-lg shadow-xl border border-orange-200 rounded-xl p-4 flex flex-col md:flex-row space-x-0 md:space-x-8 space-y-4 md:space-y-0 items-center w-[97%] max-w-2xl">
+    <!-- Przyciski skalowania -->
+    <div class="flex items-center space-x-2">
+        <button type="button"
+            @click="updateScale(-10)"
+            class="img-control w-10 h-10 flex items-center justify-center bg-orange-100 rounded-lg border border-orange-200 shadow hover:bg-orange-200 active:scale-95 transition-all"
+            aria-label="Pomniejsz">
+            <svg class="w-6 h-6 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"/>
+            </svg>
+        </button>
+        <span class="px-2 text-sm text-gray-700">Skala</span>
+        <button type="button"
+            @click="updateScale(10)"
+            class="img-control w-10 h-10 flex items-center justify-center bg-orange-100 rounded-lg border border-orange-200 shadow hover:bg-orange-200 active:scale-95 transition-all"
+            aria-label="Powiększ">
+            <svg class="w-6 h-6 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+        </button>
+<span class="ml-3 text-xs text-gray-500 bg-white rounded px-2 py-1 border select-none" x-text="scale + '%'"></span>
+    </div>
+
+    <!-- Suwak obrotu -->
+    <div class="flex items-center space-x-2 w-full md:w-auto">
+        <label for="rotation-slider" class="text-sm text-gray-700">Obrót</label>
+        <input
+            id="rotation-slider"
+            type="range"
+            min="0"
+            max="360"
+            step="1"
+            x-model="rotation"
+            @input="localStorage.setItem('imagePosition', JSON.stringify({ x: posX, y: posY, scale: scale, rotation: rotation }))"
+            @mousedown.stop
+            @touchstart.stop
+            class="w-36 h-2 accent-orange-500 bg-gray-200 rounded-lg appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-orange-300"
+        >
+        <!-- Wartość obrotu z edycją -->
+        <input
+            type="number"
+            min="0"
+            max="360"
+            step="1"
+            x-model="rotation"
+            @mouseup="localStorage.setItem('imagePosition', JSON.stringify({ x: posX, y: posY, scale: scale, rotation: rotation }))"
+            class="w-14 ml-2 text-sm px-2 py-1 border rounded focus:border-orange-400 focus:ring focus:ring-orange-300 bg-white text-gray-700 transition-all"
+            style="text-align: right;"
+        >
+        <span class="ml-1 text-gray-700 text-sm select-none">°</span>
+    </div>
+</div>
+
 
                 <div class="absolute top-2 left-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 text-xs text-gray-700">
                     Przeciągnij aby ustawić | Użyj przycisków do skalowania i obracania
