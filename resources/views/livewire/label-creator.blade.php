@@ -773,7 +773,7 @@ endDrag() {
                         transform: translate(-50%, -50%) scale(${scale/100}) rotate(${rotation}deg);
                         max-width: 90%;
                         max-height: 90%;
-                        object-fit: zoom;
+                        object-fit: contain;
                      `"
                      onerror="this.onerror=null; this.src='/images/placeholder-image.png';">
 
