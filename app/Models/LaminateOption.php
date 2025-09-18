@@ -2,25 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LaminateOption extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
-        'slug',
+        'slug', 
         'description',
-        'price_multiplier',
         'finish_type',
-        'is_active',
+        'price_multiplier',
+        'texture_image_path',
         'sort_order',
+        'is_active'
     ];
 
     protected $casts = [
@@ -32,7 +26,7 @@ class LaminateOption extends Model
     /**
      * Get label projects using this laminate option
      */
-    public function labelProjects(): HasMany
+    public function labelProjects()
     {
         return $this->hasMany(LabelProject::class);
     }
@@ -45,19 +39,3 @@ class LaminateOption extends Model
         return $query->where('is_active', true)->orderBy('sort_order');
     }
 }
-return new class extends Migration
-{
-    public function up()
-    {
-        Schema::table('laminate_options', function (Blueprint $table) {
-            $table->string('texture_image_path')->nullable()->after('description');
-        });
-    }
-
-    public function down()
-    {
-        Schema::table('laminate_options', function (Blueprint $table) {
-            $table->dropColumn('texture_image_path');
-        });
-    }
-};
