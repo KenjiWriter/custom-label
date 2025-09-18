@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('label_projects', function (Blueprint $table) {
             $table->float('image_position_x')->default(50)->after('artwork_file_path')->nullable();
             $table->float('image_position_y')->default(50)->after('image_position_x')->nullable();
             $table->float('image_scale')->default(100)->after('image_position_y')->nullable();
