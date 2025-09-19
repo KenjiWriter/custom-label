@@ -67,7 +67,7 @@ class LabelDataSeeder extends Seeder
         $this->command->info('📐 Zapisywanie kształtów etykiet...');
         foreach ($shapes as $shape) {
             LabelShape::updateOrCreate(
-                ['slug' => $shape['slug']], 
+                ['slug' => $shape['slug']],
                 $shape
             );
             $this->command->info("   ✓ {$shape['name']}");
@@ -153,7 +153,7 @@ class LabelDataSeeder extends Seeder
         $this->command->info('🎨 Zapisywanie materiałów etykiet...');
         foreach ($materials as $material) {
             LabelMaterial::updateOrCreate(
-                ['slug' => $material['slug']], 
+                ['slug' => $material['slug']],
                 $material
             );
             $this->command->info("   ✓ {$material['name']}");
@@ -197,42 +197,62 @@ class LabelDataSeeder extends Seeder
         $this->command->info('✨ Zapisywanie opcji laminowania...');
         foreach ($laminates as $laminate) {
             LaminateOption::updateOrCreate(
-                ['slug' => $laminate['slug']], 
+                ['slug' => $laminate['slug']],
                 $laminate
             );
             $this->command->info("   ✓ {$laminate['name']}");
         }
 
-        // TERAZ DOPIERO DODAJ ROZMIARY - po zapisaniu kształtów!
+        // TERAZ DODAJ ROZMIARY DLA WSZYSTKICH KSZTAŁTÓW
         $this->command->info('📏 Zapisywanie predefiniowanych rozmiarów...');
 
-        // Pobierz kształty z bazy danych (teraz już istnieją)
-        $rectangleShape = LabelShape::where('slug', 'rectangle')->first();
-        $squareShape = LabelShape::where('slug', 'square')->first();
-        $circleShape = LabelShape::where('slug', 'circle')->first();
-        $ovalShape = LabelShape::where('slug', 'oval')->first();
-        $starShape = LabelShape::where('slug', 'star')->first();
-
-        // Rozmiary prostokątne
-        if ($rectangleShape) {
-            $this->command->info('   📐 Dodawanie rozmiarów prostokątnych...');
-            $rectangleSizes = [
+        $sizesByShape = [
+            'rectangle' => [
                 ['name' => '20×10 mm', 'width_mm' => 20, 'height_mm' => 10],
                 ['name' => '30×20 mm', 'width_mm' => 30, 'height_mm' => 20],
-                ['name' => '40×25 mm', 'width_mm' => 40, 'height_mm' => 25],
-                ['name' => '50×30 mm', 'width_mm' => 50, 'height_mm' => 30],
                 ['name' => '60×40 mm', 'width_mm' => 60, 'height_mm' => 40],
                 ['name' => '80×50 mm', 'width_mm' => 80, 'height_mm' => 50],
                 ['name' => '100×60 mm', 'width_mm' => 100, 'height_mm' => 60],
                 ['name' => '120×80 mm', 'width_mm' => 120, 'height_mm' => 80],
-            ];
+            ],
+            'square' => [
+                ['name' => '20×20 mm', 'width_mm' => 20, 'height_mm' => 20],
+                ['name' => '30×30 mm', 'width_mm' => 30, 'height_mm' => 30],
+                ['name' => '40×40 mm', 'width_mm' => 40, 'height_mm' => 40],
+                ['name' => '50×50 mm', 'width_mm' => 50, 'height_mm' => 50],
+                ['name' => '60×60 mm', 'width_mm' => 60, 'height_mm' => 60],
+            ],
+            'circle' => [
+                ['name' => 'Ø 20 mm', 'width_mm' => 20, 'height_mm' => 20],
+                ['name' => 'Ø 30 mm', 'width_mm' => 30, 'height_mm' => 30],
+                ['name' => 'Ø 40 mm', 'width_mm' => 40, 'height_mm' => 40],
+                ['name' => 'Ø 50 mm', 'width_mm' => 50, 'height_mm' => 50],
+                ['name' => 'Ø 60 mm', 'width_mm' => 60, 'height_mm' => 60],
+            ],
+            'oval' => [
+                ['name' => '30×20 mm', 'width_mm' => 30, 'height_mm' => 20],
+                ['name' => '40×25 mm', 'width_mm' => 40, 'height_mm' => 25],
+                ['name' => '50×30 mm', 'width_mm' => 50, 'height_mm' => 30],
+                ['name' => '60×40 mm', 'width_mm' => 60, 'height_mm' => 40],
+            ],
+            'star' => [
+                ['name' => 'Ø 30 mm', 'width_mm' => 30, 'height_mm' => 30],
+                ['name' => 'Ø 40 mm', 'width_mm' => 40, 'height_mm' => 40],
+                ['name' => 'Ø 50 mm', 'width_mm' => 50, 'height_mm' => 50],
+            ],
+        ];
 
-            foreach ($rectangleSizes as $index => $size) {
-                $slug = 'rect-' . $size['width_mm'] . 'x' . $size['height_mm'];
+        $shapes = LabelShape::all();
+        foreach ($shapes as $shape) {
+            $this->command->info("📏 Dodawanie rozmiarów dla kształtu: {$shape->name}...");
+            $sizes = $sizesByShape[$shape->slug] ?? [];
+
+            foreach ($sizes as $index => $size) {
+                $slug = "{$shape->slug}-{$size['width_mm']}x{$size['height_mm']}";
                 PredefinedSize::updateOrCreate(
                     ['slug' => $slug],
                     [
-                        'label_shape_id' => $rectangleShape->id,
+                        'label_shape_id' => $shape->id,
                         'name' => $size['name'],
                         'slug' => $slug,
                         'width_mm' => $size['width_mm'],
@@ -245,11 +265,8 @@ class LabelDataSeeder extends Seeder
             }
         }
 
-        // Reszta rozmiarów pozostaje bez zmian...
-        // [kod dla pozostałych kształtów identyczny jak wcześniej]
-
         $this->command->info('🎉 Seedowanie zakończone pomyślnie!');
-        
+
         // Podsumowanie
         $this->command->info('');
         $this->command->info('📊 Podsumowanie:');

@@ -42,7 +42,7 @@
 
 <!-- Main Content -->
 <main class="min-h-screen">
-    <div class="<?php echo e($containerClass ?? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'); ?>">
+    <div class="<?php echo e($containerClass ?? 'mx-auto px-4 sm:px-6 lg:px-8 py-8'); ?>">
         <?php echo e($slot); ?>
 
     </div>
