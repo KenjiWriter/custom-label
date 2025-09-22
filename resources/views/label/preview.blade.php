@@ -321,6 +321,112 @@
                 </div>
             </div>
 
+            <!-- Kontener 2D do pozycjonowania -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Pozycjonowanie obrazka</h3>
+                    
+                        <!-- Profesjonalny kontener 2D do przeciągania -->
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 overflow-hidden flex items-center justify-center shadow-lg transform transition-all duration-300 hover:shadow-xl hover:scale-[1.02] relative h-[320px] mb-6">
+                            <div class="relative w-full h-full min-h-[220px] flex items-center justify-center">
+                                <div id="positioning-container" class="absolute inset-0 bg-checkerboard flex items-center justify-center cursor-move rounded-lg">
+                                    <!-- Kształt etykiety do pozycjonowania -->
+                                    <div id="label-preview-2d" class="relative">
+                                        <!-- Domyślny kształt prostokąta -->
+                                        <div class="shadow-xl border-2 border-gray-300 bg-white rounded-xl transition-all duration-300 hover:shadow-2xl" 
+                                             style="width: 150px; height: 100px;">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Obrazek do pozycjonowania -->
+                                    <img id="positioning-image" src="" alt="Obrazek do pozycjonowania" 
+                                         class="absolute transform-gpu transition-all duration-300 opacity-95 hover:opacity-100 cursor-move"
+                                         style="display: none; left: 50%; top: 50%; transform: translate(-50%, -50%); object-fit: contain; max-width: 90%; max-height: 90%;"
+                                         onerror="this.onerror=null; this.src='/images/placeholder-image.png';">
+                                </div>
+                            </div>
+                        </div>
+                    
+                    <!-- Profesjonalny panel kontrolny -->
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                                    </svg>
+                                    Pozycja X: <span id="posX-display" class="text-blue-600 font-bold">50%</span>
+                                </label>
+                                <input type="range" id="posX-slider" min="0" max="100" step="0.1" value="50" 
+                                       class="w-full h-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full appearance-none cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                                    </svg>
+                                    Pozycja Y: <span id="posY-display" class="text-green-600 font-bold">50%</span>
+                                </label>
+                                <input type="range" id="posY-slider" min="0" max="100" step="0.1" value="50" 
+                                       class="w-full h-3 bg-gradient-to-r from-green-100 to-green-200 rounded-full appearance-none cursor-pointer hover:from-green-200 hover:to-green-300 transition-all duration-200">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                    </svg>
+                                    Skala: <span id="scale-display" class="text-purple-600 font-bold">100%</span>
+                                </label>
+                                <input type="range" id="scale-slider" min="20" max="200" step="1" value="100" 
+                                       class="w-full h-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full appearance-none cursor-pointer hover:from-purple-200 hover:to-purple-300 transition-all duration-200">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Obrót: <span id="rotation-display" class="text-orange-600 font-bold">0°</span>
+                                </label>
+                                <input type="range" id="rotation-slider" min="0" max="360" step="1" value="0" 
+                                       class="w-full h-3 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full appearance-none cursor-pointer hover:from-orange-200 hover:to-orange-300 transition-all duration-200">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <button id="reset-position-btn" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Reset
+                            </button>
+                            <button id="center-position-btn" class="px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                                </svg>
+                                Środek
+                            </button>
+                            <button id="fit-image-btn" class="px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                </svg>
+                                Fit
+                            </button>
+                            <button id="fill-image-btn" class="px-4 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                                </svg>
+                                Wypełnij
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Project Details -->
             <div class="space-y-6">
                 <!-- Configuration -->
@@ -471,6 +577,7 @@
                     history.pushState(null, '', window.location.href);
                 });
 
+                // Event listener dla synchronizacji z 2D kreatorem
                 window.addEventListener('storage', (event) => {
                     if (event.key === 'imagePosition' && event.newValue) {
                         try {
@@ -482,12 +589,40 @@
                                     const shape = createLabelShape(projectConfig.shape, projectConfig.dimensions
                                         .width, projectConfig.dimensions.height);
                                     addArtworkToLabel(shape, 2);
-                                    console.log('✔ Zaktualizowano obraz 3D z nową pozycją');
+                                    console.log('✔ Zaktualizowano obraz 3D z nową pozycją (storage event)');
                                 }
                             }
                         } catch (e) {
                             console.error('Błąd parsowania imagePosition:', e);
                         }
+                    }
+                });
+
+                // NOWY: Event listener dla bezpośredniej synchronizacji w czasie rzeczywistym
+                window.addEventListener('imagePositionChanged', (event) => {
+                    console.log('🔔 OTRZYMANO EVENT imagePositionChanged:', event);
+                    try {
+                        const newPos = event.detail;
+                        console.log('📊 Szczegóły eventu:', {detail: newPos, type: event.type});
+                        if (newPos) {
+                            projectConfig.imagePosition = newPos;
+                            console.log('🔄 Otrzymano nową pozycję:', newPos);
+                            
+                            if (scene && faceMesh) {
+                                scene.remove(faceMesh);
+                                const shape = createLabelShape(projectConfig.shape, projectConfig.dimensions
+                                    .width, projectConfig.dimensions.height);
+                                addArtworkToLabel(shape, 2);
+                                console.log('✅ Zaktualizowano obraz 3D w czasie rzeczywistym:', newPos);
+                            } else {
+                                console.warn('⚠️ Scena lub faceMesh nie istnieje, nie można zaktualizować');
+                                console.log('🔍 Stan sceny:', {scene: !!scene, faceMesh: !!faceMesh});
+                            }
+                        } else {
+                            console.warn('⚠️ Brak danych w event.detail');
+                        }
+                    } catch (e) {
+                        console.error('❌ Błąd synchronizacji imagePositionChanged:', e);
                     }
                 });
 
@@ -1217,6 +1352,8 @@
 
             function applyTextureToFace(texture) {
                 console.log('🎨 Naprawianie pozycjonowania obrazka...');
+                console.log('🔍 Aktualny projectConfig.imagePosition:', projectConfig.imagePosition);
+                console.log('🔍 Czy projectConfig.imagePosition się zmienia?', JSON.stringify(projectConfig.imagePosition));
 
                 // Get image dimensions and aspect ratios
                 const imgWidth = texture.image.width;
@@ -1241,7 +1378,8 @@
                     userScale,
                     rotationDeg,
                     imgSize: `${imgWidth}x${imgHeight}`,
-                    labelSize: `${labelWidth}x${labelHeight}`
+                    labelSize: `${labelWidth}x${labelHeight}`,
+                    fullImagePosition: projectConfig.imagePosition
                 });
 
                 const shape = createLabelShape(
@@ -1250,9 +1388,17 @@
                     projectConfig.dimensions.height
                 );
 
-                // Remove existing mesh
-                if (faceMesh && scene.children.includes(faceMesh)) {
-                    scene.remove(faceMesh);
+                // Remove existing mesh from scene and labelGroup
+                if (faceMesh) {
+                    if (scene.children.includes(faceMesh)) {
+                        scene.remove(faceMesh);
+                    }
+                    if (labelGroup.children.includes(faceMesh)) {
+                        labelGroup.remove(faceMesh);
+                    }
+                    // Dispose of the mesh to prevent memory leaks
+                    if (faceMesh.geometry) faceMesh.geometry.dispose();
+                    if (faceMesh.material) faceMesh.material.dispose();
                 }
 
                 // Create a new texture from the image
@@ -1398,33 +1544,61 @@
                 // Match CSS clockwise rotation: invert sign for Three.js texture rotation
                 newTexture.rotation = -rotationRad;
 
+                // WRACAM DO WERSJI Z WYCHODZENIEM POZA ETYKIETĘ: repeat=1,1, skalowanie przez geometrię
+                // Ustawiamy repeat na 1,1 żeby obrazek się nie rozciągał
+                newTexture.repeat.set(1, 1);
+                
+                // Obliczamy skalę na podstawie proporcji obrazka i etykiety
                 let scaleX, scaleY;
-
+                
                 if (imgAspect > labelAspect) {
-                    scaleY = 1 / userScale;
-                    scaleX = (labelAspect / imgAspect) / userScale;
+                    // Obrazek jest szerszy - skalujemy po wysokości
+                    scaleY = userScale;
+                    scaleX = userScale * (labelAspect / imgAspect);
                 } else {
-                    scaleX = 1 / userScale;
-                    scaleY = (imgAspect / labelAspect) / userScale;
+                    // Obrazek jest wyższy - skalujemy po szerokości
+                    scaleX = userScale;
+                    scaleY = userScale * (imgAspect / labelAspect);
                 }
-
-                newTexture.repeat.set(scaleX, scaleY);
 
                 const percentX = posX / 100;
                 const percentY = posY / 100;
 
-                // Map 2D center-based positioning to UV space: X same direction, Y flipped
-                const offsetX = percentX - 0.5 * scaleX;
-                const offsetY = (1 - percentY) - 0.5 * scaleY;
-
+                // NAPRAWIONE MAPOWANIE 2D do 3D:
+                // W 2D: 50%, 50% = środek kontenera = środek etykiety
+                // W 3D UV: 0.5, 0.5 = środek tekstury
+                
+                // Proste mapowanie: 0-100% w 2D -> 0-1 w 3D UV
+                const offsetX = percentX - 0.5;
+                const offsetY = percentY - 0.5;
+                
+                // Tylko offset do pozycjonowania - NIE używamy repeat do skalowania!
                 newTexture.offset.set(offsetX, offsetY);
+
+                console.log('🎯 Mapowanie pozycji i skali (wychodzi poza etykietę, bez rozciągania):', {
+                    '2D posX': posX,
+                    '2D posY': posY,
+                    'percentX': percentX,
+                    'percentY': percentY,
+                    'offsetX': offsetX,
+                    'offsetY': offsetY,
+                    'userScale': userScale,
+                    'scaleX': scaleX,
+                    'scaleY': scaleY,
+                    'repeat': '1,1 (bez rozciągania)',
+                    'geometryScale': `${scaleX}, ${scaleY}, 1 (może wychodzić poza etykietę)`
+                });
 
                 faceMesh = new THREE.Mesh(imageGeometry, imageMaterial);
                 faceMesh.position.z = 0.6;
                 faceMesh.renderOrder = 10000;
+                
+                // Skalowanie przez geometrię - może wychodzić poza etykietę, ale nie rozciąga
+                faceMesh.scale.set(scaleX, scaleY, 1);
+                
                 labelGroup.add(faceMesh);
 
-                console.log('✅ Pozycjonowanie obrazka naprawione:', {
+                console.log('✅ Pozycjonowanie obrazka naprawione (bez klonowania):', {
                     offset: {
                         x: offsetX,
                         y: offsetY
@@ -1433,7 +1607,9 @@
                         x: scaleX,
                         y: scaleY
                     },
-                    rotation: rotationRad
+                    rotation: rotationRad,
+                    meshCount: labelGroup.children.length,
+                    sceneCount: scene.children.length
                 });
             }
 
@@ -1812,23 +1988,25 @@
             let rotationEnabled = true;
 
             // Obsługa OrbitControls: zatrzymaj obrót jak użytkownik trzyma lewy przycisk myszy
-            renderer.domElement.addEventListener('mousedown', (event) => {
-                if (event.button === 0) { // Lewy przycisk myszy
-                    rotationEnabled = false;
-                }
-            });
+            if (renderer && renderer.domElement) {
+                renderer.domElement.addEventListener('mousedown', (event) => {
+                    if (event.button === 0) { // Lewy przycisk myszy
+                        rotationEnabled = false;
+                    }
+                });
 
-            // Wznów automatyczny obrót po puszczeniu lewego przycisku myszy
-            renderer.domElement.addEventListener('mouseup', (event) => {
-                if (event.button === 0) {
+                // Wznów automatyczny obrót po puszczeniu lewego przycisku myszy
+                renderer.domElement.addEventListener('mouseup', (event) => {
+                    if (event.button === 0) {
+                        rotationEnabled = true;
+                    }
+                });
+
+                // Opcjonalnie można dodać też obsługę wyjścia kursora (mouseleave) aby wznowić obrót, na wypadek gubienia eventów
+                renderer.domElement.addEventListener('mouseleave', () => {
                     rotationEnabled = true;
-                }
-            });
-
-            // Opcjonalnie można dodać też obsługę wyjścia kursora (mouseleave) aby wznowić obrót, na wypadek gubienia eventów
-            renderer.domElement.addEventListener('mouseleave', () => {
-                rotationEnabled = true;
-            });
+                });
+            }
 
 
             function animate() {
@@ -1898,6 +2076,1151 @@
                 addArtworkToLabel(shape, 2);
             };
 
+            // NOWA FUNKCJA: Ręczna synchronizacja pozycji obrazka
+            window.syncImagePosition = function(positionData) {
+                console.log('🔄 Ręczna synchronizacja pozycji obrazka:', positionData);
+                
+                if (positionData) {
+                    projectConfig.imagePosition = positionData;
+                    
+                    // Zapisz do localStorage
+                    localStorage.setItem('imagePosition', JSON.stringify(positionData));
+                    
+                    if (scene && faceMesh) {
+                        scene.remove(faceMesh);
+                        const shape = createLabelShape(
+                            projectConfig.shape,
+                            projectConfig.dimensions.width,
+                            projectConfig.dimensions.height
+                        );
+                        addArtworkToLabel(shape, 2);
+                        console.log('✅ Pozycja obrazka zsynchronizowana');
+                    }
+                }
+            };
+            
+            // FUNKCJA DEBUGOWANIA: Pokaż aktualny stan synchronizacji
+            window.debugSync = function() {
+                console.log('🔍 DEBUG SYNCHRONIZACJI:');
+                console.log('📊 projectConfig.imagePosition:', projectConfig.imagePosition);
+                console.log('💾 localStorage imagePosition:', localStorage.getItem('imagePosition'));
+                console.log('🎭 scene istnieje:', !!scene);
+                console.log('🖼️ faceMesh istnieje:', !!faceMesh);
+                console.log('📐 wymiary etykiety:', projectConfig.dimensions);
+                console.log('🖼️ URL obrazka:', projectConfig.artworkUrl);
+            };
+            
+            // FUNKCJA TESTOWA: Test pozycjonowania w różnych miejscach
+            window.testPositions = function() {
+                const positions = [
+                    {x: 0, y: 0, name: 'Lewy górny róg'},
+                    {x: 100, y: 0, name: 'Prawy górny róg'},
+                    {x: 0, y: 100, name: 'Lewy dolny róg'},
+                    {x: 100, y: 100, name: 'Prawy dolny róg'},
+                    {x: 50, y: 50, name: 'Środek'},
+                    {x: 20, y: 50, name: 'Lewa strona'},
+                    {x: 80, y: 50, name: 'Prawa strona'}
+                ];
+                
+                let index = 0;
+                const testNext = () => {
+                    if (index < positions.length) {
+                        const pos = positions[index];
+                        console.log(`🧪 Test ${index + 1}: ${pos.name} (${pos.x}%, ${pos.y}%)`);
+                        window.syncImagePosition({x: pos.x, y: pos.y, scale: 50, rotation: 0});
+                        index++;
+                        setTimeout(testNext, 2000);
+                    }
+                };
+                testNext();
+            };
+            
+            // FUNKCJA TESTOWA: Test idealnej synchronizacji
+            window.testPerfectSync = function() {
+                console.log('🎯 TEST IDEALNEJ SYNCHRONIZACJI');
+                console.log('1. Ustaw obrazek po lewej stronie w 2D kreatorze');
+                console.log('2. Sprawdź czy jest po lewej stronie w 3D podglądzie');
+                console.log('3. Ustaw obrazek po prawej stronie w 2D kreatorze');
+                console.log('4. Sprawdź czy jest po prawej stronie w 3D podglądzie');
+                
+                // Test lewej strony
+                console.log('🧪 Test: Lewa strona (20%, 50%)');
+                window.syncImagePosition({x: 20, y: 50, scale: 40, rotation: 0});
+                
+                setTimeout(() => {
+                    console.log('🧪 Test: Prawa strona (80%, 50%)');
+                    window.syncImagePosition({x: 80, y: 50, scale: 40, rotation: 0});
+                }, 3000);
+            };
+            
+            // FUNKCJA TESTOWA: Test mapowania kierunków
+            window.testDirections = function() {
+                console.log('🧭 TEST KIERUNKÓW');
+                const tests = [
+                    {x: 10, y: 10, name: 'Lewy górny róg'},
+                    {x: 90, y: 10, name: 'Prawy górny róg'},
+                    {x: 10, y: 90, name: 'Lewy dolny róg'},
+                    {x: 90, y: 90, name: 'Prawy dolny róg'},
+                    {x: 50, y: 50, name: 'Środek'}
+                ];
+                
+                let index = 0;
+                const testNext = () => {
+                    if (index < tests.length) {
+                        const test = tests[index];
+                        console.log(`🧪 Test ${index + 1}: ${test.name} (${test.x}%, ${test.y}%)`);
+                        window.syncImagePosition({x: test.x, y: test.y, scale: 30, rotation: 0});
+                        index++;
+                        setTimeout(testNext, 2000);
+                    }
+                };
+                testNext();
+            };
+            
+            // FUNKCJA TESTOWA: Test lewej i prawej strony
+            window.testLeftRight = function() {
+                console.log('🔄 TEST LEWA vs PRAWA STRONA');
+                
+                // Test lewej strony
+                console.log('🧪 Lewa strona (20%, 50%)');
+                window.syncImagePosition({x: 20, y: 50, scale: 40, rotation: 0});
+                
+                setTimeout(() => {
+                    console.log('🧪 Prawa strona (80%, 50%)');
+                    window.syncImagePosition({x: 80, y: 50, scale: 40, rotation: 0});
+                }, 3000);
+                
+                setTimeout(() => {
+                    console.log('🧪 Środek (50%, 50%)');
+                    window.syncImagePosition({x: 50, y: 50, scale: 40, rotation: 0});
+                }, 6000);
+            };
+            
+            // FUNKCJA TESTOWA: Test synchronizacji z 2D kreatora
+            window.testSyncFromCreator = function() {
+                console.log('🧪 TEST SYNCHRONIZACJI Z 2D KREATORA');
+                
+                // Symuluj event z 2D kreatora
+                const testData = {x: 30, y: 70, scale: 60, rotation: 15};
+                console.log('📤 Wysyłam testowy event:', testData);
+                
+                window.dispatchEvent(new CustomEvent('imagePositionChanged', {
+                    detail: testData
+                }));
+                
+                setTimeout(() => {
+                    const testData2 = {x: 70, y: 30, scale: 80, rotation: 45};
+                    console.log('📤 Wysyłam drugi testowy event:', testData2);
+                    window.dispatchEvent(new CustomEvent('imagePositionChanged', {
+                        detail: testData2
+                    }));
+                }, 2000);
+            };
+            
+            // FUNKCJA TESTOWA: Test mapowania lewa/prawa strona
+            window.testLeftRightMapping = function() {
+                console.log('🧭 TEST MAPOWANIA LEWA/PRAWA STRONA');
+                
+                // Test lewej strony (powinna być po lewej w 3D)
+                console.log('🧪 Lewa strona (20%, 50%) - powinna być po LEWEJ w 3D');
+                window.syncImagePosition({x: 20, y: 50, scale: 50, rotation: 0});
+                
+                setTimeout(() => {
+                    // Test prawej strony (powinna być po prawej w 3D)
+                    console.log('🧪 Prawa strona (80%, 50%) - powinna być po PRAWEJ w 3D');
+                    window.syncImagePosition({x: 80, y: 50, scale: 50, rotation: 0});
+                }, 3000);
+                
+                setTimeout(() => {
+                    // Test środka (powinien być po środku w 3D)
+                    console.log('🧪 Środek (50%, 50%) - powinien być po ŚRODKU w 3D');
+                    window.syncImagePosition({x: 50, y: 50, scale: 50, rotation: 0});
+                }, 6000);
+            };
+            
+            // FUNKCJA TESTOWA: Test różnych mapowań
+            window.testMapping = function() {
+                console.log('🧪 TEST RÓŻNYCH MAPOWAŃ');
+                
+                const tests = [
+                    {x: 10, y: 50, name: 'Bardzo lewa strona'},
+                    {x: 25, y: 50, name: 'Lewa strona'},
+                    {x: 50, y: 50, name: 'Środek'},
+                    {x: 75, y: 50, name: 'Prawa strona'},
+                    {x: 90, y: 50, name: 'Bardzo prawa strona'}
+                ];
+                
+                let index = 0;
+                const testNext = () => {
+                    if (index < tests.length) {
+                        const test = tests[index];
+                        console.log(`🧪 Test ${index + 1}: ${test.name} (${test.x}%, ${test.y}%)`);
+                        window.syncImagePosition({x: test.x, y: test.y, scale: 40, rotation: 0});
+                        index++;
+                        setTimeout(testNext, 2000);
+                    }
+                };
+                testNext();
+            };
+            
+            // FUNKCJA TESTOWA: Test lewej strony z różnymi mapowaniami
+            window.testLeftSide = function() {
+                console.log('🧪 TEST LEWEJ STRONY - różne mapowania');
+                
+                // Test z pozycją 20% (lewa strona w 2D)
+                console.log('🎯 Pozycja 20% w 2D - sprawdź gdzie jest w 3D');
+                window.syncImagePosition({x: 20, y: 50, scale: 60, rotation: 0});
+                
+                setTimeout(() => {
+                    console.log('🎯 Pozycja 80% w 2D - sprawdź gdzie jest w 3D');
+                    window.syncImagePosition({x: 80, y: 50, scale: 60, rotation: 0});
+                }, 3000);
+            };
+            
+            // NOWA FUNKCJA: Interaktywne pozycjonowanie 2D w preview
+            let isDragging2D = false;
+            let dragStart2D = { x: 0, y: 0 };
+            let currentPosition2D = { x: 50, y: 50, scale: 100, rotation: 0 };
+            
+            // Inicjalizuj pozycję z localStorage
+            const savedPosition = localStorage.getItem('imagePosition');
+            if (savedPosition) {
+                try {
+                    currentPosition2D = JSON.parse(savedPosition);
+                    projectConfig.imagePosition = currentPosition2D;
+                } catch (e) {
+                    console.warn('⚠️ Błąd parsowania zapisanej pozycji:', e);
+                }
+            }
+            
+            // Funkcja inicjalizacji kontenera 2D
+            function init2DPositioning() {
+                console.log('🚀 INICJALIZACJA KONTENERA 2D');
+                
+                const container = document.getElementById('positioning-container');
+                const labelPreview = document.getElementById('label-preview-2d');
+                const image = document.getElementById('positioning-image');
+                
+                console.log('🔍 Elementy:', {
+                    container: !!container,
+                    labelPreview: !!labelPreview,
+                    image: !!image
+                });
+                
+                if (!container || !labelPreview || !image) {
+                    console.warn('⚠️ Nie znaleziono elementów kontenera 2D');
+                    console.log('🔍 Sprawdzam dostępne elementy:');
+                    console.log('positioning-container:', document.getElementById('positioning-container'));
+                    console.log('label-preview-2d:', document.getElementById('label-preview-2d'));
+                    console.log('positioning-image:', document.getElementById('positioning-image'));
+                    return;
+                }
+                
+                console.log('✅ Wszystkie elementy znalezione, inicjalizuję...');
+                
+                // Utwórz kształt etykiety w kontenerze 2D
+                create2DLabelShape();
+                
+                // Załaduj obrazek jeśli istnieje
+                load2DImage();
+                
+                // Spróbuj załadować obrazek z localStorage
+                setTimeout(() => {
+                    loadImageFromStorage();
+                }, 500);
+                
+                // Dodaj event listenery
+                add2DDragListeners();
+                add2DControlListeners();
+                
+                // Zaktualizuj wyświetlane wartości
+                update2DDisplay();
+                
+                console.log('✅ Inicjalizacja kontenera 2D zakończona');
+            }
+            
+            // Utwórz kształt etykiety w kontenerze 2D
+            function create2DLabelShape() {
+                console.log('🎨 TWORZENIE KSZTAŁTU ETYKIETY 2D');
+                
+                const labelPreview = document.getElementById('label-preview-2d');
+                if (!labelPreview) {
+                    console.warn('⚠️ Nie znaleziono labelPreview');
+                    return;
+                }
+                
+                // Pobierz dane z projectConfig
+                const shape = projectConfig.shape || 'rectangle';
+                const width = projectConfig.dimensions?.width || 50;
+                const height = projectConfig.dimensions?.height || 50;
+                const material = projectConfig.material || 'white-matte';
+                
+                console.log('📐 Dane etykiety:', { shape, width, height, material });
+                
+                // Skalowanie do kontenera
+                const containerSize = 200;
+                const scale = Math.min(containerSize / width, containerSize / height);
+                const displayWidth = width * scale;
+                const displayHeight = height * scale;
+                
+                console.log('📏 Wymiary wyświetlane:', { displayWidth, displayHeight, scale });
+                
+                // Klasa materiału
+                let materialClass = 'bg-white';
+                if (material.includes('gold')) {
+                    materialClass = 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600';
+                } else if (material.includes('silver')) {
+                    materialClass = 'bg-gradient-to-br from-gray-200 via-gray-400 to-gray-500';
+                } else if (material.includes('kraft')) {
+                    materialClass = 'bg-amber-100';
+                }
+                
+                // Klasa kształtu
+                let shapeClass = 'rounded-lg';
+                if (shape === 'circle') {
+                    shapeClass = 'rounded-full';
+                } else if (shape === 'oval') {
+                    shapeClass = 'rounded-full';
+                } else if (shape === 'square') {
+                    shapeClass = 'rounded-lg';
+                } else if (shape === 'star') {
+                    shapeClass = 'rounded-lg';
+                }
+                
+                console.log('🎨 Klasy CSS:', { materialClass, shapeClass });
+                
+                // Utwórz element etykiety
+                const labelHTML = `
+                    <div class="shadow-lg border border-gray-200 ${materialClass} ${shapeClass}" 
+                         style="width: ${displayWidth}px; height: ${displayHeight}px; ${shape === 'star' ? 'clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);' : ''}">
+                    </div>
+                `;
+                
+                labelPreview.innerHTML = labelHTML;
+                console.log('✅ Kształt etykiety utworzony:', labelHTML);
+            }
+            
+            // Załaduj obrazek do kontenera 2D
+            function load2DImage() {
+                const image = document.getElementById('positioning-image');
+                if (!image) return;
+                
+                console.log('🖼️ Ładowanie obrazka do kontenera 2D...');
+                console.log('🔍 projectConfig.artworkUrl:', projectConfig.artworkUrl);
+                console.log('🔍 projectConfig.artwork:', projectConfig.artwork);
+                
+                let imageUrl = null;
+                
+                // Spróbuj z projectConfig.artworkUrl (główny sposób)
+                if (projectConfig.artworkUrl && projectConfig.artworkUrl !== '') {
+                    imageUrl = projectConfig.artworkUrl;
+                    console.log('✅ Znaleziono obrazek w projectConfig.artworkUrl:', imageUrl);
+                }
+                // Spróbuj z projectConfig.artwork
+                else if (projectConfig.artwork && projectConfig.artwork.length > 0) {
+                    imageUrl = `/storage/${projectConfig.artwork[0]}`;
+                    console.log('✅ Znaleziono obrazek w projectConfig.artwork:', imageUrl);
+                }
+                // Spróbuj z localStorage
+                else {
+                    const savedArtwork = localStorage.getItem('selectedArtwork');
+                    console.log('🔍 savedArtwork z localStorage:', savedArtwork);
+                    
+                    if (savedArtwork) {
+                        try {
+                            const artworkData = JSON.parse(savedArtwork);
+                            if (artworkData.path) {
+                                imageUrl = `/storage/${artworkData.path}`;
+                                console.log('✅ Znaleziono obrazek w localStorage:', imageUrl);
+                            }
+                        } catch (e) {
+                            console.warn('⚠️ Błąd parsowania savedArtwork:', e);
+                        }
+                    }
+                }
+                
+                if (imageUrl) {
+                    image.src = imageUrl;
+                    image.style.display = 'block';
+                    console.log('✅ Obrazek załadowany:', image.src);
+                    
+                    // Automatyczne dopasowanie po załadowaniu obrazka
+                    image.onload = function() {
+                        console.log('🖼️ Obrazek załadowany, automatyczne dopasowanie...');
+                        currentPosition2D.x = 50;
+                        currentPosition2D.y = 50;
+                        currentPosition2D.scale = calculateFitScale();
+                        currentPosition2D.rotation = 0;
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    };
+                    
+                    update2DImagePosition();
+                } else {
+                    console.warn('⚠️ Nie znaleziono obrazka do załadowania w load2DImage');
+                    // NIE ukrywaj obrazka - może być załadowany przez inne funkcje
+                    console.log('ℹ️ Obrazek pozostaje widoczny - może być załadowany przez inne funkcje');
+                }
+            }
+            
+            // Zaktualizuj pozycję obrazka w kontenerze 2D
+            function update2DImagePosition() {
+                const image = document.getElementById('positioning-image');
+                if (!image) return;
+                
+                const { x, y, scale, rotation } = currentPosition2D;
+                
+                image.style.left = `${x}%`;
+                image.style.top = `${y}%`;
+                image.style.transform = `translate(-50%, -50%) scale(${scale/100}) rotate(${rotation}deg)`;
+            }
+            
+            // Dodaj event listenery do przeciągania 2D
+            function add2DDragListeners() {
+                const container = document.getElementById('positioning-container');
+                if (!container) return;
+                
+                container.addEventListener('mousedown', (e) => {
+                    if (e.target.tagName === 'IMG') {
+                        isDragging2D = true;
+                        dragStart2D = { x: e.clientX, y: e.clientY };
+                        container.style.cursor = 'grabbing';
+                        e.preventDefault();
+                    }
+                });
+                
+                container.addEventListener('mousemove', (e) => {
+                    if (isDragging2D) {
+                        const deltaX = e.clientX - dragStart2D.x;
+                        const deltaY = e.clientY - dragStart2D.y;
+                        
+                        // Przelicz deltę na procenty
+                        const sensitivity = 0.5;
+                        const newX = Math.max(0, Math.min(100, currentPosition2D.x + (deltaX * sensitivity)));
+                        const newY = Math.max(0, Math.min(100, currentPosition2D.y + (deltaY * sensitivity)));
+                        
+                        currentPosition2D.x = newX;
+                        currentPosition2D.y = newY;
+                        
+                        // Zaktualizuj wyświetlanie
+                        update2DImagePosition();
+                        update2DDisplay();
+                        
+                        // Synchronizuj z 3D
+                        sync2DTo3D();
+                        
+                        // Zaktualizuj punkt startowy
+                        dragStart2D = { x: e.clientX, y: e.clientY };
+                    }
+                });
+                
+                container.addEventListener('mouseup', () => {
+                    if (isDragging2D) {
+                        isDragging2D = false;
+                        container.style.cursor = 'move';
+                    }
+                });
+                
+                container.addEventListener('mouseleave', () => {
+                    if (isDragging2D) {
+                        isDragging2D = false;
+                        container.style.cursor = 'move';
+                    }
+                });
+            }
+            
+            // Dodaj event listenery do kontrolek 2D
+            function add2DControlListeners() {
+                const posXSlider = document.getElementById('posX-slider');
+                const posYSlider = document.getElementById('posY-slider');
+                const scaleSlider = document.getElementById('scale-slider');
+                const rotationSlider = document.getElementById('rotation-slider');
+                const resetBtn = document.getElementById('reset-position-btn');
+                const centerBtn = document.getElementById('center-position-btn');
+                
+                if (posXSlider) {
+                    posXSlider.addEventListener('input', (e) => {
+                        currentPosition2D.x = parseFloat(e.target.value);
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                if (posYSlider) {
+                    posYSlider.addEventListener('input', (e) => {
+                        currentPosition2D.y = parseFloat(e.target.value);
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                if (scaleSlider) {
+                    scaleSlider.addEventListener('input', (e) => {
+                        currentPosition2D.scale = parseInt(e.target.value);
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                if (rotationSlider) {
+                    rotationSlider.addEventListener('input', (e) => {
+                        currentPosition2D.rotation = parseInt(e.target.value);
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                        currentPosition2D = { x: 50, y: 50, scale: 100, rotation: 0 };
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                if (centerBtn) {
+                    centerBtn.addEventListener('click', () => {
+                        currentPosition2D.x = 50;
+                        currentPosition2D.y = 50;
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                const fitBtn = document.getElementById('fit-image-btn');
+                const fillBtn = document.getElementById('fill-image-btn');
+                
+                if (fitBtn) {
+                    fitBtn.addEventListener('click', () => {
+                        console.log('🎯 FIT - dopasuj obrazek do etykiety');
+                        currentPosition2D.x = 50;
+                        currentPosition2D.y = 50;
+                        currentPosition2D.scale = calculateFitScale(); // Inteligentne obliczenie skali
+                        currentPosition2D.rotation = 0;
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+                
+                if (fillBtn) {
+                    fillBtn.addEventListener('click', () => {
+                        console.log('🎯 WYPEŁNIJ - rozciągnij obrazek na całą etykietę');
+                        currentPosition2D.x = 50;
+                        currentPosition2D.y = 50;
+                        currentPosition2D.scale = calculateFillScale(); // Inteligentne obliczenie skali
+                        currentPosition2D.rotation = 0;
+                        update2DImagePosition();
+                        update2DDisplay();
+                        sync2DTo3D();
+                    });
+                }
+            }
+            
+            // Zaktualizuj wyświetlane wartości w kontenerze 2D
+            function update2DDisplay() {
+                const posXDisplay = document.getElementById('posX-display');
+                const posYDisplay = document.getElementById('posY-display');
+                const scaleDisplay = document.getElementById('scale-display');
+                const rotationDisplay = document.getElementById('rotation-display');
+                
+                const posXSlider = document.getElementById('posX-slider');
+                const posYSlider = document.getElementById('posY-slider');
+                const scaleSlider = document.getElementById('scale-slider');
+                const rotationSlider = document.getElementById('rotation-slider');
+                
+                // Zaktualizuj wyświetlane wartości
+                if (posXDisplay) posXDisplay.textContent = currentPosition2D.x.toFixed(1) + '%';
+                if (posYDisplay) posYDisplay.textContent = currentPosition2D.y.toFixed(1) + '%';
+                if (scaleDisplay) scaleDisplay.textContent = currentPosition2D.scale + '%';
+                if (rotationDisplay) rotationDisplay.textContent = currentPosition2D.rotation + '°';
+                
+                // Zaktualizuj wartości suwaków
+                if (posXSlider) posXSlider.value = currentPosition2D.x;
+                if (posYSlider) posYSlider.value = currentPosition2D.y;
+                if (scaleSlider) scaleSlider.value = currentPosition2D.scale;
+                if (rotationSlider) rotationSlider.value = currentPosition2D.rotation;
+                
+                console.log('🔄 Zaktualizowano wyświetlanie 2D:', currentPosition2D);
+            }
+            
+            // Synchronizuj pozycję 2D z 3D
+            function sync2DTo3D() {
+                console.log('🔄 SYNCHRONIZACJA 2D → 3D:', currentPosition2D);
+                
+                // Zaktualizuj projectConfig
+                projectConfig.imagePosition = currentPosition2D;
+                
+                // Zapisz do localStorage
+                localStorage.setItem('imagePosition', JSON.stringify(currentPosition2D));
+                
+                // Wymuś aktualizację 3D
+                if (typeof updateImagePosition === 'function') {
+                    updateImagePosition();
+                    console.log('✅ Etykieta 3D zaktualizowana');
+                } else {
+                    console.warn('⚠️ Funkcja updateImagePosition nie istnieje');
+                }
+            }
+            
+            // Funkcja do ręcznego załadowania obrazka
+            function loadImageFromStorage() {
+                console.log('🔄 Próba załadowania obrazka z localStorage...');
+                
+                // Sprawdź różne klucze w localStorage
+                const keys = ['selectedArtwork', 'artwork', 'tempArtworkPath', 'imagePath'];
+                let artworkPath = null;
+                
+                for (const key of keys) {
+                    const value = localStorage.getItem(key);
+                    console.log(`🔍 Sprawdzam klucz "${key}":`, value);
+                    
+                    if (value) {
+                        try {
+                            const parsed = JSON.parse(value);
+                            if (parsed.path) {
+                                artworkPath = parsed.path;
+                                break;
+                            } else if (typeof parsed === 'string') {
+                                artworkPath = parsed;
+                                break;
+                            }
+                        } catch (e) {
+                            // Jeśli nie można sparsować jako JSON, użyj jako string
+                            if (typeof value === 'string' && value.includes('.')) {
+                                artworkPath = value;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (artworkPath) {
+                    console.log('✅ Znaleziono ścieżkę obrazka:', artworkPath);
+                    const image = document.getElementById('positioning-image');
+                    if (image) {
+                        image.src = `/storage/${artworkPath}`;
+                        image.style.display = 'block';
+                        update2DImagePosition();
+                    }
+                } else {
+                    console.warn('⚠️ Nie znaleziono obrazka w localStorage');
+                }
+            }
+            
+            // Funkcja do debugowania localStorage
+            window.debugLocalStorage = function() {
+                console.log('🔍 DEBUG LOCALSTORAGE:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    console.log(`${key}:`, value);
+                }
+            };
+            
+            // Funkcja do ręcznego załadowania obrazka
+            window.loadImage = function() {
+                loadImageFromStorage();
+            };
+            
+            // Funkcja do załadowania prawdziwego obrazka
+            window.loadRealImage = function() {
+                console.log('🖼️ ŁADOWANIE PRAWDZIWEGO OBRAZKA');
+                load2DImage();
+            };
+            
+            // Funkcja do debugowania obrazka
+            window.debugImage = function() {
+                console.log('🔍 DEBUG OBRAZKA');
+                console.log('projectConfig:', projectConfig);
+                console.log('projectConfig.artworkUrl:', projectConfig.artworkUrl);
+                console.log('projectConfig.artwork:', projectConfig.artwork);
+                
+                const image = document.getElementById('positioning-image');
+                console.log('Obrazek element:', image);
+                if (image) {
+                    console.log('Obrazek src:', image.src);
+                    console.log('Obrazek display:', image.style.display);
+                    console.log('Obrazek naturalWidth:', image.naturalWidth);
+                    console.log('Obrazek naturalHeight:', image.naturalHeight);
+                    console.log('Obrazek complete:', image.complete);
+                    console.log('Obrazek readyState:', image.readyState);
+                }
+                
+                // Sprawdź localStorage
+                const savedArtwork = localStorage.getItem('selectedArtwork');
+                console.log('savedArtwork:', savedArtwork);
+                
+                // Sprawdź wszystkie klucze localStorage
+                console.log('Wszystkie klucze localStorage:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    console.log(`${key}:`, localStorage.getItem(key));
+                }
+            };
+            
+            // Funkcja do monitorowania znikającego obrazka
+            window.monitorImage = function() {
+                const image = document.getElementById('positioning-image');
+                if (!image) return;
+                
+                console.log('👁️ MONITOROWANIE OBRAZKA');
+                
+                // Monitoruj zmiany display
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            console.log('🔄 Zmiana style:', image.style.display);
+                            if (image.style.display === 'none') {
+                                console.warn('⚠️ OBRAZEK ZNIKA! Przyczyna:', new Error().stack);
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(image, { attributes: true, attributeFilter: ['style'] });
+                
+                // Monitoruj zmiany src
+                const srcObserver = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                            console.log('🔄 Zmiana src:', image.src);
+                        }
+                    });
+                });
+                
+                srcObserver.observe(image, { attributes: true, attributeFilter: ['src'] });
+                
+                console.log('✅ Monitoring włączony');
+            };
+            
+            // Funkcja do debugowania klonowania
+            window.debugCloning = function() {
+                console.log('🔍 DEBUG KLONOWANIA');
+                console.log('labelGroup.children.length:', labelGroup.children.length);
+                console.log('scene.children.length:', scene.children.length);
+                
+                // Sprawdź wszystkie meshe w labelGroup
+                labelGroup.children.forEach((child, index) => {
+                    console.log(`Mesh ${index}:`, {
+                        type: child.type,
+                        position: child.position,
+                        scale: child.scale,
+                        visible: child.visible
+                    });
+                });
+                
+                // Sprawdź czy faceMesh istnieje
+                console.log('faceMesh:', faceMesh);
+                if (faceMesh) {
+                    console.log('faceMesh.parent:', faceMesh.parent);
+                    console.log('faceMesh.scale:', faceMesh.scale);
+                }
+            };
+            
+            // Funkcja do debugowania znikającego obrazka
+            window.debugImageDisappearing = function() {
+                console.log('🔍 DEBUG ZNIKAJĄCEGO OBRAZKA');
+                console.log('faceMesh:', faceMesh);
+                console.log('faceMesh.visible:', faceMesh ? faceMesh.visible : 'undefined');
+                console.log('faceMesh.scale:', faceMesh ? faceMesh.scale : 'undefined');
+                console.log('faceMesh.position:', faceMesh ? faceMesh.position : 'undefined');
+                console.log('faceMesh.material:', faceMesh ? faceMesh.material : 'undefined');
+                
+                if (faceMesh && faceMesh.material) {
+                    console.log('faceMesh.material.visible:', faceMesh.material.visible);
+                    console.log('faceMesh.material.opacity:', faceMesh.material.opacity);
+                    console.log('faceMesh.material.transparent:', faceMesh.material.transparent);
+                }
+                
+                console.log('labelGroup.children.length:', labelGroup.children.length);
+                console.log('scene.children.length:', scene.children.length);
+            };
+            
+            // Funkcja do przywrócenia obrazka
+            window.restoreImage = function() {
+                console.log('🔄 PRZYWRACANIE OBRAZKA');
+                
+                if (faceMesh) {
+                    // Przywróć widoczność
+                    faceMesh.visible = true;
+                    
+                    // Przywróć domyślną skalę
+                    faceMesh.scale.set(1, 1, 1);
+                    
+                    // Przywróć domyślną pozycję
+                    faceMesh.position.set(0, 0, 0.6);
+                    
+                    // Przywróć domyślny offset tekstury
+                    if (faceMesh.material && faceMesh.material.map) {
+                        faceMesh.material.map.offset.set(0, 0);
+                        faceMesh.material.map.rotation = 0;
+                    }
+                    
+                    console.log('✅ Obrazek przywrócony');
+                } else {
+                    console.warn('⚠️ Brak faceMesh - nie można przywrócić');
+                }
+            };
+            
+            // Funkcja do wymuszenia ponownego załadowania obrazka
+            window.forceReloadImage = function() {
+                console.log('🔄 WYMUSZENIE PONOWNEGO ZAŁADOWANIA OBRAZKA');
+                
+                // Wywołaj addArtworkToLabel ponownie
+                if (typeof addArtworkToLabel === 'function') {
+                    addArtworkToLabel();
+                    console.log('✅ Obrazek ponownie załadowany');
+                } else {
+                    console.warn('⚠️ Funkcja addArtworkToLabel nie istnieje');
+                }
+            };
+            
+            // Profesjonalna funkcja do ładowania obrazka z różnych źródeł
+            window.forceLoadImage = function() {
+                console.log('🔄 PROFESJONALNE ŁADOWANIE OBRAZKA');
+                const image = document.getElementById('positioning-image');
+                if (!image) {
+                    console.warn('❌ Nie znaleziono elementu obrazka');
+                    return;
+                }
+                
+                // Sprawdź czy obrazek jest już załadowany
+                if (image.src && image.src !== '' && image.complete && image.naturalWidth > 0) {
+                    console.log('✅ Obrazek już załadowany:', image.src);
+                    image.style.display = 'block';
+                    return;
+                }
+                
+                // Tylko prawdziwe źródła obrazków (bez testowych)
+                const sources = [
+                    projectConfig.artworkUrl,
+                    projectConfig.artwork && projectConfig.artwork.length > 0 ? `/storage/${projectConfig.artwork[0]}` : null,
+                    '/images/placeholder-image.png'
+                ].filter(src => src); // Usuń puste wartości
+                
+                if (sources.length === 0) {
+                    console.warn('⚠️ Brak dostępnych źródeł obrazka w forceLoadImage');
+                    // NIE ukrywaj obrazka - może być już załadowany
+                    console.log('ℹ️ Obrazek pozostaje widoczny - może być już załadowany');
+                    return;
+                }
+                
+                let loaded = false;
+                sources.forEach((src, index) => {
+                    if (!loaded) {
+                        console.log(`🔄 Próba ${index + 1}: ${src}`);
+                        image.src = src;
+                        image.style.display = 'block';
+                        image.onload = function() {
+                            console.log(`✅ Obrazek załadowany z źródła ${index + 1}: ${src}`);
+                            loaded = true;
+                            
+                            // Automatyczne dopasowanie
+                            currentPosition2D.x = 50;
+                            currentPosition2D.y = 50;
+                            currentPosition2D.scale = calculateFitScale();
+                            currentPosition2D.rotation = 0;
+                            update2DImagePosition();
+                            update2DDisplay();
+                            sync2DTo3D();
+                        };
+                        image.onerror = function() {
+                            console.warn(`❌ Błąd ładowania z źródła ${index + 1}: ${src}`);
+                            if (index === sources.length - 1) {
+                                // Ostatnie źródło - ale NIE ukrywaj obrazka
+                                console.warn('⚠️ Wszystkie źródła obrazka nieudane, ale obrazek pozostaje widoczny');
+                                // Sprawdź czy obrazek ma już src
+                                if (!image.src || image.src === '') {
+                                    console.log('ℹ️ Obrazek nie ma src - ukrywamy');
+                                    image.style.display = 'none';
+                                } else {
+                                    console.log('ℹ️ Obrazek ma src - pozostaje widoczny');
+                                }
+                            }
+                        };
+                    }
+                });
+            };
+            
+            // Funkcja do inteligentnego dopasowania obrazka (Fit - mieści cały obrazek)
+            function calculateFitScale() {
+                const image = document.getElementById('positioning-image');
+                if (!image || !image.complete) return 80;
+                
+                const labelWidth = 150; // Szerokość etykiety w kontenerze 2D
+                const labelHeight = 100; // Wysokość etykiety w kontenerze 2D
+                
+                const imageWidth = image.naturalWidth;
+                const imageHeight = image.naturalHeight;
+                
+                if (!imageWidth || !imageHeight) return 80;
+                
+                // FIT: Oblicz skalę żeby zmieścić cały obrazek w etykiecie
+                const scaleX = labelWidth / imageWidth;
+                const scaleY = labelHeight / imageHeight;
+                
+                // Użyj mniejszej skali żeby zmieścić cały obrazek (zachowuje proporcje)
+                const fitScale = Math.min(scaleX, scaleY) * 100;
+                
+                console.log('📐 Obliczenia Fit (mieści cały obrazek):', {
+                    imageWidth,
+                    imageHeight,
+                    labelWidth,
+                    labelHeight,
+                    scaleX: scaleX * 100,
+                    scaleY: scaleY * 100,
+                    fitScale
+                });
+                
+                return Math.min(Math.max(fitScale, 20), 200);
+            }
+            
+            // Funkcja do inteligentnego wypełnienia obrazka (Wypełnij - wypełnij całą etykietę)
+            function calculateFillScale() {
+                const image = document.getElementById('positioning-image');
+                if (!image || !image.complete) return 120;
+                
+                const labelWidth = 150;
+                const labelHeight = 100;
+                
+                const imageWidth = image.naturalWidth;
+                const imageHeight = image.naturalHeight;
+                
+                if (!imageWidth || !imageHeight) return 120;
+                
+                // WYPEŁNIJ: Oblicz skalę żeby wypełnić całą etykietę
+                const scaleX = labelWidth / imageWidth;
+                const scaleY = labelHeight / imageHeight;
+                
+                // Użyj większej skali żeby wypełnić całą etykietę
+                const fillScale = Math.max(scaleX, scaleY) * 100;
+                
+                console.log('📐 Obliczenia Fill (wypełnij całą etykietę):', {
+                    imageWidth,
+                    imageHeight,
+                    labelWidth,
+                    labelHeight,
+                    scaleX: scaleX * 100,
+                    scaleY: scaleY * 100,
+                    fillScale
+                });
+                
+                return Math.min(Math.max(fillScale, 50), 300);
+            }
+            
+            // Funkcja do debugowania całego systemu
+            window.debugSystem = function() {
+                console.log('🔍 DEBUG CAŁEGO SYSTEMU');
+                console.log('projectConfig:', projectConfig);
+                console.log('projectConfig.artworkUrl:', projectConfig.artworkUrl);
+                console.log('projectConfig.artwork:', projectConfig.artwork);
+                console.log('projectConfig.imagePosition:', projectConfig.imagePosition);
+                
+                const image = document.getElementById('positioning-image');
+                console.log('Obrazek element:', image);
+                if (image) {
+                    console.log('Obrazek src:', image.src);
+                    console.log('Obrazek display:', image.style.display);
+                }
+                
+                const container = document.getElementById('positioning-container');
+                console.log('Kontener:', container);
+                
+                const sliders = document.querySelectorAll('input[type="range"]');
+                console.log('Suwaki:', sliders.length);
+            };
+            
+            // Funkcja do debugowania pozycjonowania
+            window.debugPositioning = function() {
+                console.log('🔍 DEBUG POZYCJONOWANIA:');
+                console.log('currentPosition2D:', currentPosition2D);
+                console.log('projectConfig.imagePosition:', projectConfig.imagePosition);
+                
+                const image = document.getElementById('positioning-image');
+                if (image) {
+                    console.log('Obrazek:', {
+                        src: image.src,
+                        display: image.style.display,
+                        left: image.style.left,
+                        top: image.style.top,
+                        transform: image.style.transform
+                    });
+                }
+                
+                const container = document.getElementById('positioning-container');
+                if (container) {
+                    console.log('Kontener:', {
+                        exists: !!container,
+                        children: container.children.length
+                    });
+                }
+            };
+            
+            // Funkcja do testowania pozycjonowania
+            window.testPositioning = function() {
+                console.log('🧪 TEST POZYCJONOWANIA');
+                currentPosition2D = { x: 20, y: 30, scale: 80, rotation: 45 };
+                update2DImagePosition();
+                update2DDisplay();
+                sync2DTo3D();
+            };
+            
+            // Profesjonalna funkcja do testowania obrazka
+            window.testImage = function() {
+                console.log('🧪 PROFESJONALNY TEST OBRAZKA');
+                const image = document.getElementById('positioning-image');
+                if (image) {
+                    // Spróbuj załadować prawdziwy obrazek
+                    window.forceLoadImage();
+                } else {
+                    console.warn('❌ Nie znaleziono elementu obrazka');
+                }
+            };
+            
+            // Funkcja do ręcznej inicjalizacji
+            window.init2D = function() {
+                console.log('🔄 RĘCZNA INICJALIZACJA 2D');
+                init2DPositioning();
+            };
+            
+            // Funkcja do testowania suwaków
+            window.testSliders = function() {
+                console.log('🧪 TEST SUWAKÓW');
+                const sliders = ['posX-slider', 'posY-slider', 'scale-slider', 'rotation-slider'];
+                sliders.forEach(id => {
+                    const slider = document.getElementById(id);
+                    if (slider) {
+                        console.log(`✅ Suwak ${id} znaleziony`);
+                    } else {
+                        console.warn(`❌ Suwak ${id} NIE znaleziony`);
+                    }
+                });
+            };
+            
+            // Prosta funkcja testowa - nie zależy od projectConfig
+            // Profesjonalna funkcja testowa
+            window.simpleTest = function() {
+                console.log('🧪 PROFESJONALNY TEST');
+                
+                // Sprawdź elementy
+                const container = document.getElementById('positioning-container');
+                const image = document.getElementById('positioning-image');
+                const sliders = document.querySelectorAll('input[type="range"]');
+                
+                console.log('Elementy:', {
+                    container: !!container,
+                    image: !!image,
+                    sliders: sliders.length
+                });
+                
+                // Spróbuj załadować prawdziwy obrazek
+                if (image) {
+                    window.forceLoadImage();
+                    console.log('✅ Próba załadowania prawdziwego obrazka');
+                }
+                
+                console.log('✅ Test zakończony');
+            };
+            
+            
+            // Funkcja aktualizacji pozycji obrazka
+            function updateImagePosition() {
+                if (scene && faceMesh) {
+                    // NIE usuwaj mesh - tylko zaktualizuj jego właściwości
+                    const { x, y, scale, rotation } = projectConfig.imagePosition;
+                    
+                    // Oblicz pozycję w 3D
+                    const percentX = x / 100;
+                    const percentY = y / 100;
+                    const offsetX = percentX - 0.5;
+                    const offsetY = percentY - 0.5;
+                    
+                    // Aktualizuj offset tekstury
+                    if (faceMesh.material && faceMesh.material.map) {
+                        faceMesh.material.map.offset.set(offsetX, offsetY);
+                    }
+                    
+                    // Aktualizuj skalę mesh - BEZ ograniczeń (jak było wcześniej)
+                    const userScale = scale / 100;
+                    const imgAspect = 1; // Domyślna proporcja
+                    const labelAspect = projectConfig.dimensions.width / projectConfig.dimensions.height;
+                    
+                    let scaleX, scaleY;
+                    if (imgAspect > labelAspect) {
+                        scaleY = userScale;
+                        scaleX = userScale * (labelAspect / imgAspect);
+                    } else {
+                        scaleX = userScale;
+                        scaleY = userScale * (imgAspect / labelAspect);
+                    }
+                    
+                    faceMesh.scale.set(scaleX, scaleY, 1);
+                    
+                    // Aktualizuj obrót
+                    const rotationRad = (rotation * Math.PI) / 180;
+                    if (faceMesh.material && faceMesh.material.map) {
+                        faceMesh.material.map.rotation = -rotationRad;
+                    }
+                    
+                    console.log('✅ Pozycjonowanie obrazka zaktualizowane (bez klonowania):', {
+                        offset: { x: offsetX, y: offsetY },
+                        scale: { x: scaleX, y: scaleY },
+                        rotation: rotationRad,
+                        meshCount: labelGroup.children.length
+                    });
+                } else {
+                    console.warn('⚠️ Nie można zaktualizować pozycji - brak sceny lub mesh');
+                }
+            }
+            
+            
+            // FUNKCJA TESTOWA: Wymuś aktualizację pozycji
+            window.forceUpdatePosition = function(x, y, scale, rotation) {
+                const newPos = {
+                    x: x || 20,
+                    y: y || 50,
+                    scale: scale || 60,
+                    rotation: rotation || 0
+                };
+                
+                console.log('🔄 WYMUSZAM AKTUALIZACJĘ POZYCJI:', newPos);
+                
+                // Zaktualizuj projectConfig
+                projectConfig.imagePosition = newPos;
+                console.log('✅ projectConfig.imagePosition zaktualizowany:', projectConfig.imagePosition);
+                
+                // Zapisz do localStorage
+                localStorage.setItem('imagePosition', JSON.stringify(newPos));
+                
+                // Wymuś ponowne renderowanie
+                if (scene && faceMesh) {
+                    console.log('🔄 Usuwam stary faceMesh...');
+                    scene.remove(faceMesh);
+                    
+                    console.log('🔄 Tworzę nowy kształt...');
+                    const shape = createLabelShape(
+                        projectConfig.shape,
+                        projectConfig.dimensions.width,
+                        projectConfig.dimensions.height
+                    );
+                    
+                    console.log('🔄 Dodaję nowy obrazek...');
+                    addArtworkToLabel(shape, 2);
+                    
+                    console.log('✅ Pozycja wymuszona!');
+                } else {
+                    console.warn('⚠️ Scena lub faceMesh nie istnieje!');
+                }
+            };
+
             // Czyszczenie zasobów przy opuszczaniu strony
             window.addEventListener('beforeunload', function() {
                 isAnimating = false;
@@ -1922,6 +3245,66 @@
                         window.location.href = "{{ route('checkout') }}";
                     });
                 }
+                
+                // Dodaj interaktywne pozycjonowanie po załadowaniu sceny
+                setTimeout(() => {
+                    console.log('⏰ Wywołuję inicjalizację 2D po 1 sekundzie');
+                    console.log('🔍 projectConfig przed inicjalizacją:', projectConfig);
+                    if (typeof init2DPositioning === 'function') {
+                        init2DPositioning();
+                    } else {
+                        console.warn('⚠️ Funkcja init2DPositioning nie istnieje');
+                    }
+                }, 1000);
+                
+                // Dodatkowa inicjalizacja po 3 sekundach na wypadek problemów
+                setTimeout(() => {
+                    console.log('⏰ Dodatkowa inicjalizacja 2D po 3 sekundach');
+                    init2DPositioning();
+                }, 3000);
+                
+        // Profesjonalna inicjalizacja po 2 sekundach
+        setTimeout(() => {
+            console.log('⏰ Profesjonalna inicjalizacja po 2 sekundach');
+            if (typeof window.forceLoadImage === 'function') {
+                window.forceLoadImage();
+            }
+            if (typeof window.monitorImage === 'function') {
+                window.monitorImage();
+            }
+        }, 2000);
+                
+        // Profesjonalna inicjalizacja kontenera 2D po 3 sekundach
+        setTimeout(() => {
+            console.log('⏰ Profesjonalna inicjalizacja kontenera 2D po 3 sekundach');
+            const container = document.getElementById('positioning-container');
+            const image = document.getElementById('positioning-image');
+            
+            if (container && image) {
+                console.log('✅ Elementy kontenera 2D znalezione');
+                
+                // Zawsze próbuj załadować prawdziwy obrazek
+                if (typeof window.forceLoadImage === 'function') {
+                    window.forceLoadImage();
+                } else {
+                    console.warn('⚠️ Funkcja forceLoadImage nie jest dostępna');
+                }
+            } else {
+                console.warn('⚠️ Nie znaleziono elementów kontenera 2D');
+            }
+        }, 3000);
+                
+                // Debug systemu po 4 sekundach
+                setTimeout(() => {
+                    console.log('⏰ Debug systemu po 4 sekundach');
+                    window.debugSystem();
+                }, 4000);
+                
+                // Test obrazka po 5 sekundach
+                setTimeout(() => {
+                    console.log('⏰ Test obrazka po 5 sekundach');
+                    window.testImage();
+                }, 5000);
             });
         </script>
     @endpush

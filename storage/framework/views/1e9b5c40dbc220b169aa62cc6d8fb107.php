@@ -43,9 +43,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Linia łącząca -->
-                            <div x-show="step < totalSteps" class="w-full h-1 absolute top-5 left-10"
-                                :class="currentStep > step ? 'bg-orange-600' : 'bg-gray-200'"></div>
+                            
                         </div>
                     </div>
                 </template>
@@ -709,73 +707,11 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
 
-                        <!-- Prawa kolumna - podgląd obrazka z możliwością pozycjonowania -->
+                        <!-- Prawa kolumna - podgląd obrazka (tylko wybór, bez pozycjonowania) -->
                         <div
                             class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center shadow-inner transform transition-all duration-300 hover:shadow-lg relative h-[300px]">
                             <div class="relative w-full h-full min-h-[200px] flex items-center justify-center">
-                                <div x-data="{
-                                    dragging: false,
-                                    posX: <?php if ((object) ('imagePositionX') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imagePositionX'->value()); ?>')<?php echo e('imagePositionX'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imagePositionX'); ?>')<?php endif; ?>.defer || 50,
-                                    posY: <?php if ((object) ('imagePositionY') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imagePositionY'->value()); ?>')<?php echo e('imagePositionY'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imagePositionY'); ?>')<?php endif; ?>.defer || 50,
-                                    scale: <?php if ((object) ('imageScale') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageScale'->value()); ?>')<?php echo e('imageScale'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageScale'); ?>')<?php endif; ?>.defer || 100,
-                                    rotation: <?php if ((object) ('imageRotation') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageRotation'->value()); ?>')<?php echo e('imageRotation'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('imageRotation'); ?>')<?php endif; ?>.defer || 0,
-                                    startDrag(e) {
-                                        if (e.target.classList.contains('img-control')) return;
-                                        this.dragging = true;
-                                        this.altMode = e.altKey; // Dodaj tryb obracania
-                                        this.startX = e.clientX;
-                                        this.startY = e.clientY;
-                                        this.initRotation = this.rotation;
-                                        this.initPosX = this.posX;
-                                        this.initPosY = this.posY;
-                                        e.preventDefault();
-                                    },
-                                    drag(e) {
-                                        if (!this.dragging) return;
-                                        if (this.altMode) {
-                                            // Obracanie wokół środka container
-                                            const container = e.currentTarget.getBoundingClientRect();
-                                            const centerX = container.left + container.width / 2;
-                                            const centerY = container.top + container.height / 2;
-                                            const angleStart = Math.atan2(this.startY - centerY, this.startX - centerX);
-                                            const angleNow = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-                                            this.rotation = this.initRotation + ((angleNow - angleStart) * 180 / Math.PI);
-                                        } else {
-                                            // Standardowy drag dla pozycjonowania
-                                            const container = e.currentTarget.getBoundingClientRect();
-                                            const x = (e.clientX - container.left) / container.width * 100;
-                                            const y = (e.clientY - container.top) / container.height * 100;
-                                            this.posX = Math.min(Math.max(x, 0), 100);
-                                            this.posY = Math.min(Math.max(y, 0), 100);
-                                        }
-                                        localStorage.setItem('imagePosition', JSON.stringify({
-                                            x: this.posX,
-                                            y: this.posY,
-                                            scale: this.scale,
-                                            rotation: this.rotation
-                                        }));
-                                    },
-                                    endDrag() {
-                                        this.dragging = false;
-                                        this.altMode = false;
-                                    },
-                                
-                                    updateScale(delta) {
-                                        this.scale = Math.min(Math.max(this.scale + delta, 20), 200);
-                                    },
-                                    updateRotation(delta) {
-                                        this.rotation = (this.rotation + delta) % 360;
-                                        if (this.rotation < 0) this.rotation += 360;
-                                        localStorage.setItem('imagePosition', JSON.stringify({
-                                            x: this.posX,
-                                            y: this.posY,
-                                            scale: this.scale,
-                                            rotation: this.rotation
-                                        }));
-                                    },
-                                }" @mousedown="startDrag" @mousemove="drag"
-                                    @mouseup="endDrag" @mouseleave="endDrag"
-                                    class="absolute inset-0 bg-checkerboard cursor-move">
+                                <div class="absolute inset-0 bg-checkerboard flex items-center justify-center">
                                     <!-- Wyświetlanie kształtu etykiety w zależności od wyboru użytkownika -->
                                     <div class="absolute inset-0 flex items-center justify-center">
                                         <?php
@@ -853,111 +789,41 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                                         <!-- Kształt etykiety -->
                                         <!--[if BLOCK]><![endif]--><?php if($shapeType == 'circle'): ?>
-                                            <div class="rounded-full shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
+                                            <div class="label-preview rounded-full shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
                                                 style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayWidth); ?>px;">
                                             </div>
                                         <?php elseif($shapeType == 'oval'): ?>
-                                            <div class="rounded-full shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
+                                            <div class="label-preview rounded-full shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
                                                 style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayHeight); ?>px;">
                                             </div>
                                         <?php elseif($shapeType == 'square'): ?>
-                                            <div class="rounded-lg shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
+                                            <div class="label-preview rounded-lg shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
                                                 style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayWidth); ?>px;">
                                             </div>
                                         <?php elseif($shapeType == 'star'): ?>
-                                            <div class="shadow-lg <?php echo e($materialClass); ?>"
+                                            <div class="label-preview shadow-lg <?php echo e($materialClass); ?>"
                                                 style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayHeight); ?>px; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);">
                                             </div>
                                         <?php else: ?>
                                             <!-- Domyślny prostokąt -->
-                                            <div class="rounded-lg shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
-                                                style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayHeight); ?>px;">
                                             </div>
                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </div>
 
-                                    <!-- Grafika nakładana na etykietę -->
+                                    <!-- Grafika nakładana na etykietę (tylko podgląd, bez pozycjonowania) -->
                                     <!--[if BLOCK]><![endif]--><?php if($tempArtworkPath): ?>
                                         <img src="/storage/<?php echo e($tempArtworkPath); ?>" alt="Podgląd grafiki"
-                                            class="absolute transform-gpu transition-transform duration-200 opacity-90"
-                                            :style="`
-                                                                    left: ${posX}%;
-                                                                    top: ${posY}%;
-                                                                    transform: translate(-50%, -50%) scale(${scale/100}) rotate(${rotation}deg);
-                                                                    max-width: 90%;
-                                                                    max-height: 90%;
-                                                                    object-fit: contain;
-                                                                 `"
+                                            class="max-w-[80%] max-h-[80%] object-contain opacity-90"
                                             onerror="this.onerror=null; this.src='/images/placeholder-image.png';">
-
-                                        <!-- Panel sterowania skalą i obrotem -->
-                                        <div
-                                            class="absolute z-50 bottom-4 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-lg shadow-xl border border-orange-200 rounded-xl p-4 flex flex-col md:flex-row space-x-0 md:space-x-8 space-y-4 md:space-y-0 items-center w-[97%] max-w-2xl">
-                                            <!-- Przyciski skalowania -->
-                                            <div class="flex items-center space-x-2">
-                                                <button type="button" @click="updateScale(-10)"
-                                                    class="img-control w-10 h-10 flex items-center justify-center bg-orange-100 rounded-lg border border-orange-200 shadow hover:bg-orange-200 active:scale-95 transition-all"
-                                                    aria-label="Pomniejsz">
-                                                    <svg class="w-6 h-6 text-orange-700" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M18 12H6" />
-                                                    </svg>
-                                                </button>
-                                                <span class="px-2 text-sm text-gray-700">Skala</span>
-                                                <button type="button" @click="updateScale(10)"
-                                                    class="img-control w-10 h-10 flex items-center justify-center bg-orange-100 rounded-lg border border-orange-200 shadow hover:bg-orange-200 active:scale-95 transition-all"
-                                                    aria-label="Powiększ">
-                                                    <svg class="w-6 h-6 text-orange-700" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                    </svg>
-                                                </button>
-                                                <span
-                                                    class="ml-3 text-xs text-gray-500 bg-white rounded px-2 py-1 border select-none"
-                                                    x-text="scale + '%'"></span>
-                                            </div>
-
-                                            <!-- Suwak obrotu -->
-                                            <div class="flex items-center space-x-2 w-full md:w-auto">
-                                                <label for="rotation-slider"
-                                                    class="text-sm text-gray-700">Obrót</label>
-                                                <input id="rotation-slider" type="range" min="0"
-                                                    max="360" step="1" x-model="rotation"
-                                                    @input="localStorage.setItem('imagePosition', JSON.stringify({ x: posX, y: posY, scale: scale, rotation: rotation }))"
-                                                    @mousedown.stop @touchstart.stop
-                                                    class="w-36 h-2 accent-orange-500 bg-gray-200 rounded-lg appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-orange-300">
-                                                <!-- Wartość obrotu z edycją -->
-                                                <input type="number" min="0" max="360" step="1"
-                                                    x-model="rotation"
-                                                    @mouseup="localStorage.setItem('imagePosition', JSON.stringify({ x: posX, y: posY, scale: scale, rotation: rotation }))"
-                                                    class="w-14 ml-2 text-sm px-2 py-1 border rounded focus:border-orange-400 focus:ring focus:ring-orange-300 bg-white text-gray-700 transition-all"
-                                                    style="text-align: right;">
-                                                <span class="ml-1 text-gray-700 text-sm select-none">°</span>
-                                            </div>
-                                        </div>
-
-
-                                        <div
-                                            class="absolute top-2 left-2 bg-white/70 backdrop-blur-sm rounded-lg p-2 text-xs text-gray-700">
-                                            Przeciągnij aby ustawić | Użyj przycisków do skalowania i obracania
-                                        </div>
                                     <?php else: ?>
-                                        <div class="absolute inset-0 flex items-center justify-center">
-                                            <div class="text-center p-4 bg-white/70 backdrop-blur-sm rounded-lg">
-                                                <div class="text-gray-500 mb-2">
-                                                    <svg class="w-10 h-10 mx-auto" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                        </path>
-                                                    </svg>
-                                                </div>
-                                                <p class="text-gray-600">Dodaj grafikę, aby umieścić ją na etykiecie
-                                                </p>
-                                            </div>
+                                        <div class="text-center text-gray-500">
+                                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <p class="text-sm">Wybierz plik graficzny</p>
                                         </div>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
@@ -1052,6 +918,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                     }, 300); // Zwiększono opóźnienie dla pewności załadowania komponentu
                 }
             });
+            
+            
         </script>
     </div> <!-- Zamknięcie div data-creator-section -->
 </div> <!-- Zamknięcie zewnętrznego div -->
