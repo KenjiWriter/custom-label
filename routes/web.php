@@ -34,6 +34,17 @@ Route::view('profile', 'profile')
     return view('checkout', compact('project'));
 })->name('checkout');
 
+Route::get('/order-confirmation', function () {
+    $projectId = session('project_id');
+    $project = null;
+    if ($projectId) {
+        $project = LabelProject::find($projectId);
+    } else {
+        $project = LabelProject::latest()->first();
+    }
+    return view('order-confirmation', compact('project'));
+})->name('order.confirmation');
+
 
 Route::get('/login', function() {
     return view('login-page');

@@ -103,60 +103,34 @@
                     </div>
 
                     <!-- Payment Methods -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Payment Method</h3>
-                        <div class="space-y-3">
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h3 class="text-base font-semibold text-gray-900 mb-3">Wybierz metodę płatności</h3>
+                        <div class="space-y-2">
                             <!-- Credit/Debit Card -->
-                            <div class="space-y-3">
+                            <div class="space-y-2">
                                 <label class="relative cursor-pointer">
                                     <input type="radio" name="payment_method" value="card" checked class="sr-only">
-                                    <div class="relative overflow-hidden rounded-lg border-2 border-orange-600 bg-gradient-to-br from-orange-50 to-orange-100 transition-all duration-300 hover:shadow-lg">
-                                        <!-- Credit Card Visual -->
-                                        <div class="relative p-4">
-                                            <div class="flex items-center justify-between mb-3">
+                                    <div class="relative overflow-hidden rounded-lg border-2 border-orange-600 bg-orange-50 transition-all duration-200 hover:shadow-md">
+                                        <div class="relative p-3">
+                                            <div class="flex items-center justify-between">
                                                 <div class="flex items-center">
-                                                    <div class="w-4 h-4 border-2 border-orange-600 rounded-full bg-orange-600 flex items-center justify-center mr-2">
+                                                    <div class="w-4 h-4 border-2 border-orange-600 rounded-full bg-orange-600 flex items-center justify-center mr-3">
                                                         <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
                                                     </div>
-                                                    <span class="font-semibold text-gray-900">Credit/Debit Card</span>
+                                                    <span class="font-medium text-gray-900">Karta kredytowa/debetowa</span>
                                                 </div>
                                                 <div class="flex space-x-1">
-                                                    <img src="https://img.icons8.com/color/16/000000/visa.png" alt="Visa" class="opacity-80">
-                                                    <img src="https://img.icons8.com/color/16/000000/mastercard.png" alt="Mastercard" class="opacity-80">
-                                                    <img src="https://img.icons8.com/color/16/000000/amex.png" alt="Amex" class="opacity-80">
+                                                    <img src="https://img.icons8.com/color/16/000000/visa.png" alt="Visa" class="opacity-70">
+                                                    <img src="https://img.icons8.com/color/16/000000/mastercard.png" alt="Mastercard" class="opacity-70">
+                                                    <img src="https://img.icons8.com/color/16/000000/amex.png" alt="Amex" class="opacity-70">
                                                 </div>
-                                            </div>
-                                            
-                                            <!-- Mini Credit Card Preview -->
-                                            <div class="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded p-3 text-white shadow">
-                                                <div class="flex justify-between items-start mb-2">
-                                                    <div class="text-xs opacity-75">CARD NUMBER</div>
-                                                    <div class="w-6 h-4 bg-white rounded opacity-20"></div>
-                                                </div>
-                                                <div class="text-xs font-mono tracking-wider mb-2">•••• •••• •••• 1234</div>
-                                                <div class="flex justify-between items-end">
-                                                    <div>
-                                                        <div class="text-xs opacity-75">EXP</div>
-                                                        <div class="text-xs">12/25</div>
-                                                    </div>
-                                                    <div class="text-xs opacity-75">CVV</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="mt-2 text-xs text-gray-600">
-                                                <span class="inline-flex items-center">
-                                                    <svg class="w-3 h-3 mr-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                                    </svg>
-                                                    Secure & Encrypted
-                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </label>
                                 
                                 <!-- Card Information Form -->
-                                <div id="card-info" class="bg-white rounded-lg shadow-sm p-4 border border-orange-200">
+                                <div id="card-info" class="bg-white rounded-lg shadow-sm p-4 border border-orange-200 transition-all duration-300 ease-in-out">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-sm font-semibold text-gray-900">Card Information</h3>
                                         <div class="flex items-center text-green-600">
@@ -211,59 +185,42 @@
                                         <div class="grid grid-cols-2 gap-3">
                                             <div>
                                                 <label class="block text-xs font-medium text-gray-700 mb-1">Expiry</label>
-                                                <input type="text" id="card-expiry" placeholder="MM/YY" 
+                                                <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5"
                                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
+                                                <div id="expiry-error" class="text-xs text-red-600 mt-1 hidden"></div>
                                             </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-700 mb-1">CVV</label>
-                                                <input type="text" id="card-cvv" placeholder="123" 
-                                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
-                                            </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">CVV</label>
+                        <input type="text" id="card-cvv" placeholder="123" maxlength="3"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
+                        <div id="cvv-error" class="text-xs text-red-600 mt-1 hidden"></div>
+                    </div>
                                         </div>
                                         
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Cardholder Name</label>
                                             <input type="text" id="card-name" placeholder="John Doe" 
                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
+                                            <div id="name-error" class="text-xs text-red-600 mt-1 hidden"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- PayPal -->
-                            <div class="space-y-3">
+                            <div class="space-y-2">
                                 <label class="relative cursor-pointer">
                                     <input type="radio" name="payment_method" value="paypal" class="sr-only">
-                                    <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100 transition-all duration-300 hover:border-blue-400 hover:shadow-lg">
-                                        <div class="p-4">
-                                            <div class="flex items-center justify-between mb-3">
+                                    <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 bg-blue-50 transition-all duration-200 hover:border-blue-400 hover:shadow-md">
+                                        <div class="p-3">
+                                            <div class="flex items-center justify-between">
                                                 <div class="flex items-center">
-                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-2"></div>
-                                                    <span class="font-semibold text-gray-900">PayPal</span>
-                                                    <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Express</span>
+                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
+                                                    <span class="font-medium text-gray-900">PayPal</span>
+                                                    <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Express</span>
                                                 </div>
-                                                <div class="w-8 h-6 bg-gradient-to-r from-blue-600 to-blue-800 rounded flex items-center justify-center">
+                                                <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
                                                     <span class="text-white font-bold text-xs">PP</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- PayPal Visual -->
-                                            <div class="bg-white rounded p-3 shadow-sm border border-blue-200">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.543-.676c-.978-1.01-2.4-1.35-3.92-1.35h-3.73l-.98 6.2h3.73c1.52 0 2.94-.34 3.92-1.35.978-1.01 1.35-2.42 1.35-3.92 0-.23-.02-.46-.05-.68z"/>
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-xs font-medium text-gray-900">Pay with PayPal</div>
-                                                            <div class="text-xs text-gray-500">Safe & fast</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <div class="text-xs text-green-600 font-medium">✓ Protected</div>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -271,7 +228,7 @@
                                 </label>
                                 
                                 <!-- PayPal Form -->
-                                <div id="paypal-info" class="bg-white rounded-lg shadow-sm p-4 border border-blue-200 hidden">
+                                <div id="paypal-info" class="bg-white rounded-lg shadow-sm p-4 border border-blue-200 hidden transition-all duration-300 ease-in-out">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-sm font-semibold text-gray-900">PayPal Account</h3>
                                         <div class="flex items-center text-blue-600">
@@ -304,42 +261,21 @@
                             </div>
 
                             <!-- Apple Pay -->
-                            <div class="space-y-4">
+                            <div class="space-y-2">
                                 <label class="relative cursor-pointer">
                                     <input type="radio" name="payment_method" value="applepay" class="sr-only">
-                                    <div class="relative overflow-hidden rounded-xl border-2 border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 transition-all duration-300 hover:border-gray-400 hover:shadow-lg">
-                                        <div class="p-6">
-                                            <div class="flex items-center justify-between mb-4">
+                                    <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-50 transition-all duration-200 hover:border-gray-400 hover:shadow-md">
+                                        <div class="p-3">
+                                            <div class="flex items-center justify-between">
                                                 <div class="flex items-center">
-                                                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3"></div>
-                                                    <span class="font-semibold text-gray-900 text-lg">Apple Pay</span>
-                                                    <span class="ml-3 px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">Touch ID</span>
+                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
+                                                    <span class="font-medium text-gray-900">Apple Pay</span>
+                                                    <span class="ml-2 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Touch ID</span>
                                                 </div>
-                                                <div class="w-12 h-8 bg-black rounded flex items-center justify-center">
-                                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                <div class="w-6 h-6 bg-black rounded flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.11-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                                                     </svg>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Apple Pay Visual -->
-                                            <div class="bg-black rounded-lg p-4 text-white">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center space-x-3">
-                                                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.11-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-sm font-medium">Pay with Apple Pay</div>
-                                                            <div class="text-xs opacity-75">Touch ID or Face ID</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <div class="text-xs opacity-75">Instant</div>
-                                                        <div class="text-xs text-green-400 font-medium">✓ Secure</div>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -347,7 +283,7 @@
                                 </label>
                                 
                                 <!-- Apple Pay Form -->
-                                <div id="applepay-info" class="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hidden">
+                                <div id="applepay-info" class="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hidden transition-all duration-300 ease-in-out">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-sm font-semibold text-gray-900">Apple Pay Account</h3>
                                         <div class="flex items-center text-gray-600">
@@ -380,19 +316,19 @@
                             </div>
 
                             <!-- Google Pay -->
-                            <div class="space-y-4">
+                            <div class="space-y-2">
                                 <label class="relative cursor-pointer">
                                     <input type="radio" name="payment_method" value="googlepay" class="sr-only">
-                                    <div class="relative overflow-hidden rounded-xl border-2 border-gray-200 bg-gradient-to-br from-red-50 to-red-100 transition-all duration-300 hover:border-red-400 hover:shadow-lg">
-                                        <div class="p-6">
-                                            <div class="flex items-center justify-between mb-4">
+                                    <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 bg-red-50 transition-all duration-200 hover:border-red-400 hover:shadow-md">
+                                        <div class="p-3">
+                                            <div class="flex items-center justify-between">
                                                 <div class="flex items-center">
-                                                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3"></div>
-                                                    <span class="font-semibold text-gray-900 text-lg">Google Pay</span>
-                                                    <span class="ml-3 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">One-tap</span>
+                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
+                                                    <span class="font-medium text-gray-900">Google Pay</span>
+                                                    <span class="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">One-tap</span>
                                                 </div>
-                                                <div class="w-12 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded flex items-center justify-center">
-                                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                <div class="w-6 h-6 bg-red-500 rounded flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                                                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                                                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -400,36 +336,12 @@
                                                     </svg>
                                                 </div>
                                             </div>
-                                            
-                                            <!-- Google Pay Visual -->
-                                            <div class="bg-white rounded-lg p-4 shadow-sm border border-red-200">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center space-x-3">
-                                                        <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                                                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                                                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                                                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-sm font-medium text-gray-900">Pay with Google Pay</div>
-                                                            <div class="text-xs text-gray-500">One-tap payment</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <div class="text-xs text-gray-500">Fast</div>
-                                                        <div class="text-xs text-green-600 font-medium">✓ Safe</div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </label>
                                 
                                 <!-- Google Pay Form -->
-                                <div id="googlepay-info" class="bg-white rounded-lg shadow-sm p-4 border border-red-200 hidden">
+                                <div id="googlepay-info" class="bg-white rounded-lg shadow-sm p-4 border border-red-200 hidden transition-all duration-300 ease-in-out">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-sm font-semibold text-gray-900">Google Pay Account</h3>
                                         <div class="flex items-center text-red-600">
@@ -462,94 +374,50 @@
                             </div>
 
                             <!-- Bank Transfer -->
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="payment_method" value="bank" class="sr-only">
-                                <div class="relative overflow-hidden rounded-xl border-2 border-gray-200 bg-gradient-to-br from-green-50 to-green-100 transition-all duration-300 hover:border-green-400 hover:shadow-lg">
-                                    <div class="p-6">
-                                        <div class="flex items-center justify-between mb-4">
-                                            <div class="flex items-center">
-                                                <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3"></div>
-                                                <span class="font-semibold text-gray-900 text-lg">Bank Transfer</span>
-                                                <span class="ml-3 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">2-3 business days</span>
-                                            </div>
-                                            <div class="w-12 h-8 bg-gradient-to-r from-green-600 to-green-700 rounded flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Bank Transfer Visual -->
-                                        <div class="bg-white rounded-lg p-4 shadow-sm border border-green-200">
+                            <div class="space-y-2">
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="payment_method" value="bank" class="sr-only">
+                                    <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 bg-green-50 transition-all duration-200 hover:border-green-400 hover:shadow-md">
+                                        <div class="p-3">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center space-x-3">
-                                                    <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <div class="text-sm font-medium text-gray-900">Direct Bank Transfer</div>
-                                                        <div class="text-xs text-gray-500">Traditional banking</div>
-                                                    </div>
+                                                <div class="flex items-center">
+                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
+                                                    <span class="font-medium text-gray-900">Przelew bankowy</span>
+                                                    <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">2-3 dni</span>
                                                 </div>
-                                                <div class="text-right">
-                                                    <div class="text-xs text-gray-500">2-3 days</div>
-                                                    <div class="text-xs text-green-600 font-medium">✓ Reliable</div>
+                                                <div class="w-6 h-6 bg-green-600 rounded flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                                    </svg>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </label>
+                                </label>
+                            </div>
 
                             <!-- Cryptocurrency -->
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="payment_method" value="crypto" class="sr-only">
-                                <div class="relative overflow-hidden rounded-xl border-2 border-gray-200 bg-gradient-to-br from-purple-50 to-purple-100 transition-all duration-300 hover:border-purple-400 hover:shadow-lg">
-                                    <div class="p-6">
-                                        <div class="flex items-center justify-between mb-4">
-                                            <div class="flex items-center">
-                                                <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3"></div>
-                                                <span class="font-semibold text-gray-900 text-lg">Cryptocurrency</span>
-                                                <span class="ml-3 px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">BTC, ETH, LTC</span>
-                                            </div>
-                                            <div class="w-12 h-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Crypto Visual -->
-                                        <div class="bg-white rounded-lg p-4 shadow-sm border border-purple-200">
+                            <div class="space-y-2">
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="payment_method" value="crypto" class="sr-only">
+                                    <div class="relative overflow-hidden rounded-lg border-2 border-gray-200 bg-purple-50 transition-all duration-200 hover:border-purple-400 hover:shadow-md">
+                                        <div class="p-3">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center space-x-3">
-                                                    <div class="flex space-x-1">
-                                                        <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                                                            <span class="text-white text-xs font-bold">₿</span>
-                                                        </div>
-                                                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                                                            <span class="text-white text-xs font-bold">Ξ</span>
-                                                        </div>
-                                                        <div class="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
-                                                            <span class="text-white text-xs font-bold">Ł</span>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="text-sm font-medium text-gray-900">Pay with Crypto</div>
-                                                        <div class="text-xs text-gray-500">Bitcoin, Ethereum, Litecoin</div>
-                                                    </div>
+                                                <div class="flex items-center">
+                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
+                                                    <span class="font-medium text-gray-900">Kryptowaluty</span>
+                                                    <span class="ml-2 px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">BTC, ETH, LTC</span>
                                                 </div>
-                                                <div class="text-right">
-                                                    <div class="text-xs text-gray-500">Instant</div>
-                                                    <div class="text-xs text-purple-600 font-medium">✓ Decentralized</div>
+                                                <div class="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                                    </svg>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </label>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -624,20 +492,30 @@
                         <div class="border-t pt-4">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-700">Ilość</span>
-                                <div class="flex items-center">
-                                    <button type="button" id="quantity-decrease" class="p-2 rounded-l-lg bg-orange-100 text-orange-600 border border-r-0 border-orange-200 hover:bg-orange-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                <div class="relative">
+                                    <button type="button" id="quantity-dropdown" class="flex items-center justify-between w-32 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        <span id="quantity-display"><?php echo e($project->quantity ?? 1); ?> sztuk</span>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
                                     </button>
-                                    <input type="number" id="quantity-input" value="<?php echo e($project->quantity ?? 1); ?>" min="1" max="10000" 
-                                           class="w-20 text-center py-2 border-y border-orange-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
-                                    <button type="button" id="quantity-increase" class="p-2 rounded-r-lg bg-orange-100 text-orange-600 border border-l-0 border-orange-200 hover:bg-orange-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </svg>
-                                    </button>
-                                    <span class="ml-2 text-gray-600 text-sm">sztuk</span>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div id="quantity-menu" class="absolute right-0 mt-1 w-40 bg-white border border-gray-300 rounded-lg shadow-lg z-10 hidden">
+                                        <div class="py-1">
+                                            <?php for($i = 1; $i <= 20; $i++): ?>
+                                                <button type="button" class="quantity-option w-full px-3 py-2 text-sm text-left hover:bg-gray-100 <?php echo e($i == ($project->quantity ?? 1) ? 'bg-orange-50 text-orange-600' : 'text-gray-700'); ?>" data-value="<?php echo e($i); ?>">
+                                                    <?php echo e($i); ?> <?php echo e($i == 1 ? 'sztuka' : 'sztuk'); ?>
+
+                                                </button>
+                                            <?php endfor; ?>
+                                            <div class="border-t border-gray-200">
+                                                <button type="button" class="quantity-option w-full px-3 py-2 text-sm text-left hover:bg-gray-100 text-gray-700" data-value="custom">
+                                                    Własna ilość...
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mt-2 text-xs text-gray-500">
@@ -845,21 +723,57 @@
                         }
                     });
                     
-                    // Hide all forms
-                    [cardInfo, paypalInfo, applepayInfo, googlepayInfo].forEach(form => {
-                        if (form) form.classList.add('hidden');
+                    // Smooth transition between forms
+                    const allForms = [cardInfo, paypalInfo, applepayInfo, googlepayInfo];
+                    
+                    // Hide all forms with animation
+                    allForms.forEach(form => {
+                        if (form && !form.classList.contains('hidden')) {
+                            form.style.opacity = '0';
+                            form.style.transform = 'translateY(-10px)';
+                            setTimeout(() => {
+                                form.classList.add('hidden');
+                            }, 150);
+                        }
                     });
                     
-                    // Show selected form
-                    if (this.value === 'card' && cardInfo) {
-                        cardInfo.classList.remove('hidden');
-                    } else if (this.value === 'paypal' && paypalInfo) {
-                        paypalInfo.classList.remove('hidden');
-                    } else if (this.value === 'applepay' && applepayInfo) {
-                        applepayInfo.classList.remove('hidden');
-                    } else if (this.value === 'googlepay' && googlepayInfo) {
-                        googlepayInfo.classList.remove('hidden');
-                    }
+                    // Show selected form with animation
+                    setTimeout(() => {
+                        let selectedForm = null;
+                        if (this.value === 'card' && cardInfo) {
+                            selectedForm = cardInfo;
+                        } else if (this.value === 'paypal' && paypalInfo) {
+                            selectedForm = paypalInfo;
+                        } else if (this.value === 'applepay' && applepayInfo) {
+                            selectedForm = applepayInfo;
+                        } else if (this.value === 'googlepay' && googlepayInfo) {
+                            selectedForm = googlepayInfo;
+                        }
+                        
+                        if (selectedForm) {
+                            selectedForm.classList.remove('hidden');
+                            selectedForm.style.opacity = '0';
+                            selectedForm.style.transform = 'translateY(-10px)';
+                            
+                            // Trigger reflow
+                            selectedForm.offsetHeight;
+                            
+                            selectedForm.style.opacity = '1';
+                            selectedForm.style.transform = 'translateY(0)';
+                            
+                            // Scroll to the payment methods section instead of the form
+                            setTimeout(() => {
+                                const paymentSection = document.querySelector('.bg-white.rounded-xl.shadow-sm.p-4');
+                                if (paymentSection) {
+                                    paymentSection.scrollIntoView({ 
+                                        behavior: 'smooth', 
+                                        block: 'start',
+                                        inline: 'nearest'
+                                    });
+                                }
+                            }, 100);
+                        }
+                    }, 200);
                 });
             });
             
@@ -923,26 +837,7 @@
                     }
                     
                     // Validate expiry date
-                    if (value.length === 5) {
-                        const [month, year] = value.split('/');
-                        const currentDate = new Date();
-                        const currentYear = currentDate.getFullYear() % 100;
-                        const currentMonth = currentDate.getMonth() + 1;
-                        
-                        if (parseInt(month) >= 1 && parseInt(month) <= 12 && 
-                            (parseInt(year) > currentYear || (parseInt(year) === currentYear && parseInt(month) >= currentMonth))) {
-                            e.target.classList.add('form-success');
-                            e.target.classList.remove('form-error');
-                        } else {
-                            e.target.classList.add('form-error');
-                            e.target.classList.remove('form-success');
-                        }
-                    } else if (value.length > 0) {
-                        e.target.classList.add('form-error');
-                        e.target.classList.remove('form-success');
-                    } else {
-                        e.target.classList.remove('form-error', 'form-success');
-                    }
+                    validateExpiryDate(value);
                 });
             }
             
@@ -962,15 +857,8 @@
                         cardDisplayCvv.textContent = '•••';
                     }
                     
-                    if (value.length >= 3) {
-                        e.target.classList.add('form-success');
-                        e.target.classList.remove('form-error');
-                    } else if (value.length > 0) {
-                        e.target.classList.add('form-error');
-                        e.target.classList.remove('form-success');
-                    } else {
-                        e.target.classList.remove('form-error', 'form-success');
-                    }
+                    // Validate CVV
+                    validateCVV(value);
                 });
             }
             
@@ -980,59 +868,62 @@
             
             if (nameInput && cardDisplayName) {
                 nameInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    
                     // Update visual card
-                    if (e.target.value.length > 0) {
-                        cardDisplayName.textContent = e.target.value.toUpperCase();
+                    if (value.length > 0) {
+                        cardDisplayName.textContent = value.toUpperCase();
                     } else {
                         cardDisplayName.textContent = 'FULL NAME';
                     }
                     
-                    if (e.target.value.length >= 2) {
-                        e.target.classList.add('form-success');
-                        e.target.classList.remove('form-error');
-                    } else if (e.target.value.length > 0) {
-                        e.target.classList.add('form-error');
-                        e.target.classList.remove('form-success');
-                    } else {
-                        e.target.classList.remove('form-error', 'form-success');
-                    }
+                    // Validate name
+                    validateCardholderName(value);
                 });
             }
             
-            // Quantity controls
-            const quantityInput = document.getElementById('quantity-input');
-            const quantityDecrease = document.getElementById('quantity-decrease');
-            const quantityIncrease = document.getElementById('quantity-increase');
+            // Quantity dropdown
+            const quantityDropdown = document.getElementById('quantity-dropdown');
+            const quantityMenu = document.getElementById('quantity-menu');
+            const quantityDisplay = document.getElementById('quantity-display');
+            const quantityOptions = document.querySelectorAll('.quantity-option');
             
-            if (quantityInput && quantityDecrease && quantityIncrease) {
-                quantityDecrease.addEventListener('click', function() {
-                    let currentValue = parseInt(quantityInput.value) || 1;
-                    if (currentValue > 1) {
-                        quantityInput.value = currentValue - 1;
-                        updateOrderSummary();
-                    }
+            if (quantityDropdown && quantityMenu && quantityDisplay) {
+                // Toggle dropdown
+                quantityDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    quantityMenu.classList.toggle('hidden');
                 });
                 
-                quantityIncrease.addEventListener('click', function() {
-                    let currentValue = parseInt(quantityInput.value) || 1;
-                    if (currentValue < 10000) {
-                        quantityInput.value = currentValue + 1;
-                        updateOrderSummary();
-                    }
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    quantityMenu.classList.add('hidden');
                 });
                 
-                quantityInput.addEventListener('input', function() {
-                    let value = parseInt(this.value) || 1;
-                    if (value < 1) value = 1;
-                    if (value > 10000) value = 10000;
-                    this.value = value;
-                    updateOrderSummary();
+                // Handle option selection
+                quantityOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        const value = this.dataset.value;
+                        
+                        if (value === 'custom') {
+                            const customValue = prompt('Wprowadź własną ilość (1-10000):', quantityDisplay.textContent.split(' ')[0]);
+                            if (customValue && !isNaN(customValue) && customValue >= 1 && customValue <= 10000) {
+                                quantityDisplay.textContent = customValue + ' sztuk';
+                                updateOrderSummary();
+                            }
+                        } else {
+                            quantityDisplay.textContent = value + ' sztuk';
+                            updateOrderSummary();
+                        }
+                        
+                        quantityMenu.classList.add('hidden');
+                    });
                 });
             }
             
             // Update order summary function
             function updateOrderSummary() {
-                const quantity = parseInt(quantityInput.value) || 1;
+                const quantity = parseInt(quantityDisplay.textContent.split(' ')[0]) || 1;
                 const basePrice = <?php echo e($project->calculated_price ?? 0); ?> / <?php echo e($project->quantity ?? 1); ?>;
                 const newTotal = basePrice * quantity * 1.23;
                 
@@ -1136,9 +1027,9 @@
             // Payment processing modal
             function showPaymentProcessing(method) {
                 const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.className = 'fixed inset-0 flex items-center justify-center z-50';
                 modal.innerHTML = `
-                    <div class="bg-white rounded-2xl p-8 max-w-md mx-auto text-center animate-pop">
+                    <div class="bg-white rounded-2xl p-8 max-w-md mx-auto text-center animate-pop shadow-2xl border border-gray-200">
                         <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-orange-600 loading-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -1185,27 +1076,27 @@
             // Payment success modal
             function showPaymentSuccess() {
                 const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.className = 'fixed inset-0 flex items-center justify-center z-50';
                 modal.innerHTML = `
-                    <div class="bg-white rounded-2xl p-8 max-w-md mx-auto text-center animate-pop">
+                    <div class="bg-white rounded-2xl p-8 max-w-md mx-auto text-center animate-pop shadow-2xl border border-gray-200">
                         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">Płatność zakończona pomyślnie!</h3>
-                        <p class="text-gray-600 mb-6">Dziękujemy za złożenie zamówienia. Potwierdzenie zostało wysłane na Twój e-mail.</p>
-                        <div class="space-y-3">
-                            <button onclick="this.closest('.fixed').remove()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
-                                Zamknij
-                            </button>
-                            <button onclick="window.location.href='<?php echo e(route('home')); ?>'" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-lg transition-colors">
-                                Wróć do strony głównej
-                            </button>
+                        <p class="text-gray-600 mb-6">Przekierowujemy do potwierdzenia zamówienia...</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                            <div class="bg-green-600 h-2 rounded-full animate-pulse" style="width: 100%"></div>
                         </div>
                     </div>
                 `;
                 document.body.appendChild(modal);
+                
+                // Redirect to confirmation page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/order-confirmation';
+                }, 2000);
             }
             
             // Get payment method name
@@ -1219,6 +1110,123 @@
                     'crypto': 'Kryptowaluta'
                 };
                 return names[method] || method;
+            }
+            
+            // Expiry date validation function
+            function validateExpiryDate(expiry) {
+                const expiryError = document.getElementById('expiry-error');
+                
+                if (!expiry || expiry.length < 5) {
+                    hideError(expiryError);
+                    return true;
+                }
+                
+                const [month, year] = expiry.split('/');
+                const currentDate = new Date();
+                const currentYear = currentDate.getFullYear() % 100; // Get last 2 digits
+                const currentMonth = currentDate.getMonth() + 1;
+                
+                const cardMonth = parseInt(month);
+                const cardYear = parseInt(year);
+                const cardFullYear = 2000 + cardYear;
+                
+                // Check if month is valid (1-12)
+                if (cardMonth < 1 || cardMonth > 12) {
+                    showError(expiryError, 'Niepoprawny miesiąc (1-12)');
+                    return false;
+                }
+                
+                // Check if card is not expired (within 2 years)
+                const cardDate = new Date(cardFullYear, cardMonth - 1);
+                const twoYearsAgo = new Date(currentDate.getFullYear() - 2, currentDate.getMonth());
+                
+                if (cardDate < twoYearsAgo) {
+                    showError(expiryError, 'Karta jest przedawniona. Proszę użyć innej karty.');
+                    return false;
+                }
+                
+                // Check if card is expired (past current month/year)
+                if (cardYear < currentYear || (cardYear === currentYear && cardMonth < currentMonth)) {
+                    showError(expiryError, 'Karta jest przedawniona. Proszę użyć innej karty.');
+                    return false;
+                }
+                
+                hideError(expiryError);
+                return true;
+            }
+            
+            // CVV validation function
+            function validateCVV(cvv) {
+                const cvvError = document.getElementById('cvv-error');
+                const cardDisplayCvv = document.getElementById('card-display-cvv');
+                
+                if (!cvv) {
+                    hideError(cvvError);
+                    if (cardDisplayCvv) {
+                        cardDisplayCvv.textContent = '•••';
+                    }
+                    return true;
+                }
+                
+                if (cvv.length < 3) {
+                    showError(cvvError, 'CVV musi mieć 3 cyfry');
+                    if (cardDisplayCvv) {
+                        cardDisplayCvv.textContent = '•'.repeat(cvv.length);
+                    }
+                    return false;
+                }
+                
+                if (!/^\d{3}$/.test(cvv)) {
+                    showError(cvvError, 'CVV może zawierać tylko cyfry');
+                    if (cardDisplayCvv) {
+                        cardDisplayCvv.textContent = '•'.repeat(cvv.length);
+                    }
+                    return false;
+                }
+                
+                hideError(cvvError);
+                if (cardDisplayCvv) {
+                    cardDisplayCvv.textContent = '•••';
+                }
+                return true;
+            }
+            
+            // Cardholder name validation function
+            function validateCardholderName(name) {
+                const nameError = document.getElementById('name-error');
+                
+                if (!name) {
+                    hideError(nameError);
+                    return true;
+                }
+                
+                // Check if name contains only letters, spaces, and common name characters
+                if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-']+$/.test(name)) {
+                    showError(nameError, 'Imię i nazwisko może zawierać tylko litery');
+                    return false;
+                }
+                
+                if (name.length < 2) {
+                    showError(nameError, 'Imię i nazwisko musi mieć co najmniej 2 znaki');
+                    return false;
+                }
+                
+                hideError(nameError);
+                return true;
+            }
+            
+            // Helper functions for error display
+            function showError(errorElement, message) {
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.classList.remove('hidden');
+                }
+            }
+            
+            function hideError(errorElement) {
+                if (errorElement) {
+                    errorElement.classList.add('hidden');
+                }
             }
             
             // Add CSS for animations
