@@ -289,6 +289,17 @@ public $imageRotation = 0;
         }
 
         $this->isConfigurationValid = $isValid;
+        
+        logger('Configuration check:', [
+            'selectedShape' => $this->selectedShape,
+            'selectedMaterial' => $this->selectedMaterial,
+            'quantity' => $this->quantity,
+            'useCustomSize' => $this->useCustomSize,
+            'customWidth' => $this->customWidth,
+            'customHeight' => $this->customHeight,
+            'selectedSize' => $this->selectedSize,
+            'isValid' => $isValid
+        ]);
     }
 
     public function getAvailableSizesProperty()
@@ -359,6 +370,97 @@ public $imageRotation = 0;
                 // Emituj zdarzenie, że formularz został zaktualizowany
                 $this->dispatch('formUpdated');
             }
+        }
+    }
+
+    public function goToPreview()
+    {
+        logger('goToPreview method called');
+        
+        try {
+            // Sprawdź konfigurację przed walidacją
+            $this->checkConfiguration();
+            
+            logger('Configuration valid: ' . ($this->isConfigurationValid ? 'true' : 'false'));
+
+            if (!$this->isConfigurationValid) {
+                session()->flash('error', 'Uzupełnij wszystkie wymagane pola konfiguracji.');
+                return;
+            }
+
+            // Walidacja z dostosowanymi regułami
+            $validatedData = $this->validate();
+
+            // Debug info
+            logger('Going to preview with data:', [
+                'selectedShape' => $this->selectedShape,
+                'selectedMaterial' => $this->selectedMaterial,
+                'useCustomSize' => $this->useCustomSize,
+                'customWidth' => $this->customWidth,
+                'customHeight' => $this->customHeight,
+                'selectedSize' => $this->selectedSize,
+                'selectedLaminate' => $this->selectedLaminate,
+                'quantity' => $this->quantity,
+                'calculatedPrice' => $this->calculatedPrice,
+                'imagePositionX' => $this->imagePositionX,
+                'imagePositionY' => $this->imagePositionY,
+                'imageScale' => $this->imageScale,
+                'imageRotation' => $this->imageRotation,
+            ]);
+
+            // Przygotuj dane projektu, w tym pozycjonowanie obrazka
+            $projectData = [
+                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'label_shape_id' => $this->selectedShape,
+                'label_material_id' => $this->selectedMaterial,
+                'quantity' => $this->quantity,
+                'calculated_price' => $this->calculatedPrice,
+                'status' => 'preview',
+                'laminate_option_id' => $this->selectedLaminate ?: null,
+                'predefined_size_id' => !$this->useCustomSize ? $this->selectedSize : null,
+                'custom_width_mm' => $this->useCustomSize ? $this->customWidth : null,
+                'custom_height_mm' => $this->useCustomSize ? $this->customHeight : null,
+                'image_position_x' => $this->imagePositionX,
+                'image_position_y' => $this->imagePositionY,
+                'image_scale' => $this->imageScale,
+                'image_rotation' => $this->imageRotation,
+            ];
+
+            // Sprawdź czy user jest zalogowany czy to gość
+            if (auth()->check()) {
+                $projectData['user_id'] = auth()->id();
+            }
+
+            // Obsługa pliku artwork
+            if ($this->artworkFile) {
+                $artworkPath = $this->artworkFile->store('artworks', 'public');
+                $projectData['artwork_file_path'] = $artworkPath;
+            } elseif ($this->tempArtworkPath) {
+                $projectData['artwork_file_path'] = $this->tempArtworkPath;
+            }
+
+            // Utwórz projekt etykiety
+            $project = LabelProject::create($projectData);
+
+            logger('Project created successfully for preview:', ['uuid' => $project->uuid, 'id' => $project->id]);
+
+            // Store project ID in session for preview page
+            session(['project_id' => $project->id]);
+
+            // Generate preview URL
+            $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
+
+            // Dodaj logowanie URL do debugowania
+            logger('Preview URL:', ['url' => $previewUrl]);
+
+            // Redirect to preview page
+            return redirect()->to($previewUrl);
+
+        } catch (\Exception $e) {
+            logger('Error saving project for preview: ' . $e->getMessage());
+            logger('Stack trace: ' . $e->getTraceAsString());
+            session()->flash('error', 'Wystąpił błąd podczas zapisywania projektu: ' . $e->getMessage());
+            return null;
         }
     }
 

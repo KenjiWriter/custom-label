@@ -839,10 +839,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </button>
 
                             <!-- Final Submit Button -->
-                            <button type="button" wire:click="saveProject"
+                            <button type="button" 
+                                wire:click="goToPreview"
                                 class="w-full sm:w-auto px-8 py-4 font-semibold rounded-xl transition-all duration-200 shadow-lg <?php echo e($isConfigurationValid ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'); ?>"
-                                :disabled="!<?php echo e($isConfigurationValid ? 'true' : 'false'); ?>">
+                                <?php if(!$isConfigurationValid): ?> disabled <?php endif; ?>>
                                 <div class="flex items-center justify-center space-x-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
                                     <span class="font-medium">Przejdź do podglądu 3D</span>
                                 </div>
                             </button>

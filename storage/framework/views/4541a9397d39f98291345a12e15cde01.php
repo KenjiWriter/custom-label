@@ -28,9 +28,9 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <!-- 3D Preview -->
-            <div class="lg:col-span-2">
+            <div class="xl:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6 border-b border-gray-200">
                         <h2 class="text-xl font-semibold text-gray-900 mb-2">
@@ -334,13 +334,13 @@
                 </div>
             </div>
 
-            <!-- Kontener 2D do pozycjonowania -->
-            <div class="space-y-6">
+            <!-- Pozycjonowanie obrazka -->
+            <div class="xl:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Pozycjonowanie obrazka</h3>
                     
                         <!-- Profesjonalny kontener 2D do przeciągania -->
-                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 overflow-hidden flex items-center justify-center shadow-lg transform transition-all duration-300 hover:shadow-xl hover:scale-[1.02] relative h-[320px] mb-6">
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 overflow-hidden flex items-center justify-center shadow-lg transform transition-all duration-300 hover:shadow-xl hover:scale-[1.02] relative h-[300px] mb-6">
                             <div class="relative w-full h-full min-h-[220px] flex items-center justify-center">
                                 <div id="positioning-container" class="absolute inset-0 bg-checkerboard flex items-center justify-center cursor-move rounded-lg">
                                     <!-- Kształt etykiety do pozycjonowania -->
@@ -370,7 +370,7 @@
                                     </svg>
                                     Pozycja X: <span id="posX-display" class="text-blue-600 font-bold">50%</span>
                                 </label>
-                                <input type="range" id="posX-slider" min="0" max="100" step="0.1" value="50" 
+                                <input type="range" id="posX-slider" min="0" max="100" step="0.5" value="50" 
                                        class="w-full h-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full appearance-none cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200">
                             </div>
                             
@@ -381,7 +381,7 @@
                                     </svg>
                                     Pozycja Y: <span id="posY-display" class="text-green-600 font-bold">50%</span>
                                 </label>
-                                <input type="range" id="posY-slider" min="0" max="100" step="0.1" value="50" 
+                                <input type="range" id="posY-slider" min="0" max="100" step="0.5" value="50" 
                                        class="w-full h-3 bg-gradient-to-r from-green-100 to-green-200 rounded-full appearance-none cursor-pointer hover:from-green-200 hover:to-green-300 transition-all duration-200">
                             </div>
                         </div>
@@ -394,7 +394,7 @@
                                     </svg>
                                     Skala: <span id="scale-display" class="text-purple-600 font-bold">100%</span>
                                 </label>
-                                <input type="range" id="scale-slider" min="20" max="200" step="1" value="100" 
+                                <input type="range" id="scale-slider" min="20" max="200" step="2" value="100" 
                                        class="w-full h-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full appearance-none cursor-pointer hover:from-purple-200 hover:to-purple-300 transition-all duration-200">
                             </div>
                             
@@ -405,7 +405,7 @@
                                     </svg>
                                     Obrót: <span id="rotation-display" class="text-orange-600 font-bold">0°</span>
                                 </label>
-                                <input type="range" id="rotation-slider" min="0" max="360" step="1" value="0" 
+                                <input type="range" id="rotation-slider" min="0" max="360" step="2" value="0" 
                                        class="w-full h-3 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full appearance-none cursor-pointer hover:from-orange-200 hover:to-orange-300 transition-all duration-200">
                             </div>
                         </div>
@@ -440,8 +440,8 @@
                 </div>
             </div>
 
-            <!-- Project Details -->
-            <div class="space-y-6">
+            <!-- Konfiguracja i Przyciski -->
+            <div class="xl:col-span-1">
                 <!-- Configuration -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Konfiguracja</h3>
@@ -476,7 +476,7 @@
                 <!-- Price -->
                 <div
                     class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl shadow-lg p-6 border border-orange-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Cena</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Cena</h3>
                     <div class="text-3xl font-bold text-orange-600">
                         <?php echo e(number_format($project->calculated_price, 2)); ?> zł
                     </div>
@@ -484,29 +484,29 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="space-y-3">
+                <div class="space-y-4">
 
                     <button id="goToCheckoutBtn"
-                        class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105">
+                        class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-5 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105">
                         Przejdź do płatności
                     </button>
 
                     <!-- Przycisk do odświeżania obrazka -->
                     <button onclick="window.reloadArtwork()"
-                        class="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 rounded-xl font-medium text-center transition-colors mb-3">
+                        class="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 py-4 rounded-xl font-medium text-center transition-colors mb-4">
                         Odśwież obrazek
                     </button>
 
                     <!-- Zamieniony link na button z ID dla lepszej obsługi JavaScript -->
                     <button id="backToCreator"
-                        class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium text-center transition-colors">
+                        class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl font-medium text-center transition-colors">
                         Wróć do kreatora
                     </button>
                 </div>
 
                 <!-- Trust Indicators -->
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <div class="flex items-center space-x-2 mb-3">
+                <div class="bg-gray-50 rounded-xl p-5">
+                    <div class="flex items-center space-x-2 mb-4">
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -515,7 +515,7 @@
                         </svg>
                         <span class="font-medium text-gray-900">Bezpieczna płatność</span>
                     </div>
-                    <div class="text-sm text-gray-600 space-y-1">
+                    <div class="text-sm text-gray-600 space-y-2">
                         <div>✓ Szyfrowana transmisja danych</div>
                         <div>✓ Gwarancja jakości</div>
                         <div>✓ Możliwość zwrotu</div>
@@ -2308,8 +2308,8 @@
             
             // NOWA FUNKCJA: Interaktywne pozycjonowanie 2D w preview
             let isDragging2D = false;
-            let dragStart2D = { x: 0, y: 0 };
             let currentPosition2D = { x: 50, y: 50, scale: 100, rotation: 0 };
+            let syncThrottle = null;
             
             // Inicjalizuj pozycję z localStorage
             const savedPosition = localStorage.getItem('imagePosition');
@@ -2500,9 +2500,18 @@
                 
                 const { x, y, scale, rotation } = currentPosition2D;
                 
-                image.style.left = `${x}%`;
-                image.style.top = `${y}%`;
-                image.style.transform = `translate(-50%, -50%) scale(${scale/100}) rotate(${rotation}deg)`;
+                // Użyj transform zamiast left/top dla lepszej kontroli
+                image.style.left = '50%';
+                image.style.top = '50%';
+                
+                // Bardzo płynne przejścia z lepszym easing
+                image.style.transition = 'transform 0.05s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                image.style.transform = `translate(calc(-50% + ${(x - 50) * 2.5}px), calc(-50% + ${(y - 50) * 2.5}px)) scale(${scale/100}) rotate(${rotation}deg)`;
+                
+                // Usuń transition po zakończeniu animacji
+                setTimeout(() => {
+                    image.style.transition = 'none';
+                }, 50);
             }
             
             // Dodaj event listenery do przeciągania 2D
@@ -2513,7 +2522,6 @@
                 container.addEventListener('mousedown', (e) => {
                     if (e.target.tagName === 'IMG') {
                         isDragging2D = true;
-                        dragStart2D = { x: e.clientX, y: e.clientY };
                         container.style.cursor = 'grabbing';
                         e.preventDefault();
                     }
@@ -2521,26 +2529,36 @@
                 
                 container.addEventListener('mousemove', (e) => {
                     if (isDragging2D) {
-                        const deltaX = e.clientX - dragStart2D.x;
-                        const deltaY = e.clientY - dragStart2D.y;
+                        const containerRect = container.getBoundingClientRect();
                         
-                        // Przelicz deltę na procenty
-                        const sensitivity = 0.5;
-                        const newX = Math.max(0, Math.min(100, currentPosition2D.x + (deltaX * sensitivity)));
-                        const newY = Math.max(0, Math.min(100, currentPosition2D.y + (deltaY * sensitivity)));
+                        // Oblicz pozycję kursora względem kontenera
+                        const mouseX = e.clientX - containerRect.left;
+                        const mouseY = e.clientY - containerRect.top;
+                        
+                        // Przelicz na procenty (0-100) z lepszą precyzją
+                        const newX = Math.max(0, Math.min(100, (mouseX / containerRect.width) * 100));
+                        const newY = Math.max(0, Math.min(100, (mouseY / containerRect.height) * 100));
                         
                         currentPosition2D.x = newX;
                         currentPosition2D.y = newY;
                         
+                        // Natychmiastowa aktualizacja bez transition podczas przeciągania
+                        const image = document.getElementById('positioning-image');
+                        if (image) {
+                            image.style.transition = 'none';
+                            image.style.transform = `translate(calc(-50% + ${(newX - 50) * 2.5}px), calc(-50% + ${(newY - 50) * 2.5}px)) scale(${currentPosition2D.scale/100}) rotate(${currentPosition2D.rotation}deg)`;
+                        }
+                        
                         // Zaktualizuj wyświetlanie
-                        update2DImagePosition();
                         update2DDisplay();
                         
-                        // Synchronizuj z 3D
-                        sync2DTo3D();
-                        
-                        // Zaktualizuj punkt startowy
-                        dragStart2D = { x: e.clientX, y: e.clientY };
+                        // Synchronizuj z 3D (z throttling)
+                        if (!syncThrottle) {
+                            syncThrottle = setTimeout(() => {
+                                sync2DTo3D();
+                                syncThrottle = null;
+                            }, 8); // ~120fps dla jeszcze większej płynności
+                        }
                     }
                 });
                 
@@ -2571,36 +2589,92 @@
                 if (posXSlider) {
                     posXSlider.addEventListener('input', (e) => {
                         currentPosition2D.x = parseFloat(e.target.value);
-                        update2DImagePosition();
+                        
+                        // Natychmiastowa aktualizacja bez transition
+                        const image = document.getElementById('positioning-image');
+                        if (image) {
+                            image.style.transition = 'none';
+                            image.style.transform = `translate(calc(-50% + ${(currentPosition2D.x - 50) * 2.5}px), calc(-50% + ${(currentPosition2D.y - 50) * 2.5}px)) scale(${currentPosition2D.scale/100}) rotate(${currentPosition2D.rotation}deg)`;
+                        }
+                        
                         update2DDisplay();
-                        sync2DTo3D();
+                        
+                        // Throttled sync dla płynności
+                        if (!syncThrottle) {
+                            syncThrottle = setTimeout(() => {
+                                sync2DTo3D();
+                                syncThrottle = null;
+                            }, 8);
+                        }
                     });
                 }
                 
                 if (posYSlider) {
                     posYSlider.addEventListener('input', (e) => {
                         currentPosition2D.y = parseFloat(e.target.value);
-                        update2DImagePosition();
+                        
+                        // Natychmiastowa aktualizacja bez transition
+                        const image = document.getElementById('positioning-image');
+                        if (image) {
+                            image.style.transition = 'none';
+                            image.style.transform = `translate(calc(-50% + ${(currentPosition2D.x - 50) * 2.5}px), calc(-50% + ${(currentPosition2D.y - 50) * 2.5}px)) scale(${currentPosition2D.scale/100}) rotate(${currentPosition2D.rotation}deg)`;
+                        }
+                        
                         update2DDisplay();
-                        sync2DTo3D();
+                        
+                        // Throttled sync dla płynności
+                        if (!syncThrottle) {
+                            syncThrottle = setTimeout(() => {
+                                sync2DTo3D();
+                                syncThrottle = null;
+                            }, 8);
+                        }
                     });
                 }
                 
                 if (scaleSlider) {
                     scaleSlider.addEventListener('input', (e) => {
                         currentPosition2D.scale = parseInt(e.target.value);
-                        update2DImagePosition();
+                        
+                        // Natychmiastowa aktualizacja bez transition
+                        const image = document.getElementById('positioning-image');
+                        if (image) {
+                            image.style.transition = 'none';
+                            image.style.transform = `translate(calc(-50% + ${(currentPosition2D.x - 50) * 2.5}px), calc(-50% + ${(currentPosition2D.y - 50) * 2.5}px)) scale(${currentPosition2D.scale/100}) rotate(${currentPosition2D.rotation}deg)`;
+                        }
+                        
                         update2DDisplay();
-                        sync2DTo3D();
+                        
+                        // Throttled sync dla płynności
+                        if (!syncThrottle) {
+                            syncThrottle = setTimeout(() => {
+                                sync2DTo3D();
+                                syncThrottle = null;
+                            }, 8);
+                        }
                     });
                 }
                 
                 if (rotationSlider) {
                     rotationSlider.addEventListener('input', (e) => {
                         currentPosition2D.rotation = parseInt(e.target.value);
-                        update2DImagePosition();
+                        
+                        // Natychmiastowa aktualizacja bez transition
+                        const image = document.getElementById('positioning-image');
+                        if (image) {
+                            image.style.transition = 'none';
+                            image.style.transform = `translate(calc(-50% + ${(currentPosition2D.x - 50) * 2.5}px), calc(-50% + ${(currentPosition2D.y - 50) * 2.5}px)) scale(${currentPosition2D.scale/100}) rotate(${currentPosition2D.rotation}deg)`;
+                        }
+                        
                         update2DDisplay();
-                        sync2DTo3D();
+                        
+                        // Throttled sync dla płynności
+                        if (!syncThrottle) {
+                            syncThrottle = setTimeout(() => {
+                                sync2DTo3D();
+                                syncThrottle = null;
+                            }, 8);
+                        }
                     });
                 }
                 
@@ -2665,17 +2739,41 @@
                 const scaleSlider = document.getElementById('scale-slider');
                 const rotationSlider = document.getElementById('rotation-slider');
                 
-                // Zaktualizuj wyświetlane wartości
-                if (posXDisplay) posXDisplay.textContent = currentPosition2D.x.toFixed(1) + '%';
-                if (posYDisplay) posYDisplay.textContent = currentPosition2D.y.toFixed(1) + '%';
-                if (scaleDisplay) scaleDisplay.textContent = currentPosition2D.scale + '%';
-                if (rotationDisplay) rotationDisplay.textContent = currentPosition2D.rotation + '°';
+                // Natychmiastowa aktualizacja wyświetlanych wartości
+                if (posXDisplay) {
+                    posXDisplay.style.transition = 'color 0.1s ease';
+                    posXDisplay.textContent = currentPosition2D.x.toFixed(1) + '%';
+                }
+                if (posYDisplay) {
+                    posYDisplay.style.transition = 'color 0.1s ease';
+                    posYDisplay.textContent = currentPosition2D.y.toFixed(1) + '%';
+                }
+                if (scaleDisplay) {
+                    scaleDisplay.style.transition = 'color 0.1s ease';
+                    scaleDisplay.textContent = currentPosition2D.scale + '%';
+                }
+                if (rotationDisplay) {
+                    rotationDisplay.style.transition = 'color 0.1s ease';
+                    rotationDisplay.textContent = currentPosition2D.rotation + '°';
+                }
                 
-                // Zaktualizuj wartości suwaków
-                if (posXSlider) posXSlider.value = currentPosition2D.x;
-                if (posYSlider) posYSlider.value = currentPosition2D.y;
-                if (scaleSlider) scaleSlider.value = currentPosition2D.scale;
-                if (rotationSlider) rotationSlider.value = currentPosition2D.rotation;
+                // Natychmiastowa aktualizacja suwaków
+                if (posXSlider) {
+                    posXSlider.style.transition = 'background 0.1s ease';
+                    posXSlider.value = currentPosition2D.x;
+                }
+                if (posYSlider) {
+                    posYSlider.style.transition = 'background 0.1s ease';
+                    posYSlider.value = currentPosition2D.y;
+                }
+                if (scaleSlider) {
+                    scaleSlider.style.transition = 'background 0.1s ease';
+                    scaleSlider.value = currentPosition2D.scale;
+                }
+                if (rotationSlider) {
+                    rotationSlider.style.transition = 'background 0.1s ease';
+                    rotationSlider.value = currentPosition2D.rotation;
+                }
                 
                 console.log('🔄 Zaktualizowano wyświetlanie 2D:', currentPosition2D);
             }
@@ -3249,19 +3347,18 @@
                 
                 const imageAspect = imageWidth / imageHeight;
                 
-                // FIT: Oblicz skalę żeby zmieścić cały obrazek w etykiecie (rog do rogu)
-                // W Three.js wszystko jest w jednostkach względnych
+                // FIT: Oblicz skalę żeby zmieścić cały obrazek w etykiecie
                 let fitScale;
                 
                 if (imageAspect > labelAspect) {
                     // Obrazek jest szerszy - ogranicz do szerokości etykiety
-                    fitScale = 100; // 100% szerokości etykiety
+                    fitScale = 90; // 90% szerokości etykiety
                 } else {
                     // Obrazek jest wyższy - ogranicz do wysokości etykiety
-                    fitScale = 100; // 100% wysokości etykiety
+                    fitScale = 90; // 90% wysokości etykiety
                 }
                 
-                console.log('📐 Obliczenia Fit (rog do rogu na etykiecie 3D):', {
+                console.log('📐 Obliczenia Fit:', {
                     imageWidth,
                     imageHeight,
                     imageAspect,
@@ -3291,18 +3388,17 @@
                 const imageAspect = imageWidth / imageHeight;
                 
                 // WYPEŁNIJ: Oblicz skalę żeby wypełnić całą etykietę
-                // W Three.js wszystko jest w jednostkach względnych
                 let fillScale;
                 
                 if (imageAspect > labelAspect) {
                     // Obrazek jest szerszy - wypełnij wysokość etykiety
-                    fillScale = 150; // 150% żeby wypełnić całą wysokość
+                    fillScale = 120; // 120% żeby wypełnić całą wysokość
                 } else {
                     // Obrazek jest wyższy - wypełnij szerokość etykiety
-                    fillScale = 150; // 150% żeby wypełnić całą szerokość
+                    fillScale = 120; // 120% żeby wypełnić całą szerokość
                 }
                 
-                console.log('📐 Obliczenia Fill (wypełnij całą etykietę 3D):', {
+                console.log('📐 Obliczenia Fill:', {
                     imageWidth,
                     imageHeight,
                     imageAspect,
@@ -3539,7 +3635,9 @@
                 const btn = document.getElementById('goToCheckoutBtn');
                 if (btn) {
                     btn.addEventListener('click', function() {
-                        window.location.href = "<?php echo e(route('checkout')); ?>";
+                        // Przekaż project_id przez URL
+                        const projectId = '<?php echo e($project->id); ?>';
+                        window.location.href = "<?php echo e(route('checkout')); ?>?project_id=" + projectId;
                     });
                 }
                 

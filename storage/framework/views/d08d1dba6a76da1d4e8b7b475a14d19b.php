@@ -17,18 +17,18 @@
                     <div class="flex items-center">
                        
                         <span class="></span>
-                    </div>
+                </div>
                     <div class="flex-1 h-1 bg-orange-600 mx-4"></div>
                     <div class="flex items-center">
-                        <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                        <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
                         <span class="ml-2 text-sm font-medium text-orange-600">Payment</span>
-                    </div>
+                </div>
                     <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
                     <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                        <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">2</div>
                         <span class="ml-2 text-sm font-medium text-gray-500">Confirmation</span>
+            </div>
                     </div>
-                </div>
             </div>
         </div>
 
@@ -158,10 +158,10 @@
                                             </div>
                                             
                                             <div class="flex justify-between items-end">
-                                                <div>
+                            <div>
                                                     <div class="text-xs opacity-75 mb-1">NAME</div>
                                                     <div class="text-xs font-medium" id="card-display-name">FULL NAME</div>
-                                                </div>
+                            </div>
                                                 <div class="text-right">
                                                     <div class="text-xs opacity-75 mb-1">EXP</div>
                                                     <div class="text-xs font-mono" id="card-display-expiry">MM/YY</div>
@@ -176,11 +176,11 @@
                                     
                                     <!-- Form Inputs -->
                                     <div class="space-y-3">
-                                        <div>
+                            <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Card Number</label>
                                             <input type="text" id="card-number" placeholder="1234 5678 9012 3456" 
                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
-                                        </div>
+                            </div>
                                         
                                         <div class="grid grid-cols-2 gap-3">
                                             <div>
@@ -188,22 +188,22 @@
                                                 <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5"
                                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
                                                 <div id="expiry-error" class="text-xs text-red-600 mt-1 hidden"></div>
-                                            </div>
-                    <div>
+                        </div>
+                            <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">CVV</label>
                         <input type="text" id="card-cvv" placeholder="123" maxlength="3"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
                         <div id="cvv-error" class="text-xs text-red-600 mt-1 hidden"></div>
-                    </div>
+                            </div>
                                         </div>
                                         
-                                        <div>
+                            <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Cardholder Name</label>
                                             <input type="text" id="card-name" placeholder="John Doe" 
                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 card-input">
                                             <div id="name-error" class="text-xs text-red-600 mt-1 hidden"></div>
-                                        </div>
-                                    </div>
+                            </div>
+                        </div>
                                 </div>
                             </div>
 
@@ -240,11 +240,11 @@
                                     </div>
                                     
                                     <div class="space-y-3">
-                                        <div>
+                        <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">PayPal Email</label>
                                             <input type="email" id="paypal-email" placeholder="your@email.com" 
                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        </div>
+                        </div>
                                         
                                         <div class="bg-blue-50 rounded p-3">
                                             <div class="flex items-center">
@@ -295,11 +295,11 @@
                                     </div>
                                     
                                     <div class="space-y-3">
-                                        <div>
+                        <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Apple ID Email</label>
                                             <input type="email" id="applepay-email" placeholder="your@icloud.com" 
                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500">
-                                        </div>
+                        </div>
                                         
                                         <div class="bg-gray-50 rounded p-3">
                                             <div class="flex items-center">
@@ -308,8 +308,8 @@
                                                 </svg>
                                                 <div class="text-xs text-gray-700">
                                                     <strong>Note:</strong> You will be redirected to Apple Pay to complete your payment securely.
-                                                </div>
-                                            </div>
+                        </div>
+                        </div>
                                         </div>
                                     </div>
                                 </div>
@@ -349,7 +349,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                             </svg>
                                             <span class="text-xs font-medium">Secure</span>
-                                        </div>
+                            </div>
                                     </div>
                                     
                                     <div class="space-y-3">
@@ -366,12 +366,12 @@
                                                 </svg>
                                                 <div class="text-xs text-red-800">
                                                     <strong>Note:</strong> You will be redirected to Google Pay to complete your payment securely.
+                                            </div>
                                                 </div>
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
 
                             <!-- Bank Transfer -->
                             <div class="space-y-2">
@@ -384,15 +384,15 @@
                                                     <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
                                                     <span class="font-medium text-gray-900">Przelew bankowy</span>
                                                     <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">2-3 dni</span>
-                                                </div>
+                                </div>
                                                 <div class="w-6 h-6 bg-green-600 rounded flex items-center justify-center">
                                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                                                     </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            </div>
+                                </div>
+                            </div>
+                                </div>
                                 </label>
                             </div>
 
@@ -407,7 +407,7 @@
                                                     <div class="w-4 h-4 border-2 border-gray-300 rounded-full mr-3"></div>
                                                     <span class="font-medium text-gray-900">Kryptowaluty</span>
                                                     <span class="ml-2 px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">BTC, ETH, LTC</span>
-                                                </div>
+                        </div>
                                                 <div class="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
                                                     <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -440,7 +440,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
                             <span class="text-sm font-medium">SSL Protected</span>
-                        </div>
+                </div>
                         <div class="flex items-center text-green-600">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -451,7 +451,7 @@
                 </div>
 
                 <!-- Right Panel - Product Display & Security Info -->
-                <div class="space-y-8">
+                        <div class="space-y-8">
                     <!-- Product Display -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex items-center justify-between mb-4">
@@ -539,17 +539,17 @@
                         </div>
                         
                         <div class="space-y-3">
-                            <div class="flex items-center">
+                                <div class="flex items-center">
                                 <div class="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center mr-3">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                 </div>
-                                <div>
+                                    <div>
                                     <span class="font-medium text-gray-900">256-bit SSL Encryption</span>
                                     <p class="text-sm text-gray-600">All data transmitted is encrypted</p>
-                                </div>
-                            </div>
+                                        </div>
+                                    </div>
                             
                             <div class="flex items-center">
                                 <div class="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center mr-3">
@@ -560,22 +560,22 @@
                                 <div>
                                     <span class="font-medium text-gray-900">PCI DSS Compliant</span>
                                     <p class="text-sm text-gray-600">Meets payment card industry standards</p>
-                                </div>
                             </div>
+                        </div>
                             
                             <div class="flex items-center">
                                 <div class="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center mr-3">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
-                                </div>
+                            </div>
                                 <div>
                                     <span class="font-medium text-gray-900">Fraud Detection</span>
                                     <p class="text-sm text-gray-600">Advanced AI monitors for suspicious activity</p>
-                                </div>
+                            </div>
                             </div>
                         </div>
-                    </div>
+                            </div>
 
                     <!-- Trusted By Millions -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
@@ -586,7 +586,7 @@
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                     </svg>
-                                </div>
+                            </div>
                                 <div class="text-2xl font-bold text-gray-900">10M+</div>
                                 <div class="text-sm text-gray-600">Transactions</div>
                             </div>
@@ -595,7 +595,7 @@
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
-                                </div>
+                        </div>
                                 <div class="text-2xl font-bold text-gray-900">99.9%</div>
                                 <div class="text-sm text-gray-600">Uptime</div>
                             </div>
@@ -627,8 +627,8 @@
                             <img src="https://img.icons8.com/color/24/000000/paypal.png" alt="PayPal">
                             <img src="https://img.icons8.com/ios-filled/24/000000/mac-os.png" alt="Apple Pay">
                             <img src="https://img.icons8.com/color/24/000000/google-pay-india.png" alt="Google Pay">
-                        </div>
                     </div>
+                </div>
 
                     <!-- Customer Testimonials -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
@@ -645,11 +645,11 @@
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                                 </svg>
                                             <?php endfor; ?>
-                                        </div>
-                                    </div>
+            </div>
+        </div>
                                     <p class="text-sm text-gray-600">"Fast and secure payment process. Highly recommended!"</p>
-                                </div>
-                            </div>
+    </div>
+    </div>
                             
                             <div class="flex items-start space-x-3">
                                 <div class="w-10 h-10 bg-gray-300 rounded-full"></div>
@@ -660,12 +660,12 @@
                                             <?php for($i = 0; $i < 5; $i++): ?>
                                                 <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                </svg>
+                </svg>
                                             <?php endfor; ?>
-                                        </div>
-                                    </div>
+            </div>
+        </div>
                                     <p class="text-sm text-gray-600">"Excellent service and great customer support."</p>
-                                </div>
+    </div>
                             </div>
                         </div>
                     </div>
@@ -917,8 +917,8 @@
                         }
                         
                         quantityMenu.classList.add('hidden');
-                    });
                 });
+            });
             }
             
             // Update order summary function
@@ -1055,7 +1055,7 @@
             // Payment error modal
             function showPaymentError(message) {
                 const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.className = 'fixed inset-0 bg-none bg-opacity-50 flex items-center justify-center z-50';
                 modal.innerHTML = `
                     <div class="bg-white rounded-2xl p-8 max-w-md mx-auto text-center animate-pop">
                         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1095,7 +1095,13 @@
                 
                 // Redirect to confirmation page after 2 seconds
                 setTimeout(() => {
-                    window.location.href = '/order-confirmation';
+                    // Przekaż project_id przez URL
+                    const projectId = '<?php echo e($project->id ?? null); ?>';
+                    if (projectId) {
+                        window.location.href = '/order-confirmation?project_id=' + projectId;
+                    } else {
+                        window.location.href = '/order-confirmation';
+                    }
                 }, 2000);
             }
             
@@ -1243,7 +1249,7 @@
             `;
             document.head.appendChild(style);
         });
-    </script>
+        </script>
     <?php $__env->stopPush(); ?>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
