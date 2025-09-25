@@ -789,20 +789,12 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                                         <!-- Kształt etykiety -->
                                         <!--[if BLOCK]><![endif]--><?php if($shapeType == 'circle'): ?>
-                                            <div class="label-preview rounded-full shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
-                                                style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayWidth); ?>px;">
                                             </div>
                                         <?php elseif($shapeType == 'oval'): ?>
-                                            <div class="label-preview rounded-full shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
-                                                style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayHeight); ?>px;">
                                             </div>
                                         <?php elseif($shapeType == 'square'): ?>
-                                            <div class="label-preview rounded-lg shadow-lg border border-gray-200 <?php echo e($materialClass); ?>"
-                                                style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayWidth); ?>px;">
                                             </div>
                                         <?php elseif($shapeType == 'star'): ?>
-                                            <div class="label-preview shadow-lg <?php echo e($materialClass); ?>"
-                                                style="width: <?php echo e($displayWidth); ?>px; height: <?php echo e($displayHeight); ?>px; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);">
                                             </div>
                                         <?php else: ?>
                                             <!-- Domyślny prostokąt -->

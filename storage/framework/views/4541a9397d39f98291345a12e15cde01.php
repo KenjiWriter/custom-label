@@ -1609,8 +1609,21 @@
                 faceMesh.position.z = 0.6;
                 faceMesh.renderOrder = 10000;
                 
-                // Skalowanie przez geometrię - może wychodzić poza etykietę, ale nie rozciąga
-                faceMesh.scale.set(scaleX, scaleY, 1);
+                // OGRANICZENIE SKALI: Nie pozwól żeby obrazek wychodził poza etykietę
+                const maxScaleX = 1.0; // Maksymalnie 100% szerokości etykiety
+                const maxScaleY = 1.0; // Maksymalnie 100% wysokości etykiety
+                
+                const limitedScaleX = Math.min(scaleX, maxScaleX);
+                const limitedScaleY = Math.min(scaleY, maxScaleY);
+                
+                // Zastosuj ograniczone skalowanie
+                faceMesh.scale.set(limitedScaleX, limitedScaleY, 1);
+                
+                console.log('🔒 Obrazek ograniczony do wymiarów etykiety:', {
+                    'oryginalne skale': { x: scaleX, y: scaleY },
+                    'ograniczone skale': { x: limitedScaleX, y: limitedScaleY },
+                    'maksymalne skale': { x: maxScaleX, y: maxScaleY }
+                });
                 
                 labelGroup.add(faceMesh);
 
@@ -2899,6 +2912,258 @@
                 }
             };
             
+            // Funkcja do debugowania bezpiecznego ograniczenia
+            window.debugSafeBounds = function() {
+                console.log('🔍 DEBUG BEZPIECZNEGO OGRANICZENIA');
+                const { maxScaleX, maxScaleY } = calculateMaxScaleSafe();
+                console.log('Maksymalne skale:', { maxScaleX, maxScaleY });
+                
+                if (faceMesh) {
+                    console.log('Aktualna skala faceMesh:', faceMesh.scale);
+                    console.log('faceMesh.visible:', faceMesh.visible);
+                }
+                
+                console.log('projectConfig.dimensions:', projectConfig.dimensions);
+            };
+            
+            // Funkcja do testowania ograniczeń wymiarów
+            window.testBounds = function() {
+                console.log('🧪 TEST OGRANICZEŃ WYMIARÓW');
+                
+                // Test z różnymi skalami
+                const testScales = [0.5, 1.0, 1.5, 2.0, 3.0];
+                
+                testScales.forEach(scale => {
+                    const { maxScaleX, maxScaleY } = calculateMaxScaleSafe();
+                    const limitedX = Math.min(scale, maxScaleX);
+                    const limitedY = Math.min(scale, maxScaleY);
+                    
+                    console.log(`Skala ${scale}:`, {
+                        'maxScaleX': maxScaleX,
+                        'maxScaleY': maxScaleY,
+                        'limitedX': limitedX,
+                        'limitedY': limitedY,
+                        'ograniczone': limitedX < scale || limitedY < scale
+                    });
+                });
+            };
+            
+            // Funkcja do testowania rzeczywistych wymiarów obrazka
+            window.testRealImageBounds = function() {
+                console.log('🧪 TEST RZECZYWISTYCH WYMIARÓW OBRAZKA');
+                
+                // Test z obrazkiem 2D
+                const image = document.getElementById('positioning-image');
+                if (image) {
+                    console.log('Obrazek 2D:', {
+                        'naturalWidth': image.naturalWidth,
+                        'naturalHeight': image.naturalHeight,
+                        'aspect': image.naturalWidth / image.naturalHeight
+                    });
+                }
+                
+                // Test z teksturą 3D
+                if (faceMesh && faceMesh.material && faceMesh.material.map && faceMesh.material.map.image) {
+                    const img = faceMesh.material.map.image;
+                    console.log('Obrazek 3D:', {
+                        'width': img.width,
+                        'height': img.height,
+                        'naturalWidth': img.naturalWidth,
+                        'naturalHeight': img.naturalHeight,
+                        'aspect': (img.width || img.naturalWidth) / (img.height || img.naturalHeight)
+                    });
+                }
+                
+                // Test calculateMaxScaleSafe
+                const bounds = calculateMaxScaleSafe();
+                console.log('Maksymalne skale:', bounds);
+            };
+            
+            // Funkcja do testowania skalowania
+            window.testScaling = function() {
+                console.log('🧪 TEST SKALOWANIA');
+                
+                if (!faceMesh) {
+                    console.warn('⚠️ Brak faceMesh - nie można testować skalowania');
+                    return;
+                }
+                
+                console.log('Aktualna skala faceMesh:', faceMesh.scale);
+                console.log('Aktualna pozycja faceMesh:', faceMesh.position);
+                
+                // Test z różnymi skalami
+                const testScales = [0.5, 1.0, 1.5, 2.0];
+                
+                testScales.forEach(scale => {
+                    console.log(`\n--- TEST SKALI ${scale} ---`);
+                    
+                    // Symuluj obliczenia jak w updateImagePosition
+                    const userScale = scale;
+                    const imgAspect = 1; // Domyślna proporcja
+                    const labelAspect = projectConfig.dimensions.width / projectConfig.dimensions.height;
+                    
+                    let scaleX, scaleY;
+                    if (imgAspect > labelAspect) {
+                        scaleY = userScale;
+                        scaleX = userScale * (labelAspect / imgAspect);
+                    } else {
+                        scaleX = userScale;
+                        scaleY = userScale * (imgAspect / labelAspect);
+                    }
+                    
+                    const { maxScaleX, maxScaleY } = calculateMaxScaleSafe();
+                    const limitedScaleX = Math.min(scaleX, maxScaleX);
+                    const limitedScaleY = Math.min(scaleY, maxScaleY);
+                    
+                    console.log(`Skala ${scale}:`, {
+                        'scaleX': scaleX,
+                        'scaleY': scaleY,
+                        'maxScaleX': maxScaleX,
+                        'maxScaleY': maxScaleY,
+                        'limitedScaleX': limitedScaleX,
+                        'limitedScaleY': limitedScaleY,
+                        'ograniczone': limitedScaleX < scaleX || limitedScaleY < scaleY
+                    });
+                });
+            };
+            
+            // Funkcja do sprawdzenia stanu faceMesh
+            window.checkFaceMesh = function() {
+                console.log('🔍 SPRAWDZANIE STANU FACE MESH');
+                console.log('faceMesh:', faceMesh);
+                console.log('faceMesh type:', typeof faceMesh);
+                console.log('faceMesh === null:', faceMesh === null);
+                console.log('faceMesh === undefined:', faceMesh === undefined);
+                
+                if (faceMesh) {
+                    console.log('faceMesh.scale:', faceMesh.scale);
+                    console.log('faceMesh.position:', faceMesh.position);
+                    console.log('faceMesh.visible:', faceMesh.visible);
+                    console.log('faceMesh.parent:', faceMesh.parent);
+                    console.log('faceMesh.material:', faceMesh.material);
+                    
+                    if (faceMesh.material && faceMesh.material.map) {
+                        console.log('faceMesh.material.map:', faceMesh.material.map);
+                        console.log('faceMesh.material.map.offset:', faceMesh.material.map.offset);
+                        console.log('faceMesh.material.map.rotation:', faceMesh.material.map.rotation);
+                    }
+                } else {
+                    console.warn('⚠️ faceMesh nie istnieje!');
+                    
+                    // Sprawdź czy istnieje w scene
+                    if (scene) {
+                        console.log('scene.children.length:', scene.children.length);
+                        console.log('scene.children:', scene.children);
+                    }
+                    
+                    // Sprawdź czy istnieje w labelGroup
+                    if (labelGroup) {
+                        console.log('labelGroup.children.length:', labelGroup.children.length);
+                        console.log('labelGroup.children:', labelGroup.children);
+                    }
+                }
+            };
+            
+            // Funkcja do testowania proporcji
+            window.testAspectRatio = function() {
+                console.log('🧪 TEST PROPORCJI OBRAZKA');
+                
+                if (!faceMesh) {
+                    console.warn('⚠️ Brak faceMesh - nie można testować proporcji');
+                    return;
+                }
+                
+                // Test z tekstury 3D
+                if (faceMesh.material && faceMesh.material.map && faceMesh.material.map.image) {
+                    const img = faceMesh.material.map.image;
+                    const imgWidth = img.width || img.naturalWidth || 1;
+                    const imgHeight = img.height || img.naturalHeight || 1;
+                    const imgAspect = imgWidth / imgHeight;
+                    
+                    console.log('Obrazek 3D:', {
+                        'img.width': img.width,
+                        'img.naturalWidth': img.naturalWidth,
+                        'img.height': img.height,
+                        'img.naturalHeight': img.naturalHeight,
+                        'imgWidth': imgWidth,
+                        'imgHeight': imgHeight,
+                        'imgAspect': imgAspect
+                    });
+                }
+                
+                // Test z obrazka 2D
+                const image = document.getElementById('positioning-image');
+                if (image) {
+                    const imgWidth = image.naturalWidth || 1;
+                    const imgHeight = image.naturalHeight || 1;
+                    const imgAspect = imgWidth / imgHeight;
+                    
+                    console.log('Obrazek 2D:', {
+                        'naturalWidth': image.naturalWidth,
+                        'naturalHeight': image.naturalHeight,
+                        'imgAspect': imgAspect
+                    });
+                }
+                
+                // Test etykiety
+                if (projectConfig && projectConfig.dimensions) {
+                    const labelAspect = projectConfig.dimensions.width / projectConfig.dimensions.height;
+                    console.log('Etykieta:', {
+                        'width': projectConfig.dimensions.width,
+                        'height': projectConfig.dimensions.height,
+                        'labelAspect': labelAspect
+                    });
+                }
+            };
+            
+            // Funkcja do testowania przycisków Fit i Wypełnij
+            window.testFitFillButtons = function() {
+                console.log('🧪 TEST PRZYCISKÓW FIT I WYPEŁNIJ');
+                
+                // Test Fit
+                const fitScale = calculateFitScale();
+                console.log('Fit scale:', fitScale);
+                
+                // Test Wypełnij
+                const fillScale = calculateFillScale();
+                console.log('Fill scale:', fillScale);
+                
+                // Test z różnymi skalami
+                console.log('Test z różnymi skalami:');
+                console.log('Fit 50%:', calculateFitScale() * 0.5);
+                console.log('Fit 100%:', calculateFitScale());
+                console.log('Fill 50%:', calculateFillScale() * 0.5);
+                console.log('Fill 100%:', calculateFillScale());
+            };
+            
+            // Funkcja do testowania clipping
+            window.testClipping = function() {
+                console.log('✂️ TEST CLIPPING');
+                
+                if (faceMesh && faceMesh.material) {
+                    console.log('faceMesh.material.clippingPlanes:', faceMesh.material.clippingPlanes);
+                    console.log('faceMesh.material.clipShadows:', faceMesh.material.clipShadows);
+                    console.log('renderer.localClippingEnabled:', renderer.localClippingEnabled);
+                } else {
+                    console.log('❌ Brak faceMesh lub materiału');
+                }
+            };
+            
+            // Funkcja do wymuszenia skalowania
+            window.forceScale = function(scale) {
+                console.log(`🔄 WYMUSZENIE SKALI ${scale}`);
+                
+                if (!faceMesh) {
+                    console.warn('⚠️ Brak faceMesh - nie można skalować');
+                    return;
+                }
+                
+                // Ustaw skalę bezpośrednio
+                faceMesh.scale.set(scale, scale, 1);
+                
+                console.log('✅ Skala ustawiona:', faceMesh.scale);
+            };
+            
             // Profesjonalna funkcja do ładowania obrazka z różnych źródeł
             window.forceLoadImage = function() {
                 console.log('🔄 PROFESJONALNE ŁADOWANIE OBRAZKA');
@@ -2968,31 +3233,39 @@
             
             // Funkcja do inteligentnego dopasowania obrazka (Fit - mieści cały obrazek)
             function calculateFitScale() {
+                if (!projectConfig || !projectConfig.dimensions) return 80;
+                
+                // Pobierz proporcje etykiety 3D
+                const labelAspect = projectConfig.dimensions.width / projectConfig.dimensions.height;
+                
+                // Pobierz proporcje obrazka z obrazka 2D
                 const image = document.getElementById('positioning-image');
                 if (!image || !image.complete) return 80;
-                
-                const labelWidth = 150; // Szerokość etykiety w kontenerze 2D
-                const labelHeight = 100; // Wysokość etykiety w kontenerze 2D
                 
                 const imageWidth = image.naturalWidth;
                 const imageHeight = image.naturalHeight;
                 
                 if (!imageWidth || !imageHeight) return 80;
                 
-                // FIT: Oblicz skalę żeby zmieścić cały obrazek w etykiecie
-                const scaleX = labelWidth / imageWidth;
-                const scaleY = labelHeight / imageHeight;
+                const imageAspect = imageWidth / imageHeight;
                 
-                // Użyj mniejszej skali żeby zmieścić cały obrazek (zachowuje proporcje)
-                const fitScale = Math.min(scaleX, scaleY) * 100;
+                // FIT: Oblicz skalę żeby zmieścić cały obrazek w etykiecie (rog do rogu)
+                // W Three.js wszystko jest w jednostkach względnych
+                let fitScale;
                 
-                console.log('📐 Obliczenia Fit (mieści cały obrazek):', {
+                if (imageAspect > labelAspect) {
+                    // Obrazek jest szerszy - ogranicz do szerokości etykiety
+                    fitScale = 100; // 100% szerokości etykiety
+                } else {
+                    // Obrazek jest wyższy - ogranicz do wysokości etykiety
+                    fitScale = 100; // 100% wysokości etykiety
+                }
+                
+                console.log('📐 Obliczenia Fit (rog do rogu na etykiecie 3D):', {
                     imageWidth,
                     imageHeight,
-                    labelWidth,
-                    labelHeight,
-                    scaleX: scaleX * 100,
-                    scaleY: scaleY * 100,
+                    imageAspect,
+                    labelAspect,
                     fitScale
                 });
                 
@@ -3001,31 +3274,39 @@
             
             // Funkcja do inteligentnego wypełnienia obrazka (Wypełnij - wypełnij całą etykietę)
             function calculateFillScale() {
+                if (!projectConfig || !projectConfig.dimensions) return 120;
+                
+                // Pobierz proporcje etykiety 3D
+                const labelAspect = projectConfig.dimensions.width / projectConfig.dimensions.height;
+                
+                // Pobierz proporcje obrazka z obrazka 2D
                 const image = document.getElementById('positioning-image');
                 if (!image || !image.complete) return 120;
-                
-                const labelWidth = 150;
-                const labelHeight = 100;
                 
                 const imageWidth = image.naturalWidth;
                 const imageHeight = image.naturalHeight;
                 
                 if (!imageWidth || !imageHeight) return 120;
                 
+                const imageAspect = imageWidth / imageHeight;
+                
                 // WYPEŁNIJ: Oblicz skalę żeby wypełnić całą etykietę
-                const scaleX = labelWidth / imageWidth;
-                const scaleY = labelHeight / imageHeight;
+                // W Three.js wszystko jest w jednostkach względnych
+                let fillScale;
                 
-                // Użyj większej skali żeby wypełnić całą etykietę
-                const fillScale = Math.max(scaleX, scaleY) * 100;
+                if (imageAspect > labelAspect) {
+                    // Obrazek jest szerszy - wypełnij wysokość etykiety
+                    fillScale = 150; // 150% żeby wypełnić całą wysokość
+                } else {
+                    // Obrazek jest wyższy - wypełnij szerokość etykiety
+                    fillScale = 150; // 150% żeby wypełnić całą szerokość
+                }
                 
-                console.log('📐 Obliczenia Fill (wypełnij całą etykietę):', {
+                console.log('📐 Obliczenia Fill (wypełnij całą etykietę 3D):', {
                     imageWidth,
                     imageHeight,
-                    labelWidth,
-                    labelHeight,
-                    scaleX: scaleX * 100,
-                    scaleY: scaleY * 100,
+                    imageAspect,
+                    labelAspect,
                     fillScale
                 });
                 

@@ -826,7 +826,7 @@
                                 class="w-full sm:w-auto px-8 py-4 font-semibold rounded-xl transition-all duration-200 shadow-lg {{ $isConfigurationValid ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
                                 :disabled="!{{ $isConfigurationValid ? 'true' : 'false' }}">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <span class="font-medium">Przejdź do podglądu 3D</span>
+                                    <span class="font-medium">Przejdź do płatności</span>
                                 </div>
                             </button>
                         </div>

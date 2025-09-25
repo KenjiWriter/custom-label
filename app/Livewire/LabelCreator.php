@@ -452,14 +452,17 @@ public $imageRotation = 0;
 
         logger('Project created successfully:', ['uuid' => $project->uuid, 'id' => $project->id]);
 
-        // Generate preview URL - upewnij się, że używasz właściwego parametru (uuid)
-        $previewUrl = route('label.preview', ['uuid' => $project->uuid]);
+        // Store project ID in session for payment page
+        session(['project_id' => $project->id]);
+
+        // Generate checkout URL
+        $checkoutUrl = route('checkout');
 
         // Dodaj logowanie URL do debugowania
-        logger('Preview URL:', ['url' => $previewUrl]);
+        logger('Checkout URL:', ['url' => $checkoutUrl]);
 
-        // Redirect to preview
-        return redirect()->to($previewUrl);
+        // Redirect to checkout page
+        return redirect()->to($checkoutUrl);
 
     } catch (\Exception $e) {
         logger('Error saving project: ' . $e->getMessage());
