@@ -5,17 +5,12 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center py-4">
                     <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">1</div>
-                        <span class="ml-2 text-sm font-medium text-gray-500">Cart</span>
-                    </div>
-                    <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">2</div>
-                        <span class="ml-2 text-sm font-medium text-gray-500">Payment</span>
+                        <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+                        <span class="ml-2 text-sm font-medium text-orange-600">Payment</span>
                     </div>
                     <div class="flex-1 h-1 bg-orange-600 mx-4"></div>
                     <div class="flex items-center">
-                        <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                        <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</div>
                         <span class="ml-2 text-sm font-medium text-orange-600">Confirmation</span>
                     </div>
                 </div>
@@ -117,34 +112,43 @@
                             <svg class="w-5 h-5 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                             </svg>
-                            Produkt
+                            Twój produkt
                         </h3>
                         @if($project)
                         <div class="bg-white rounded-lg p-4 border border-gray-200">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                    </svg>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    @if($project->artwork_file_path)
+                                        <img src="{{ asset('storage/' . $project->artwork_file_path) }}" alt="Product" class="w-full h-full object-cover rounded-lg">
+                                    @else
+                                        <div class="w-16 h-16 bg-orange-200 rounded-lg flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                            </svg>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-900 text-lg">Etykieta niestandardowa</h4>
-                                    <div class="mt-2 space-y-1">
-                                        @if($project->shape)
-                                            <p class="text-sm text-gray-600"><span class="font-medium">Kształt:</span> {{ $project->shape->name }}</p>
-                                        @endif
-                                        @if($project->material)
-                                            <p class="text-sm text-gray-600"><span class="font-medium">Materiał:</span> {{ $project->material->name }}</p>
-                                        @endif
-                                        @if($project->laminateOption)
-                                            <p class="text-sm text-gray-600"><span class="font-medium">Laminat:</span> {{ $project->laminateOption->name }}</p>
-                                        @endif
-                                    </div>
+                                    <h4 class="font-semibold text-gray-900">{{ $project->labelMaterial->name ?? 'Custom Label' }}</h4>
+                                    <p class="text-sm text-gray-600">{{ $project->labelShape->name ?? 'Custom Shape' }}</p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ $project->getActualDimensions()['width'] ?? '50' }}×{{ $project->getActualDimensions()['height'] ?? '50' }}mm
+                                    </p>
+                                    @if($project->laminateOption)
+                                        <p class="text-sm text-blue-600">Laminat: {{ $project->laminateOption->name }}</p>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="mt-4 flex justify-between items-center pt-4 border-t border-gray-200">
-                                <span class="text-gray-600 font-medium">Ilość:</span>
-                                <span class="font-bold text-gray-900 text-lg">{{ $project->quantity ?? 1 }} sztuk</span>
+                            
+                            <!-- Quantity Display -->
+                            <div class="border-t pt-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Ilość</span>
+                                    <span class="font-bold text-gray-900 text-lg">{{ $project->quantity ?? 1 }} sztuk</span>
+                                </div>
+                                <div class="mt-2 text-xs text-gray-500">
+                                    Cena za sztukę: {{ number_format(($project->calculated_price ?? 0) / ($project->quantity ?? 1), 2) }} zł
+                                </div>
                             </div>
                         </div>
                         @endif

@@ -6,8 +6,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center py-4">
                     <div class="flex items-center">
-                        <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
-                        <span class="ml-2 text-sm font-medium text-orange-600">Cart</span>
+                       
+                        <span class="></span>
                     </div>
                     <div class="flex-1 h-1 bg-orange-600 mx-4"></div>
                     <div class="flex items-center">
