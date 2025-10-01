@@ -9,13 +9,17 @@ return new class extends Migration
 {
     public function up()
     {
-        // Zmień ENUM na VARCHAR żeby pomieścić 'preview'
-        DB::statement("ALTER TABLE label_projects MODIFY COLUMN status VARCHAR(20) DEFAULT 'draft'");
+        // SQLite nie obsługuje MODIFY COLUMN, więc używamy Schema::table
+        Schema::table('label_projects', function (Blueprint $table) {
+            $table->string('status', 20)->default('draft')->change();
+        });
     }
 
     public function down()
     {
         // Powrót do ENUM (opcjonalnie)
-        DB::statement("ALTER TABLE label_projects MODIFY COLUMN status ENUM('draft', 'active', 'preview') DEFAULT 'draft'");
+        Schema::table('label_projects', function (Blueprint $table) {
+            $table->enum('status', ['draft', 'active', 'preview'])->default('draft')->change();
+        });
     }
 };
