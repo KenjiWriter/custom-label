@@ -9,6 +9,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
+use App\Models\ActivityLog;
+use App\Models\UserProject;
+use App\Models\UserSetting;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -78,5 +81,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailNotification);
+    }
+
+    public function logActivity($type, $title, $description = null, $metadata = [])
+    {
+        ActivityLog::log($this->id, $type, $title, $description, $metadata);
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(UserProject::class);
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    public function settings()
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+
+    public function getSettings()
+    {
+        return $this->settings ?? UserSetting::getForUser($this->id);
     }
 }

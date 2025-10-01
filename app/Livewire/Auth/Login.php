@@ -43,6 +43,9 @@ class Login extends Component
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
+        // Log login activity
+        Auth::user()->logActivity('login', 'Zalogowano się do systemu', 'Pomyślne logowanie przez formularz');
+
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 

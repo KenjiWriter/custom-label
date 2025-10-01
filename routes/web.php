@@ -20,6 +20,10 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/settings/profile', function () {
+    return view('settings.profile');
+})->middleware(['auth', 'verified'])->name('settings.profile');
+
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
