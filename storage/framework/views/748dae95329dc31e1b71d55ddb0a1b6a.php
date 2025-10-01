@@ -38,17 +38,6 @@
 
             <!-- User Menu -->
             <div class="flex items-center space-x-4">
-                <?php if(auth()->guard()->guest()): ?>
-                    <a href="<?php echo e(route('login')); ?>"
-                       class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
-                        Zaloguj się
-                    </a>
-                    <a href="<?php echo e(route('register')); ?>"
-                       class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-                        Zarejestruj się
-                    </a>
-                <?php endif; ?>
-
                 <?php if(auth()->guard()->check()): ?>
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open"
@@ -90,6 +79,17 @@
                             </form>
                         </div>
                     </div>
+                <?php else: ?>
+                    <?php if (! (request()->routeIs('login') || request()->routeIs('register'))): ?>
+                        <a href="<?php echo e(route('login')); ?>"
+                           class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Zaloguj się
+                        </a>
+                        <a href="<?php echo e(route('register')); ?>"
+                           class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                            Zarejestruj się
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <!-- Mobile menu button -->
@@ -129,6 +129,20 @@
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
                 Kontakt
             </a>
+            
+            <?php if(auth()->guard()->guest()): ?>
+                <?php if (! (request()->routeIs('login') || request()->routeIs('register'))): ?>
+                    <hr class="my-2 border-orange-200">
+                    <a href="<?php echo e(route('login')); ?>"
+                       class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
+                        Zaloguj się
+                    </a>
+                    <a href="<?php echo e(route('register')); ?>"
+                       class="block px-3 py-2 text-base font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-xl">
+                        Zarejestruj się
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
     </div>
 </nav>

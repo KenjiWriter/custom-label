@@ -14,6 +14,12 @@ Route::middleware('guest')->group(function () {
     Route::get('register', Register::class)->name('register');
     Route::get('forgot-password', ForgotPassword::class)->name('password.request');
     Route::get('reset-password/{token}', ResetPassword::class)->name('password.reset');
+    
+    // OAuth routes
+    Route::get('auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    Route::get('auth/microsoft', [App\Http\Controllers\SocialAuthController::class, 'redirectToMicrosoft'])->name('auth.microsoft');
+    Route::get('auth/microsoft/callback', [App\Http\Controllers\SocialAuthController::class, 'handleMicrosoftCallback'])->name('auth.microsoft.callback');
 });
 
 Route::middleware('auth')->group(function () {

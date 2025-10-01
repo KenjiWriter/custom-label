@@ -38,17 +38,6 @@
 
             <!-- User Menu -->
             <div class="flex items-center space-x-4">
-                @guest
-                    <a href="{{ route('login') }}"
-                       class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
-                        Zaloguj się
-                    </a>
-                    <a href="{{ route('register') }}"
-                       class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-                        Zarejestruj się
-                    </a>
-                @endguest
-
                 @auth
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open"
@@ -89,6 +78,17 @@
                             </form>
                         </div>
                     </div>
+                @else
+                    @unless(request()->routeIs('login') || request()->routeIs('register'))
+                        <a href="{{ route('login') }}"
+                           class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Zaloguj się
+                        </a>
+                        <a href="{{ route('register') }}"
+                           class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                            Zarejestruj się
+                        </a>
+                    @endunless
                 @endauth
 
                 <!-- Mobile menu button -->
@@ -128,6 +128,20 @@
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
                 Kontakt
             </a>
+            
+            @guest
+                @unless(request()->routeIs('login') || request()->routeIs('register'))
+                    <hr class="my-2 border-orange-200">
+                    <a href="{{ route('login') }}"
+                       class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
+                        Zaloguj się
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="block px-3 py-2 text-base font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-xl">
+                        Zarejestruj się
+                    </a>
+                @endunless
+            @endguest
         </div>
     </div>
 </nav>
