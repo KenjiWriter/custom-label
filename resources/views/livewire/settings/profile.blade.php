@@ -641,9 +641,6 @@
         // Save timezone preference
         localStorage.setItem('timezone', timezone);
         
-        // Show notification
-        alert(`Strefa czasowa zmieniona na: ${timezone}`);
-        
         // In real app, this would update the timezone
         console.log('Timezone changed to:', timezone);
     }
