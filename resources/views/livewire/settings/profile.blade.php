@@ -629,17 +629,6 @@
             // Save language preference
             localStorage.setItem('language', language);
             
-            // Get language names
-            const languageNames = {
-                'pl': 'Polski',
-                'en': 'English', 
-                'de': 'Deutsch',
-                'fr': 'Français'
-            };
-            
-            // Show notification
-            alert(`Język zmieniony na: ${languageNames[language]}`);
-            
             // Update page language
             document.documentElement.lang = language;
             
