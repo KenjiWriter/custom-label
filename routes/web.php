@@ -93,7 +93,7 @@ Route::get('/register', function() {
     return view('login-page');
 })->name('register');
 
-// Newsletter unsubscribe route
+// Newsletter unsubscribe routes
 Route::get('/newsletter/unsubscribe/{token}', function($token) {
     $subscription = \App\Models\NewsletterSubscriber::where('unsubscribe_token', $token)->first();
     
@@ -104,5 +104,19 @@ Route::get('/newsletter/unsubscribe/{token}', function($token) {
     
     return view('newsletter.unsubscribed', ['success' => false]);
 })->name('newsletter.unsubscribe');
+
+// One-click unsubscribe for Gmail (POST request)
+Route::post('/newsletter/unsubscribe/{token}', function($token) {
+    $subscription = \App\Models\NewsletterSubscriber::where('unsubscribe_token', $token)->first();
+    
+    if ($subscription) {
+        $subscription->unsubscribe();
+        return response('Unsubscribed successfully', 200)
+            ->header('Content-Type', 'text/plain');
+    }
+    
+    return response('Subscription not found', 404)
+        ->header('Content-Type', 'text/plain');
+})->name('newsletter.unsubscribe.post');
 
 require __DIR__.'/auth.php';

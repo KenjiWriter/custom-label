@@ -43,7 +43,7 @@ class NewsletterWelcomeNotification extends Notification
             ->view('emails.newsletter-welcome', [
                 'unsubscribeToken' => $this->unsubscribeToken
             ])
-            ->withSwiftMessage(function ($message) use ($unsubscribeUrl) {
+            ->withSymfonyMessage(function ($message) use ($unsubscribeUrl) {
                 $headers = $message->getHeaders();
                 
                 // Dodaj List-Unsubscribe header (dla Gmail, Outlook, etc.)
