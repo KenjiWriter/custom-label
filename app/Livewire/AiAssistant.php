@@ -44,6 +44,9 @@ class AiAssistant extends Component
         $this->currentMessage = '';
         $this->isTyping = true;
 
+        // DEBUG: Sprawdź czy wiadomość się wysyła
+        file_put_contents('debug.log', "User message: " . $userMessage . "\n", FILE_APPEND);
+
         // Symuluj opóźnienie odpowiedzi
         $this->dispatch('scroll-to-bottom');
         
@@ -66,6 +69,9 @@ class AiAssistant extends Component
     {
         $originalMessage = trim($message);
         $message = strtolower($originalMessage);
+        
+        // DEBUG: Sprawdź czy funkcja się wykonuje
+        error_log("AI Assistant: Generating response for: " . $originalMessage);
         
         // TURBO INTELIGENTNY AI - próbuj darmowe API najpierw
         
@@ -876,12 +882,17 @@ class AiAssistant extends Component
         try {
             // Groq - DARMOWE i SZYBKIE API
             $apiKey = env('GROQ_API_KEY');
-            if (!$apiKey) return null;
+            if (!$apiKey) {
+                \Log::info('GROQ API Key not found');
+                return null;
+            }
+            
+            \Log::info('GROQ API Key found, making request for: ' . $message);
 
             $systemPrompt = "Jesteś ekspertem od etykiet w firmie Custom Labels. Odpowiadaj po polsku, krótko i konkretnie. Custom Labels to polska firma od 2020 roku specjalizująca się w etykietach. Materiały: papier kraft, biała folia, laminaty. Rozmiary: 15x15mm do 200x300mm. Minimum 50 sztuk. Ceny: 100szt=3,50zł/szt. Realizacja 3-5 dni. Kreator: /creator";
 
             $data = [
-                'model' => 'llama3-8b-8192', // Darmowy model
+                'model' => 'llama-3.1-8b-instant', // Najnowszy darmowy model
                 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user', 'content' => $message]
@@ -905,17 +916,22 @@ class AiAssistant extends Component
 
             if ($httpCode === 200) {
                 $result = json_decode($response, true);
+                \Log::info('GROQ Response: ' . json_encode($result));
                 if (isset($result['choices'][0]['message']['content'])) {
                     $aiMessage = trim($result['choices'][0]['message']['content']);
                     $actions = $this->generateSmartActions($aiMessage, $message);
                     
+                    \Log::info('GROQ Success: ' . $aiMessage);
                     return [
                         'message' => $aiMessage . ' ⚡',
                         'actions' => $actions
                     ];
                 }
+            } else {
+                \Log::error('GROQ HTTP Error: ' . $httpCode . ' Response: ' . $response);
             }
         } catch (\Exception $e) {
+            \Log::error('GROQ Exception: ' . $e->getMessage());
             return null;
         }
 
