@@ -10,6 +10,21 @@
     @push('scripts')
         @vite(['resources/js/home.js'])
         <script>
+            // Initialize theme system on home page
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize theme system
+                if (window.ThemeManager) {
+                    window.ThemeManager.init();
+                }
+            });
+            
+            // Also initialize when Livewire navigates
+            document.addEventListener('livewire:navigated', function() {
+                if (window.ThemeManager) {
+                    window.ThemeManager.init();
+                }
+            });
+            
             // Enhanced smooth scrolling with offset for fixed header
             document.addEventListener('DOMContentLoaded', function() {
                 const smoothScrollLinks = document.querySelectorAll('a[href^="#"]');
@@ -76,7 +91,7 @@
             <!-- Enhanced heading with text shadow -->
             <h1 class="text-4xl md:text-6xl font-bold mb-8 leading-tight drop-shadow-lg">
                 Zaprojektuj <span
-                    class="text-yellow-300 inline-block transform hover:scale-105 transition-transform duration-300">Wymarzoną
+                    class="text-orange-600 inline-block transform hover:scale-105 transition-transform duration-300">Wymarzoną
                     Etykietę</span><br>w Kilka Minut!
             </h1>
             <p class="text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-light">
@@ -96,7 +111,7 @@
                     Rozpocznij Projektowanie
                 </a>
                 <a href="#"
-                    class="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-medium flex items-center transition-all duration-300 hover:bg-white/10 hover:scale-105 hover:shadow-lg">
+                    class="bg-white text-orange-600 px-8 py-4 rounded-lg font-medium flex items-center transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-700/30">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
@@ -110,7 +125,7 @@
             <div class="flex justify-center gap-8 mt-6 text-sm opacity-90">
                 <div
                     class="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                    <svg class="w-4 h-4 mr-2 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
                         </path>
@@ -119,7 +134,7 @@
                 </div>
                 <div
                     class="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                    <svg class="w-4 h-4 mr-2 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
@@ -127,7 +142,7 @@
                 </div>
                 <div
                     class="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                    <svg class="w-4 h-4 mr-2 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                         </path>
@@ -138,24 +153,11 @@
         </div>
     </div>
 
+    <!-- Section Separator -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-16"></div>
+
     <!-- Enhanced Label Creator Section with animated elements and improved visual design -->
-    <div class="py-20 px-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden rounded-3xl shadow-2xl mb-20 border border-orange-100"
-        data-creator-section>
-        <!-- Decorative background elements -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <div class="absolute w-64 h-64 bg-orange-50 opacity-70 rounded-full -top-20 -left-20 animate-pulse-slow">
-            </div>
-            <div class="absolute w-96 h-96 bg-yellow-50 opacity-30 rounded-full -bottom-40 -right-40 animate-pulse-slow"
-                style="animation-delay: 1.5s"></div>
-            <div class="absolute w-32 h-32 bg-gradient-to-r from-orange-100 to-yellow-100 opacity-40 rounded-full top-1/4 right-10 animate-float"
-                style="animation-duration: 6s"></div>
-            <svg class="absolute left-10 top-1/3 text-orange-50 w-40 h-40 animate-float" style="animation-delay: 0.5s"
-                viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <path fill="currentColor"
-                    d="M41.2,-65.8C54.1,-56.1,65.7,-45.9,73.7,-32.9C81.8,-19.9,86.3,-3.9,83.8,11.1C81.4,26.1,71.9,40.2,60,50.8C48.1,61.4,33.7,68.5,18.9,72.8C4,77.2,-11.2,78.7,-23.6,73.4C-35.9,68.1,-45.4,56,-54.1,43.9C-62.8,31.8,-70.7,19.9,-73.5,6.4C-76.2,-7.2,-73.8,-22.3,-65.4,-33C-57,-43.7,-42.7,-50,-29.5,-59.5C-16.4,-69,-8.2,-81.7,2.9,-86.4C14.1,-91,28.2,-75.5,41.2,-65.8Z"
-                    transform="translate(100 100)" />
-            </svg>
-        </div>
+
 
         <div class="max-w-6xl mx-auto relative z-10">
             <div class="text-center mb-14">
@@ -166,7 +168,7 @@
 
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-5">
                     Kreator Etykiet <span
-                        class="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-600">CustomLabels</span>
+                        class="text-3xl md:text-4xl font-bold text-orange-600 to text-orange-700  mb-5">CustomLabels</span>
                 </h2>
 
                 <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
@@ -190,8 +192,7 @@
             </div>
 
             <!-- Creator container with enhanced styling -->
-            <div
-                class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 transform transition-all duration-500 hover:shadow-xl">
+    
                 <!-- Creator component -->
                 @livewire('label-creator')
 
@@ -232,113 +233,106 @@
                             Wsparcie 24/7
                         </div>
                     </div>
-                </div>
-            </div>
+        </div>
+    </div>
+
+    <!-- Section Separator -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-16"></div>
 
             <!-- Enhanced Templates Section with more visual flair -->
-            <div class="py-20 px-4 bg-gradient-to-b from-gray-50 to-white">
+             
+            <div class="py-16 px-4 bg-gray-50">
                 <div class="max-w-6xl mx-auto">
                     <div class="text-center mb-16">
                         <span
-                            class="inline-block px-4 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-medium mb-3">INSPIRACJE</span>
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Popularne Szablony Etykiet</h2>
-                        <p class="text-gray-600 text-lg max-w-3xl mx-auto">Zainspiruj się profesjonalnie
-                            zaprojektowanymi szablonami lub rozpocznij od zera</p>
+                            class="inline-block px-4 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-medium mb-3">GOTOWE KONFIGURACJE</span>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Wybierz gotową konfigurację</h2>
+                        <p class="text-gray-600 text-lg max-w-3xl mx-auto">Kliknij na jedną z konfiguracji, a automatycznie ustawimy wszystko w kreatorze i przeniesiemy Cię do finalizacji</p>
                     </div>
 
                     <div
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 transform hover:translate-x-2 transition-all duration-700">
-                        <!-- Enhanced Template 1 with 3D effect -->
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <!-- Konfiguracja 1 - Fresh Organic -->
                         <div
-                            class="parallax-card template-card bg-gradient-to-br from-red-500 to-red-600 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group">
+                            class="parallax-card template-card bg-gradient-to-br from-red-900 to-red-900 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group cursor-pointer"
+                            onclick="selectConfiguration('fresh-organic')">
                             <div class="font-bold text-lg mb-4 tracking-wide">FRESH ORGANIC</div>
-                            <div class="text-5xl mb-6 animate-pulse">●</div>
+                            <div class="text-5xl mb-6 ">✓</div>
                             <div class="text-sm opacity-90 font-medium">Food & Beverage</div>
                             <div class="text-xs opacity-75 mt-1">Perfect for natural products</div>
                             <div
                                 class="mt-6 pt-4 border-t border-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
+                                <div
                                     class="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition-colors">
-                                    Użyj szablonu
-                                </button>
+                                    Wybierz konfigurację
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Enhanced Template 2 with 3D effect -->
+                        <!-- Konfiguracja 2 - Express Shipping -->
                         <div
-                            class="parallax-card template-card bg-gradient-to-br from-blue-500 to-blue-600 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group">
+                            class="parallax-card template-card bg-gradient-to-br from-blue-900 to-blue-900 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group cursor-pointer"
+                            onclick="selectConfiguration('express-shipping')">
                             <div class="font-bold text-lg mb-4 tracking-wide">EXPRESS SHIPPING</div>
-                            <div class="text-5xl mb-6 animate-pulse">◉</div>
+                            <div class="text-5xl mb-6 ">⛟</div>
                             <div class="text-sm opacity-90 font-medium">Shipping Labels</div>
                             <div class="text-xs opacity-75 mt-1">Waterproof & tear-resistant</div>
                             <div
                                 class="mt-6 pt-4 border-t border-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
+                                <div
                                     class="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition-colors">
-                                    Użyj szablonu
-                                </button>
+                                    Wybierz konfigurację
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Enhanced Template 3 with 3D effect -->
+                        <!-- Konfiguracja 3 - Premium Quality -->
                         <div
-                            class="parallax-card template-card bg-gradient-to-br from-purple-500 to-purple-600 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group">
+                            class="parallax-card template-card bg-gradient-to-br from-purple-900 to-purple-900 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group cursor-pointer"
+                            onclick="selectConfiguration('premium-quality')">
                             <div class="font-bold text-lg mb-4 tracking-wide">PREMIUM QUALITY</div>
-                            <div class="text-xl mb-6 floating-effect">★★★</div>
+                            <div class="text-xl mb-6 ">★★★★★</div>
                             <div class="text-sm opacity-90 font-medium">Luxury Brands</div>
                             <div class="text-xs opacity-75 mt-1">High-end metallic finish</div>
                             <div
                                 class="mt-6 pt-4 border-t border-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
+                                <div
                                     class="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition-colors">
-                                    Użyj szablonu
-                                </button>
+                                    Wybierz konfigurację
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Enhanced Template 4 with 3D effect -->
+                        <!-- Konfiguracja 4 - Eco Friendly -->
                         <div
-                            class="parallax-card template-card bg-gradient-to-br from-green-500 to-green-600 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group">
+                            class="parallax-card template-card bg-gradient-to-br from-green-900 to-green-900 text-white p-8 rounded-xl text-center shadow-xl transform transition-all duration-300 hover:scale-105 hover:-rotate-1 hover:shadow-2xl group cursor-pointer"
+                            onclick="selectConfiguration('eco-friendly')">
                             <div class="font-bold text-lg mb-4 tracking-wide">ECO FRIENDLY</div>
-                            <div class="text-5xl mb-6 floating-effect">♻</div>
+                            <div class="text-5xl mb-6 ">♼</div>
                             <div class="text-sm opacity-90 font-medium">Sustainable</div>
                             <div class="text-xs opacity-75 mt-1">Biodegradable materials</div>
                             <div
                                 class="mt-6 pt-4 border-t border-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
+                                <div
                                     class="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30 transition-colors">
-                                    Użyj szablonu
-                                </button>
+                                    Wybierz konfigurację
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="text-center mt-14">
-                        <a href="#"
-                            class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30">
-                            Zobacz wszystkie szablony
-                            <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                            </svg>
-                        </a>
+                        <p class="text-gray-600 text-sm">Kliknij na jedną z konfiguracji powyżej, aby automatycznie ustawić kreator i przejść do finalizacji</p>
                     </div>
                 </div>
             </div>
 
+    <!-- Section Separator -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-4"></div>
+
             <!-- Enhanced Why Choose Us Section with more visual appeal -->
-            <div class="py-24 px-4 bg-white relative overflow-hidden" id="why-choose-us">
-                <!-- Decorative background elements -->
-                <div class="absolute inset-0 pointer-events-none">
-                    <div
-                        class="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-orange-100 to-transparent rounded-bl-full opacity-30 floating-effect">
-                    </div>
-                    <div class="absolute bottom-0 left-0 w-1/4 h-1/4 bg-gradient-to-tr from-blue-100 to-transparent rounded-tr-full opacity-30 floating-effect"
-                        style="animation-delay: 1.5s"></div>
-                    <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-50 rounded-full opacity-30 floating-effect"
-                        style="animation-delay: 1s"></div>
-                </div>
+            <div class="py-32 px-4 bg-white relative overflow-hidden" id="why-choose-us">
+               
 
                 <div class="max-w-6xl mx-auto relative z-10">
                     <div class="text-center mb-16">
@@ -353,9 +347,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                         <!-- Enhanced Feature 1 with improved hover effect -->
                         <div
-                            class="bg-white p-10 rounded-2xl shadow-xl border border-gray-100 text-center transform transition-all duration-500 hover:translate-y-[-8px] hover:shadow-2xl group">
+                            class="bg-white p-10 rounded-2xl shadow-xl border border-orange-600 text-center transform transition-all duration-500 hover:translate-y-[-8px] hover:shadow-2xl group">
                             <div
-                                class="icon-wrapper bg-gradient-to-br from-orange-100 to-orange-200 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:rotate-6 transition-transform duration-300">
+                                class="icon-wrapper bg-transparent w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:rotate-6 transition-transform duration-300">
                                 <svg class="w-10 h-10 text-orange-500 transform transition-transform group-hover:scale-110 group-hover:rotate-3"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -379,7 +373,7 @@
 
                         <!-- Feature 2 -->
                         <div
-                            class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
+                            class="bg-white p-8 rounded-xl shadow-lg border border-orange-600 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
                             <div
                                 class="icon-wrapper bg-orange-100 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5">
                                 <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor"
@@ -404,7 +398,7 @@
 
                         <!-- Feature 3 -->
                         <div
-                            class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
+                            class="bg-white p-8 rounded-xl shadow-lg border border-orange-600 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
                             <div
                                 class="icon-wrapper bg-orange-100 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5">
                                 <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor"
@@ -431,7 +425,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
                         <!-- Feature 4 -->
                         <div
-                            class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
+                            class="bg-white p-8 rounded-xl shadow-lg border border-orange-600 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
                             <div
                                 class="icon-wrapper bg-orange-100 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5">
                                 <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor"
@@ -455,7 +449,7 @@
 
                         <!-- Feature 5 -->
                         <div
-                            class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
+                            class="bg-white p-8 rounded-xl shadow-lg border border-orange-600 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
                             <div
                                 class="icon-wrapper bg-orange-100 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5">
                                 <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor"
@@ -480,7 +474,7 @@
 
                         <!-- Feature 6 -->
                         <div
-                            class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
+                            class="bg-white p-8 rounded-xl shadow-lg border border-orange-600 text-center transform transition hover:translate-y-[-5px] hover:shadow-xl">
                             <div
                                 class="icon-wrapper bg-orange-100 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5">
                                 <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor"
@@ -503,22 +497,15 @@
                             </a>
                         </div>
                     </div>
-                </div>
-            </div>
+        </div>
+    </div>
+
+    <!-- Section Separator -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-8"></div>
 
             <!-- Pricing Section with dynamic background -->
-            <div class="py-16 px-4 bg-gray-50 relative" id="pricing">
-                <div class="absolute inset-0 overflow-hidden z-0">
-                    <div
-                        class="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-b from-orange-100 to-transparent rounded-bl-full opacity-30">
-                    </div>
-                    <div
-                        class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-blue-100 to-transparent rounded-tr-full opacity-30">
-                    </div>
-                    <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-50 rounded-full opacity-30 floating-effect"
-                        style="animation-delay: 1s"></div>
-                </div>
-
+            <div class="py-24 px-4 bg-gray-50 relative" id="pricing">
+                
                 <div class="max-w-5xl mx-auto relative z-10">
                     <div class="text-center mb-12">
                         <span
@@ -531,11 +518,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <!-- Starter Plan - Ulepszony design z animowaną ceną -->
                         <div
-                            class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl hover:scale-105">
+                            class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden transform transition duration-300 hover:shadow-xl hover:scale-105">
                             <div class="p-6 text-center">
                                 <div
                                     class="bg-gray-50 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 icon-wrapper">
-                                    <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor"
+                                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -594,8 +581,7 @@
 
                         <!-- Professional Plan (Highlighted) - Jeszcze lepiej wyróżniony -->
                         <div
-                            class="bg-gradient-to-b from-white to-orange-50 rounded-xl shadow-2xl border-2 border-orange-500 overflow-hidden transform scale-105 transition duration-300 hover:shadow-2xl relative">
-                            <!-- Badge with animation -->
+class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden transform transition duration-300 hover:shadow-xl hover:scale-105"                            <!-- Badge with animation -->
                             <div class="absolute top-0 right-0">
                                 <div
                                     class="bg-orange-500 text-white text-xs font-bold py-1 px-4 rounded-bl-lg animate-pulse">
@@ -673,11 +659,11 @@
 
                         <!-- Enterprise Plan - Ulepszony design -->
                         <div
-                            class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl hover:scale-105">
+                            class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden transform transition duration-300 hover:shadow-xl hover:scale-105">
                             <div class="p-6 text-center">
                                 <div
-                                    class="bg-blue-50 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 icon-wrapper">
-                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor"
+                                    class="bg-black-50 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 icon-wrapper">
+                                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
@@ -758,11 +744,14 @@
                             </svg>
                         </a>
                     </div>
-                </div>
-            </div>
+        </div>
+    </div>
+
+    <!-- Section Separator -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-8"></div>
 
             <!-- Testimonials Section with improved animations -->
-            <div class="py-16 px-4 bg-white">
+            <div class="py-24 px-4 bg-white">
                 <div class="max-w-5xl mx-auto">
                     <div class="text-center mb-12">
                         <span class="bg-yellow-100 text-yellow-600 text-sm font-medium px-4 py-2 rounded-full">Opinie
@@ -938,12 +927,11 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
+        </div>
+    </div>
             <!-- Call To Action Section z dynamicznym tłem i ulepszonymi animacjami -->
             <div
-                class="py-20 px-4 relative overflow-hidden bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 animate-gradient-x">
+                class="py-24 px-4 relative overflow-hidden bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 animate-gradient-x">
                 <!-- Animated particles background -->
                 <div class="absolute inset-0 overflow-hidden">
                     <div class="absolute w-20 h-20 rounded-full bg-white opacity-10 animate-float"
@@ -967,7 +955,7 @@
                     <p class="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
                         Dołącz do tysięcy zadowolonych klientów i zamów swoje własne,
                         spersonalizowane etykiety już dziś. Pierwsza próbka <span
-                            class="font-bold underline decoration-yellow-300 decoration-wavy">gratis!</span>
+                            class="font-extrabold text-orange-700 text-3xl md:text-6xl mb-6">gratis!</span>
                     </p>
 
                     <div class="flex flex-wrap justify-center gap-6">
@@ -986,7 +974,7 @@
                         </a>
 
                         <a href="#contact"
-                            class="bg-transparent border-2 border-white text-white px-10 py-4 rounded-xl font-medium text-lg flex items-center transition-all duration-300 hover:bg-white/10 hover:scale-105 hover:shadow-lg">
+                            class="bg-white text-orange-600 px-10 py-4 rounded-xl font-medium text-lg flex items-center transition-all duration-300 hover:bg-white/10 hover:scale-105 hover:shadow-lg">
                             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
@@ -995,11 +983,14 @@
                             Kontakt z doradcą
                         </a>
                     </div>
-                </div>
-            </div>
+        </div>
+    </div>
+
+    <!-- Section Separator -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-16"></div>
 
             <!-- FAQ Section z animowanymi pytaniami i odpowiedziami -->
-            <div class="py-20 px-4 bg-gray-50">
+            <div class="py-24 px-4 bg-gray-50">
                 <div class="max-w-4xl mx-auto">
                     <div class="text-center mb-16">
                         <span
@@ -1159,11 +1150,12 @@
                             </svg>
                         </a>
                     </div>
-                </div>
-            </div>
+        </div>
+    </div>
+
 
             <!-- Newsletter Section z gradientem i animacją -->
-            <div class="py-16 px-4 bg-gradient-to-br from-blue-600 to-blue-800 text-white relative overflow-hidden"
+            <div class="py-24 px-4 bg-gradient-to-br from-blue-900 to-blue-800 text-white relative overflow-hidden"
                 id="newsletter">
                 <!-- Animated elements -->
                 <div class="absolute inset-0 pointer-events-none">
@@ -1189,7 +1181,7 @@
                     <div class="max-w-xl mx-auto">
                         <form class="flex flex-col sm:flex-row gap-4">
                             <input type="email" placeholder="Twój adres email"
-                                class="flex-1 px-5 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-300 text-gray-800">
+                                class="flex-1 px-5 py-4 rounded-xl border-2 border-blue-600 focus:outline-none focus:ring-2 focus:ring-yellow-300 text-gray-800">
                             <button type="submit"
                                 class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-medium px-6 py-4 rounded-xl transition-colors duration-300 transform hover:scale-105">
                                 Zapisz się
@@ -1206,3 +1198,119 @@
                 </div>
             </div>
 </x-layouts.app>
+
+<script>
+function selectConfiguration(configType) {
+    // Konfiguracje dla różnych typów etykiet
+    const configurations = {
+        'fresh-organic': {
+            shape: 'oval',
+            material: 'paper-kraft',
+            size: '50x30',
+            laminate: 'laminate-matte',
+            description: 'Konfiguracja dla produktów organicznych - owalny kształt, papier kraft, laminat matowy'
+        },
+        'express-shipping': {
+            shape: 'rectangle',
+            material: 'foil-white',
+            size: '80x50',
+            laminate: 'laminate-glossy',
+            description: 'Konfiguracja dla etykiet wysyłkowych - prostokątny kształt, biała folia, laminat błyszczący'
+        },
+        'premium-quality': {
+            shape: 'square',
+            material: 'foil-gold',
+            size: '40x40',
+            laminate: 'laminate-soft-touch',
+            description: 'Konfiguracja premium - kwadratowy kształt, złota folia, laminat soft-touch'
+        },
+        'eco-friendly': {
+            shape: 'circle',
+            material: 'paper-waterproof',
+            size: '50x50',
+            laminate: 'laminate-matte',
+            description: 'Konfiguracja ekologiczna - okrągły kształt, wodoodporny papier, laminat matowy'
+        }
+    };
+
+    const config = configurations[configType];
+    if (!config) return;
+
+    // Pokaż loading
+    showLoading('Konfiguruję kreator...');
+
+    // Symuluj ustawienie konfiguracji w kreatorze
+    setTimeout(() => {
+        // Tutaj można dodać logikę ustawiania wartości w Livewire
+        // Na razie tylko pokazujemy komunikat i przekierowujemy
+        hideLoading();
+        
+        // Przekieruj do kreatora z parametrami
+        const url = new URL(window.location.origin + '/#label-creator');
+        url.searchParams.set('config', configType);
+        url.searchParams.set('shape', config.shape);
+        url.searchParams.set('material', config.material);
+        url.searchParams.set('size', config.size);
+        url.searchParams.set('laminate', config.laminate);
+        
+        window.location.href = url.toString();
+    }, 1500);
+}
+
+function showLoading(message) {
+    // Utwórz overlay loading
+    const overlay = document.createElement('div');
+    overlay.id = 'config-loading';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: white;
+        font-size: 18px;
+        font-weight: 500;
+    `;
+    overlay.innerHTML = `
+        <div style="text-align: center;">
+            <div style="width: 50px; height: 50px; border: 3px solid #f97316; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <div>${message}</div>
+        </div>
+    `;
+    
+    // Dodaj CSS dla animacji
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('config-loading');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// Obsługa parametrów URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const config = urlParams.get('config');
+    
+    if (config) {
+        // Tutaj można dodać logikę automatycznego ustawienia kreatora
+        console.log('Konfiguracja:', config);
+    }
+});
+</script>

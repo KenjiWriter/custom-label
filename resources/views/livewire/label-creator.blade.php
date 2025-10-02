@@ -1,4 +1,5 @@
 <div> <!-- Zewnętrzny div -->
+    <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-25"></div>
     <div data-creator-section x-data="{
         currentStep: 1,
         totalSteps: 4,
@@ -26,10 +27,10 @@
                         :class="step === 1 ? 'justify-start' : (step === totalSteps ? 'justify-end' : 'justify-center')">
                         <div class="relative">
                             <div class="flex items-center relative z-10">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                                <div class="border-2 border-orange-600 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
                                     :class="currentStep >= step ?
                                         'bg-orange-600 text-white' :
-                                        'bg-gray-200 text-gray-500'">
+                                        >
                                     <span class="text-sm font-semibold" x-text="step"></span>
                                 </div>
                                 <div class="ml-3">
@@ -67,7 +68,7 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     @foreach ($shapes as $shape)
                         <label class="relative cursor-pointer">
                             <input type="radio" wire:model.live="selectedShape" value="{{ $shape->id }}"
@@ -76,23 +77,41 @@
                                 class="flex flex-col items-center p-4 border-2 rounded-xl transition-all duration-200 bg-white shadow-sm hover:shadow-md peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:bg-orange-50">
                                 <div class="bg-orange-100 p-3 rounded-full mb-3">
                                     @if ($shape->slug == 'circle')
-                                        <div class="w-12 h-12 bg-orange-600 rounded-full"></div>
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <circle cx="12" cy="12" r="10"/>
+                                            </svg>
+                                        </div>
                                     @elseif($shape->slug == 'rectangle')
-                                        <div class="w-12 h-8 bg-orange-600 rounded-md"></div>
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <rect x="3" y="6" width="18" height="12" rx="2"/>
+                                            </svg>
+                                        </div>
                                     @elseif($shape->slug == 'square')
-                                        <div class="w-10 h-10 bg-orange-600 rounded-md"></div>
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            </svg>
+                                        </div>
                                     @elseif($shape->slug == 'oval')
-                                        <div class="w-12 h-8 bg-orange-600 rounded-full"></div>
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <ellipse cx="12" cy="12" rx="9" ry="6"/>
+                                            </svg>
+                                        </div>
                                     @elseif($shape->slug == 'star')
                                         <div class="w-12 h-12 flex items-center justify-center">
-                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24"
-                                                fill="currentColor">
-                                                <path
-                                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                             </svg>
                                         </div>
                                     @else
-                                        <div class="w-12 h-12 bg-orange-600 rounded-md"></div>
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            </svg>
+                                        </div>
                                     @endif
                                 </div>
 
@@ -105,7 +124,7 @@
 
                 <div class="flex justify-center">
                     <button type="button"
-                        class="px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ $selectedShape ? 'bg-orange-600 text-white shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
+                        class="border-2 border-orange-600 px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ $selectedShape ? 'bg-orange-600 text-orange-600 shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-orange-600 cursor-not-allowed' }}"
                         @click="nextStep()" :disabled="!{{ $selectedShape ? 'true' : 'false' }}">
                         Dalej
                     </button>

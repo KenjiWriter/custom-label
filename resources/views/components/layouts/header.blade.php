@@ -1,10 +1,10 @@
 <!-- Navigation -->
-<nav class="bg-white shadow-sm border-b border-orange-200 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
+<nav class="bg-white shadow-sm border-b border-orange-200 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }" x-init="mobileMenuOpen = false" x-cloak>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <!-- Logo -->
             <div class="flex items-center">
-                <a href="{{ route('home') }}" class="flex items-center space-x-3" wire:navigate>
+                <a href="{{ route('home') }}" class="flex items-center space-x-3" onclick="window.ThemeManager && window.ThemeManager.init()">
                     <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
@@ -19,7 +19,8 @@
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
                 <a href="{{ route('home') }}"
-                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('home') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
+                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('home') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}"
+                   onclick="window.ThemeManager && window.ThemeManager.init()">
                     Kreator
                 </a>
                 <a href="#"
@@ -36,6 +37,59 @@
                 </a>
             </div>
 
+            <!-- Darkness Slider and Language Selector -->
+            <div class="flex items-center space-x-3">
+                <!-- Language Selector -->
+                <div x-data="{ open: false }" x-init="open = false" x-cloak class="relative">
+                    <button @click="open = !open" 
+                            class="flex items-center space-x-1 text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                        </svg>
+                        <span class="hidden sm:block">PL</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    <div x-show="open" @click.away="open = false"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 top-full mt-1 w-32 bg-white rounded-lg shadow-lg border border-orange-200 py-1 z-50">
+                        <button @click="changeLanguage('pl'); open = false" 
+                                class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                            🇵🇱 Polski
+                        </button>
+                        <button @click="changeLanguage('en'); open = false" 
+                                class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                            🇬🇧 English
+                        </button>
+                        <button @click="changeLanguage('de'); open = false" 
+                                class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                            🇩🇪 Deutsch
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Darkness Slider -->
+                <div class="flex items-center space-x-2">
+                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                    <input type="range" 
+                           id="headerDarknessSlider" 
+                           min="0" 
+                           max="100" 
+                           value="0"
+                           class="w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
+                    <span id="headerDarknessValue" class="text-xs text-gray-600 font-medium min-w-[30px]">0%</span>
+                </div>
+            </div>
+
             <!-- User Menu -->
             <div class="flex items-center space-x-4">
                 @auth
@@ -44,7 +98,10 @@
                         showHistory: false, 
                         showProjects: false, 
                         showHelp: false 
-                    }" class="relative">
+                    }" 
+                    x-init="open = false; showHistory = false; showProjects = false; showHelp = false"
+                    x-cloak
+                    class="relative">
                         <button @click="open = !open"
                                 class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
                             <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
@@ -125,7 +182,7 @@
 
 
                         <!-- History Popup -->
-                        <div x-show="showHistory" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click="showHistory = false" @close-history.window="showHistory = false">
+                        <div x-show="showHistory" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click="showHistory = false" @close-history.window="showHistory = false">
                             <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" @click.stop>
                                 <div class="p-6">
                                     <livewire:history-popup />
@@ -134,7 +191,7 @@
                         </div>
 
                         <!-- Projects Popup -->
-                        <div x-show="showProjects" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click="showProjects = false" @close-projects.window="showProjects = false">
+                        <div x-show="showProjects" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click="showProjects = false" @close-projects.window="showProjects = false">
                             <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden" @click.stop>
                                 <div class="p-6">
                                     <livewire:projects-popup />
@@ -143,7 +200,7 @@
                         </div>
 
                         <!-- Help Popup -->
-                        <div x-show="showHelp" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click="showHelp = false">
+                        <div x-show="showHelp" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click="showHelp = false">
                             <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" @click.stop>
                                 <div class="p-6">
                                     <div class="flex items-center justify-between mb-6">
@@ -353,4 +410,69 @@
     </div>
 </nav>
 
-</nav>
+<!-- Header Slider Styles -->
+<style>
+    .slider {
+        -webkit-appearance: none;
+        appearance: none;
+        background: linear-gradient(to right, #ffffff, #000000);
+        outline: none;
+        border-radius: 5px;
+    }
+    
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #f97316;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #f97316;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<!-- Header JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Header darkness slider
+        const headerSlider = document.getElementById('headerDarknessSlider');
+        const headerValue = document.getElementById('headerDarknessValue');
+        
+        if (headerSlider && headerValue) {
+            // Load saved darkness level
+            const savedDarkness = localStorage.getItem('darknessLevel') || '0';
+            headerSlider.value = savedDarkness;
+            headerValue.textContent = savedDarkness + '%';
+            
+            // Update darkness when slider changes
+            headerSlider.addEventListener('input', function() {
+                const darkness = this.value;
+                document.documentElement.style.setProperty('--darkness-level', darkness);
+                headerValue.textContent = darkness + '%';
+                localStorage.setItem('darknessLevel', darkness);
+            });
+        }
+        
+        // Language change function
+        window.changeLanguage = function(language) {
+            document.documentElement.lang = language;
+            localStorage.setItem('language', language);
+            console.log('Język zmieniony na:', language);
+        };
+        
+        // Load saved language
+        const savedLanguage = localStorage.getItem('language') || 'pl';
+        document.documentElement.lang = savedLanguage;
+    });
+</script>
