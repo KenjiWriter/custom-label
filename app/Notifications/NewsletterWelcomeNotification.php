@@ -36,11 +36,28 @@ class NewsletterWelcomeNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $unsubscribeUrl = url('/newsletter/unsubscribe/' . $this->unsubscribeToken);
+        
         return (new MailMessage)
             ->subject('Witamy w newsletterze Custom Labels!')
             ->view('emails.newsletter-welcome', [
                 'unsubscribeToken' => $this->unsubscribeToken
-            ]);
+            ])
+            ->withSwiftMessage(function ($message) use ($unsubscribeUrl) {
+                $headers = $message->getHeaders();
+                
+                // Dodaj List-Unsubscribe header (dla Gmail, Outlook, etc.)
+                $headers->addTextHeader('List-Unsubscribe', '<' . $unsubscribeUrl . '>');
+                
+                // Dodaj List-Unsubscribe-Post header (dla jednego kliknięcia)
+                $headers->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+                
+                // Dodaj List-ID header
+                $headers->addTextHeader('List-ID', 'Custom Labels Newsletter <newsletter.customlabels.com>');
+                
+                // Dodaj Precedence header
+                $headers->addTextHeader('Precedence', 'bulk');
+            });
     }
 
     /**
