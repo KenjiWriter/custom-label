@@ -37,10 +37,10 @@
                                     <div class="text-sm font-medium transition-colors"
                                         :class="currentStep >= step ? 'text-orange-600 border-b-2 border-orange-600 pb-1' :
                                             'text-gray-500'">
-                                        <span x-show="step === 1">Wybierz kształt</span>
-                                        <span x-show="step === 2">Wybierz materiał</span>
-                                        <span x-show="step === 3">Wybierz rozmiar</span>
-                                        <span x-show="step === 4">Finalizacja</span>
+                                        <span x-show="step === 1">{{ __('messages.home.creator.steps.choose_shape') }}</span>
+                                        <span x-show="step === 2">{{ __('messages.home.creator.steps.choose_material') }}</span>
+                                        <span x-show="step === 3">{{ __('messages.home.creator.steps.choose_size') }}</span>
+                                        <span x-show="step === 4">{{ __('messages.home.creator.steps.finalization') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -61,10 +61,9 @@
                 class="space-y-8 step-1">
 
                 <div class="text-center">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Wybierz kształt etykiety</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ __('messages.home.creator.shape_section.title') }}</h3>
                     <p class="text-gray-600 max-w-2xl mx-auto">
-                        Wybierz kształt, który najlepiej pasuje do Twojego produktu. Każdy kształt ma swoje unikalne
-                        zastosowania.
+                        {{ __('messages.home.creator.shape_section.description') }}
                     </p>
                 </div>
 
@@ -115,8 +114,8 @@
                                     @endif
                                 </div>
 
-                                <span class="font-medium text-gray-900 text-sm">{{ $shape->name }}</span>
-                                <p class="mt-1 text-xs text-gray-500">{{ Str::limit($shape->description, 60) }}</p>
+                                <span class="font-medium text-gray-900 text-sm">{{ $shape->translated_name }}</span>
+                                <p class="mt-1 text-xs text-gray-500">{{ Str::limit($shape->translated_description, 60) }}</p>
                             </div>
                         </label>
                     @endforeach
@@ -126,7 +125,7 @@
                     <button type="button"
                         class="border-2 border-orange-600 px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ $selectedShape ? 'bg-orange-600 text-orange-600 shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-orange-600 cursor-not-allowed' }}"
                         @click="nextStep()" :disabled="!{{ $selectedShape ? 'true' : 'false' }}">
-                        Dalej
+                        {{ __('messages.home.creator.shape_section.next_button') }}
                     </button>
                 </div>
             </div>
@@ -337,7 +336,7 @@
                     <button type="button"
                         class="px-8 py-3 font-semibold rounded-xl transition-all duration-200 {{ $selectedMaterial ? 'bg-orange-600 text-white shadow-lg hover:bg-orange-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed' }}"
                         @click="nextStep()" :disabled="!{{ $selectedMaterial ? 'true' : 'false' }}">
-                        Dalej
+                        {{ __('messages.home.creator.shape_section.next_button') }}
                     </button>
                 </div>
             </div>
@@ -573,7 +572,7 @@
                         @click="nextStep()"
                         :disabled="!(
                             {{ ($useCustomSize && $customWidth && $customHeight) || (!$useCustomSize && $selectedSize) ? 'true' : 'false' }})">
-                        Dalej
+                        {{ __('messages.home.creator.shape_section.next_button') }}
                     </button>
                 </div>
             </div>

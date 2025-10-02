@@ -1,4 +1,4 @@
-<x-layouts.app title="Custom Labels - Twórz własne etykiety w kilka krokach">
+<x-layouts.app title="Custom Labels - {{ __('messages.home.hero.subtitle') }}">
     @push('styles')
         @vite(['resources/css/home.css'])
     @endpush
@@ -90,13 +90,10 @@
         <div class="max-w-5xl mx-auto text-center text-white relative z-10">
             <!-- Enhanced heading with text shadow -->
             <h1 class="text-4xl md:text-6xl font-bold mb-8 leading-tight drop-shadow-lg">
-                Zaprojektuj <span
-                    class="text-orange-600 inline-block transform hover:scale-105 transition-transform duration-300">Wymarzoną
-                    Etykietę</span><br>w Kilka Minut!
+                {{ __('messages.home.hero.title') }}
             </h1>
             <p class="text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-light">
-                Dołącz do ponad <span class="font-semibold">50,000+ firm</span>, które zaufały naszej platformie do
-                tworzenia profesjonalnych etykiet
+                {{ __('messages.home.hero.description') }}
             </p>
 
             <!-- Enhanced buttons with improved hover effects -->
@@ -108,7 +105,7 @@
                             d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
                         </path>
                     </svg>
-                    Rozpocznij Projektowanie
+                    {{ __('messages.home.hero.cta_button') }}
                 </a>
                 <a href="#"
                     class="bg-white text-orange-600 px-8 py-4 rounded-lg font-medium flex items-center transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-700/30">
@@ -117,7 +114,7 @@
                             d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
                         </path>
                     </svg>
-                    Porozmawiaj z ekspertem
+                    {{ __('messages.home.hero.expert_button') }}
                 </a>
             </div>
 
@@ -130,7 +127,7 @@
                             d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
                         </path>
                     </svg>
-                    Darmowe szablony
+                    {{ __('messages.home.hero.features.free_templates') }}
                 </div>
                 <div
                     class="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
@@ -138,7 +135,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
-                    Wsparcie 24/7
+                    {{ __('messages.home.hero.features.support_24_7') }}
                 </div>
                 <div
                     class="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
@@ -147,7 +144,7 @@
                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                         </path>
                     </svg>
-                    Gwarancja Zwrotu
+                    {{ __('messages.home.hero.features.guarantee') }}
                 </div>
             </div>
         </div>
@@ -167,14 +164,12 @@
                     TERAZ</span>
 
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-5">
-                    Kreator Etykiet <span
-                        class="text-3xl md:text-4xl font-bold text-orange-600 to text-orange-700  mb-5">CustomLabels</span>
+                    {{ __('messages.home.creator.title') }}
                 </h2>
 
                 <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                    Skonfiguruj swoją etykietę krok po kroku.
-                    Każda zmiana natychmiast wpływa na cenę i podgląd.
-                    <span class="block mt-2 text-orange-500 font-medium">Rozpocznij poniżej!</span>
+                    {{ __('messages.home.creator.subtitle') }}
+                    <span class="block mt-2 text-orange-500 font-medium">{{ __('messages.home.creator.start_below') }}</span>
                 </p>
             </div>
 
@@ -206,7 +201,7 @@
                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                                 </path>
                             </svg>
-                            Bezpieczne płatności
+                            {{ __('messages.home.creator.features.secure_payments') }}
                         </div>
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -214,7 +209,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Gwarancja satysfakcji
+                            {{ __('messages.home.creator.features.satisfaction_guarantee') }}
                         </div>
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -222,7 +217,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Szybka realizacja zamówień
+                            {{ __('messages.home.creator.features.fast_delivery') }}
                         </div>
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -230,7 +225,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Wsparcie 24/7
+                            {{ __('messages.home.creator.features.support_24_7') }}
                         </div>
                     </div>
         </div>
@@ -246,8 +241,8 @@
                     <div class="text-center mb-16">
                         <span
                             class="inline-block px-4 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-medium mb-3">GOTOWE KONFIGURACJE</span>
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Wybierz gotową konfigurację</h2>
-                        <p class="text-gray-600 text-lg max-w-3xl mx-auto">Kliknij na jedną z konfiguracji, a automatycznie ustawimy wszystko w kreatorze i przeniesiemy Cię do finalizacji</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ __('messages.home.templates.title') }}</h2>
+                        <p class="text-gray-600 text-lg max-w-3xl mx-auto">{{ __('messages.home.templates.subtitle') }}</p>
                     </div>
 
                     <div
@@ -322,7 +317,7 @@
                     </div>
 
                     <div class="text-center mt-14">
-                        <p class="text-gray-600 text-sm">Kliknij na jedną z konfiguracji powyżej, aby automatycznie ustawić kreator i przejść do finalizacji</p>
+                        <p class="text-gray-600 text-sm">{{ __('messages.home.templates.click_to_setup') }}</p>
                     </div>
                 </div>
             </div>
@@ -339,9 +334,8 @@
                         <span
                             class="inline-block px-5 py-2 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">Dlaczego
                             My?</span>
-                        <h2 class="text-4xl font-bold text-gray-900 mt-4 mb-3">Dlaczego warto wybrać CustomLabels</h2>
-                        <p class="text-gray-600 text-lg max-w-3xl mx-auto">Profesjonalne rozwiązania do tworzenia
-                            etykiet z najlepszymi funkcjami w branży</p>
+                        <h2 class="text-4xl font-bold text-gray-900 mt-4 mb-3">{{ __('messages.home.why_choose.title') }}</h2>
+                        <p class="text-gray-600 text-lg max-w-3xl mx-auto">{{ __('messages.home.why_choose.subtitle') }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -356,13 +350,11 @@
                                         d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-2xl text-gray-800 mb-4">Projektowanie AI</h3>
-                            <p class="text-gray-600 mb-6 leading-relaxed">Nasz zaawansowany silnik AI tworzy lepsze
-                                etykiety w oparciu o Twoją branżę i preferencje, zwiększając skuteczność marketingową.
-                            </p>
+                            <h3 class="font-bold text-2xl text-gray-800 mb-4">{{ __('messages.home.why_choose.features.ai_design.title') }}</h3>
+                            <p class="text-gray-600 mb-6 leading-relaxed">{{ __('messages.home.why_choose.features.ai_design.description') }}</p>
                             <a href="#"
                                 class="text-orange-500 hover:text-orange-600 inline-flex items-center font-medium group-hover:underline">
-                                Dowiedz się więcej
+                                {{ __('messages.home.why_choose.features.ai_design.link') }}
                                 <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -383,12 +375,11 @@
                                     </path>
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-xl text-gray-800 mb-3">Pełna Personalizacja</h3>
-                            <p class="text-gray-600 mb-4">Pełna kontrola nad wymiarami, kolorami, materiałami i
-                                czcionkami. Stwórz dokładnie to, co sobie wymarzyłeś.</p>
+                            <h3 class="font-bold text-xl text-gray-800 mb-3">{{ __('messages.home.why_choose.features.personalization.title') }}</h3>
+                            <p class="text-gray-600 mb-4">{{ __('messages.home.why_choose.features.personalization.description') }}</p>
                             <a href="#"
                                 class="nav-link text-orange-500 hover:text-orange-600 inline-flex items-center font-medium">
-                                Wypróbuj edytor
+                                {{ __('messages.home.why_choose.features.personalization.link') }}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7"></path>
@@ -407,12 +398,11 @@
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-xl text-gray-800 mb-3">Błyskawiczna Dostawa</h3>
-                            <p class="text-gray-600 mb-4">Otrzymaj swoje etykiety wydrukowane i dostarczone nawet w 24
-                                godziny. Dostępna usługa ekspresowa.</p>
+                            <h3 class="font-bold text-xl text-gray-800 mb-3">{{ __('messages.home.why_choose.features.fast_delivery.title') }}</h3>
+                            <p class="text-gray-600 mb-4">{{ __('messages.home.why_choose.features.fast_delivery.description') }}</p>
                             <a href="#"
                                 class="nav-link text-orange-500 hover:text-orange-600 inline-flex items-center font-medium">
-                                Informacje o wysyłce
+                                {{ __('messages.home.why_choose.features.fast_delivery.link') }}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7"></path>
@@ -434,12 +424,11 @@
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-xl text-gray-800 mb-3">Najwyższa Jakość</h3>
-                            <p class="text-gray-600 mb-4">Materiały i druk klasy przemysłowej zapewniają, że Twoje
-                                etykiety wytrzymają trudne warunki.</p>
+                            <h3 class="font-bold text-xl text-gray-800 mb-3">{{ __('messages.home.why_choose.features.quality.title') }}</h3>
+                            <p class="text-gray-600 mb-4">{{ __('messages.home.why_choose.features.quality.description') }}</p>
                             <a href="#"
                                 class="nav-link text-orange-500 hover:text-orange-600 inline-flex items-center font-medium">
-                                Dowiedz się więcej
+                                {{ __('messages.home.why_choose.features.quality.link') }}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7"></path>
@@ -459,12 +448,11 @@
                                     </path>
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-xl text-gray-800 mb-3">Eksperckie Wsparcie</h3>
-                            <p class="text-gray-600 mb-4">Nasi eksperci są dostępni 24/7, aby pomóc Ci z Twoimi
-                                projektami. Darmowe konsultacje projektowe.</p>
+                            <h3 class="font-bold text-xl text-gray-800 mb-3">{{ __('messages.home.why_choose.features.expert_support.title') }}</h3>
+                            <p class="text-gray-600 mb-4">{{ __('messages.home.why_choose.features.expert_support.description') }}</p>
                             <a href="#"
                                 class="nav-link text-orange-500 hover:text-orange-600 inline-flex items-center font-medium">
-                                Kontakt ze wsparciem
+                                {{ __('messages.home.why_choose.features.expert_support.link') }}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7"></path>
@@ -484,12 +472,11 @@
                                     </path>
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-xl text-gray-800 mb-3">Analityka Biznesowa</h3>
-                            <p class="text-gray-600 mb-4">Śledź wydajność etykiet, monitoruj zwroty i optymalizuj swoją
-                                strategię etykietowania dzięki danym.</p>
+                            <h3 class="font-bold text-xl text-gray-800 mb-3">{{ __('messages.home.why_choose.features.business_analytics.title') }}</h3>
+                            <p class="text-gray-600 mb-4">{{ __('messages.home.why_choose.features.business_analytics.description') }}</p>
                             <a href="#"
                                 class="nav-link text-orange-500 hover:text-orange-600 inline-flex items-center font-medium">
-                                Zobacz analizę
+                                {{ __('messages.home.why_choose.features.business_analytics.link') }}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7"></path>
@@ -510,9 +497,8 @@
                     <div class="text-center mb-12">
                         <span
                             class="bg-orange-100 text-orange-600 text-sm font-medium px-4 py-2 rounded-full">Cennik</span>
-                        <h2 class="text-3xl font-bold text-gray-900 mt-4 mb-2">Prosto i przejrzyste ceny</h2>
-                        <p class="text-gray-600 text-lg">Bez ukrytych opłat, bez kosztów konfiguracji. Płacisz tylko za
-                            wartość zamówienia z automatycznie naliczanymi rabatami ilościowymi.</p>
+                        <h2 class="text-3xl font-bold text-gray-900 mt-4 mb-2">{{ __('messages.home.pricing.title') }}</h2>
+                        <p class="text-gray-600 text-lg">{{ __('messages.home.pricing.subtitle') }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -528,13 +514,13 @@
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-1">Starter</h3>
-                                <p class="text-sm text-gray-500 mb-4">Idealny do małych projektów</p>
+                                <h3 class="text-lg font-bold text-gray-800 mb-1">{{ __('messages.home.pricing.packages.starter.name') }}</h3>
+                                <p class="text-sm text-gray-500 mb-4">{{ __('messages.home.pricing.packages.starter.description') }}</p>
 
                                 <div class="mb-6 price-counter">
                                     <span class="text-4xl font-bold text-gray-900"
-                                        data-target-price="0.25">$0.25</span>
-                                    <span class="text-sm text-gray-500">za etykietę</span>
+                                        data-target-price="0.25">{{ __('messages.home.pricing.packages.starter.price') }}</span>
+                                    <span class="text-sm text-gray-500">{{ __('messages.home.pricing.packages.starter.period') }}</span>
                                 </div>
 
                                 <ul class="text-left space-y-3 mb-8">
@@ -544,7 +530,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Do 100 etykiet
+                                        {{ __('messages.home.pricing.packages.starter.features.0') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -552,7 +538,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Podstawowe materiały
+                                        {{ __('messages.home.pricing.packages.starter.features.1') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -560,7 +546,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Standardowa wysyłka
+                                        {{ __('messages.home.pricing.packages.starter.features.2') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -568,13 +554,13 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Wsparcie mailowe
+                                        {{ __('messages.home.pricing.packages.starter.features.3') }}
                                     </li>
                                 </ul>
 
                                 <button
                                     class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors">
-                                    Rozpocznij
+                                    {{ __('messages.home.pricing.packages.starter.button') }}
                                 </button>
                             </div>
                         </div>
@@ -598,13 +584,13 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                             d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-1">Professional</h3>
-                                <p class="text-sm text-gray-500 mb-4">Najlepsza wartość dla firm</p>
+                                <h3 class="text-lg font-bold text-gray-800 mb-1">{{ __('messages.home.pricing.packages.professional.name') }}</h3>
+                                <p class="text-sm text-gray-500 mb-4">{{ __('messages.home.pricing.packages.professional.description') }}</p>
 
                                 <div class="mb-6 price-counter">
                                     <span class="text-4xl font-bold text-orange-500"
                                         data-target-price="0.18">$0.18</span>
-                                    <span class="text-sm text-gray-500">za etykietę</span>
+                                    <span class="text-sm text-gray-500">{{ __('messages.home.pricing.packages.professional.period') }}</span>
                                 </div>
 
                                 <ul class="text-left space-y-3 mb-8">
@@ -614,7 +600,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Do 5,000 etykiet
+                                        {{ __('messages.home.pricing.packages.professional.features.0') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-orange-500" fill="none"
@@ -622,7 +608,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Premium materiały
+                                        {{ __('messages.home.pricing.packages.professional.features.1') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-orange-500" fill="none"
@@ -630,7 +616,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Ekspresowa wysyłka
+                                        {{ __('messages.home.pricing.packages.professional.features.2') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-orange-500" fill="none"
@@ -638,7 +624,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Priorytetowe wsparcie
+                                        {{ __('messages.home.pricing.packages.professional.features.3') }}
                                     </li>
                                     <li class="flex items-center text-sm">
                                         <svg class="w-5 h-5 mr-2 text-orange-500" fill="none"
@@ -646,13 +632,13 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Podgląd 3D
+                                        {{ __('messages.home.pricing.packages.professional.features.4') }}
                                     </li>
                                 </ul>
 
                                 <button
                                     class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors shadow-lg hover:shadow-xl">
-                                    Rozpocznij darmowy okres próbny
+                                    {{ __('messages.home.pricing.packages.professional.button') }}
                                 </button>
                             </div>
                         </div>
@@ -670,8 +656,8 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                         </path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-800 mb-1">Enterprise</h3>
-                                <p class="text-sm text-gray-500 mb-4">Dla dużych wolumenów</p>
+                                <h3 class="text-lg font-bold text-gray-800 mb-1">{{ __('messages.home.pricing.packages.enterprise.name') }}</h3>
+                                <p class="text-sm text-gray-500 mb-4">{{ __('messages.home.pricing.packages.enterprise.description') }}</p>
 
                                 <div class="mb-6 price-counter">
                                     <span class="text-4xl font-bold text-gray-900"
@@ -756,8 +742,8 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                     <div class="text-center mb-12">
                         <span class="bg-yellow-100 text-yellow-600 text-sm font-medium px-4 py-2 rounded-full">Opinie
                             klientów</span>
-                        <h2 class="text-3xl font-bold text-gray-900 mt-4 mb-2">Zaufało nam ponad 50,000+ firm</h2>
-                        <p class="text-gray-600 text-lg">Zobacz, co mówią o nas nasi klienci</p>
+                        <h2 class="text-3xl font-bold text-gray-900 mt-4 mb-2">{{ __('messages.home.testimonials.title') }}</h2>
+                        <p class="text-gray-600 text-lg">{{ __('messages.home.testimonials.subtitle') }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -949,13 +935,10 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                 </div>
 
                 <div class="max-w-5xl mx-auto text-center relative z-10">
-                    <h2 class="text-4xl font-bold text-white mb-8 drop-shadow-lg">Gotowy na profesjonalne etykiety?
-                    </h2>
+                    <h2 class="text-4xl font-bold text-white mb-8 drop-shadow-lg">{{ __('messages.home.cta.title') }}</h2>
 
                     <p class="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
-                        Dołącz do tysięcy zadowolonych klientów i zamów swoje własne,
-                        spersonalizowane etykiety już dziś. Pierwsza próbka <span
-                            class="font-extrabold text-orange-700 text-3xl md:text-6xl mb-6">gratis!</span>
+                        {{ __('messages.home.cta.subtitle') }}
                     </p>
 
                     <div class="flex flex-wrap justify-center gap-6">
@@ -967,7 +950,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                                     d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z">
                                 </path>
                             </svg>
-                            Zaprojektuj etykietę
+                            {{ __('messages.home.cta.button') }}
                             <div
                                 class="absolute inset-0 bg-white rounded-xl -z-10 opacity-0 group-hover:opacity-10 transition-opacity duration-300">
                             </div>
@@ -995,9 +978,8 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                     <div class="text-center mb-16">
                         <span
                             class="inline-block px-4 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-3">FAQ</span>
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Najczęściej zadawane pytania</h2>
-                        <p class="text-gray-600 text-lg">Znalazłeś odpowiedź na swoje pytanie? Jeśli nie, skontaktuj
-                            się z nami.</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ __('messages.home.faq.title') }}</h2>
+                        <p class="text-gray-600 text-lg">{{ __('messages.home.faq.subtitle') }}</p>
                     </div>
 
                     <div class="space-y-4" x-data="{ selected: null }">

@@ -21,19 +21,19 @@
                 <a href="{{ route('home') }}"
                    class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('home') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}"
                    onclick="window.ThemeManager && window.ThemeManager.init()">
-                    Kreator
+                    {{ __('messages.nav.creator') }}
                 </a>
                 <a href="{{ route('gallery') }}"
                    class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('gallery') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
-                    Galeria
+                    {{ __('messages.nav.gallery') }}
                 </a>
                 <a href="{{ route('about') }}"
                    class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('about') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
-                    O nas
+                    {{ __('messages.nav.about') }}
                 </a>
                 <a href="{{ route('contact') }}"
                    class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('contact') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
-                    Kontakt
+                    {{ __('messages.nav.contact') }}
                 </a>
             </div>
 
@@ -46,7 +46,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
                         </svg>
-                        <span class="hidden sm:block">PL</span>
+                        <span class="hidden sm:block">{{ app()->getLocale() == 'pl' ? 'PL' : 'EN' }}</span>
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
@@ -60,18 +60,20 @@
                          x-transition:leave-start="opacity-100 scale-100"
                          x-transition:leave-end="opacity-0 scale-95"
                          class="absolute right-0 top-full mt-1 w-32 bg-white rounded-lg shadow-lg border border-orange-200 py-1 z-50">
-                        <button @click="changeLanguage('pl'); open = false" 
-                                class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
-                            🇵🇱 Polski
-                        </button>
-                        <button @click="changeLanguage('en'); open = false" 
-                                class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
-                            🇬🇧 English
-                        </button>
-                        <button @click="changeLanguage('de'); open = false" 
-                                class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
-                            🇩🇪 Deutsch
-                        </button>
+                        <form method="POST" action="{{ route('language.switch') }}">
+                            @csrf
+                            <input type="hidden" name="lang" value="pl">
+                            <button type="submit" class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                🇵🇱 Polski
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('language.switch') }}">
+                            @csrf
+                            <input type="hidden" name="lang" value="en">
+                            <button type="submit" class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                🇺🇸 English
+                            </button>
+                        </form>
                     </div>
                 </div>
                 
@@ -378,19 +380,19 @@
         <div class="px-2 pt-2 pb-3 space-y-1">
             <a href="{{ route('home') }}"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl {{ request()->routeIs('home') ? 'text-orange-600 bg-orange-50' : '' }}">
-                Kreator
+                {{ __('messages.nav.creator') }}
             </a>
-            <a href="#"
-               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
-                Galeria
+            <a href="{{ route('gallery') }}"
+               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl {{ request()->routeIs('gallery') ? 'text-orange-600 bg-orange-50' : '' }}">
+                {{ __('messages.nav.gallery') }}
             </a>
-            <a href="#"
-               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
-                O nas
+            <a href="{{ route('about') }}"
+               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl {{ request()->routeIs('about') ? 'text-orange-600 bg-orange-50' : '' }}">
+                {{ __('messages.nav.about') }}
             </a>
-            <a href="#"
-               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl">
-                Kontakt
+            <a href="{{ route('contact') }}"
+               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl {{ request()->routeIs('contact') ? 'text-orange-600 bg-orange-50' : '' }}">
+                {{ __('messages.nav.contact') }}
             </a>
             
             @guest

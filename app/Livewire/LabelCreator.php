@@ -574,12 +574,20 @@ public $imageRotation = 0;
     }
 }
 
-public function render()
-{
-    return view('livewire.label-creator', [
-        'shapes' => \App\Models\LabelShape::active()->orderBy('sort_order')->get(),
-        'materials' => \App\Models\LabelMaterial::active()->orderBy('sort_order')->get(),
-        'laminateOptions' => \App\Models\LaminateOption::active()->orderBy('sort_order')->get(),
-        'availableSizes' => $this->availableSizes,
-    ]);
-}}
+    public function render()
+    {
+        $shapes = \App\Models\LabelShape::active()->orderBy('sort_order')->get();
+        
+        // Add translated names and descriptions
+        foreach ($shapes as $shape) {
+            $shape->translated_name = __('messages.home.creator.shapes.' . $shape->slug . '.name');
+            $shape->translated_description = __('messages.home.creator.shapes.' . $shape->slug . '.description');
+        }
+        
+        return view('livewire.label-creator', [
+            'shapes' => $shapes,
+            'materials' => \App\Models\LabelMaterial::active()->orderBy('sort_order')->get(),
+            'laminateOptions' => \App\Models\LaminateOption::active()->orderBy('sort_order')->get(),
+            'availableSizes' => $this->availableSizes,
+        ]);
+    }}

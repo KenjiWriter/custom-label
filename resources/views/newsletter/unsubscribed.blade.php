@@ -31,7 +31,7 @@
                         Nie udało się wypisać z newslettera. Link może być nieprawidłowy lub wygasły.
                     </p>
                     <p class="mt-4 text-sm text-gray-500">
-                        Jeśli problem będzie się powtarzał, skontaktuj się z nami: CustomLabelHelp@gmail.com
+                        Jeśli problem będzie się powtarzał, skontaktuj się z nami: CustomLabelHelps@gmail.com
                     </p>
                 @endif
                 

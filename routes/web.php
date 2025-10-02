@@ -15,6 +15,9 @@ Route::view('/galeria', 'gallery')->name('gallery');
 Route::view('/o-nas', 'about')->name('about');
 Route::view('/kontakt', 'contact')->name('contact');
 
+// Language switching
+Route::post('/language/switch', [App\Http\Controllers\LanguageController::class, 'switch'])->name('language.switch');
+
 // POPRAWIONY PATTERN UUID:
 Route::get('/preview/{uuid}', [LabelPreviewController::class, 'show'])
     ->name('label.preview')

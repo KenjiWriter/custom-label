@@ -44,8 +44,6 @@ class AiAssistant extends Component
         $this->currentMessage = '';
         $this->isTyping = true;
 
-        // DEBUG: Sprawdź czy wiadomość się wysyła
-        file_put_contents('debug.log', "User message: " . $userMessage . "\n", FILE_APPEND);
 
         // Symuluj opóźnienie odpowiedzi
         $this->dispatch('scroll-to-bottom');
@@ -70,8 +68,6 @@ class AiAssistant extends Component
         $originalMessage = trim($message);
         $message = strtolower($originalMessage);
         
-        // DEBUG: Sprawdź czy funkcja się wykonuje
-        error_log("AI Assistant: Generating response for: " . $originalMessage);
         
         // TURBO INTELIGENTNY AI - próbuj darmowe API najpierw
         
@@ -230,7 +226,7 @@ class AiAssistant extends Component
         // Pytania o firmę/kontakt
         if (str_contains($message, 'kim jesteś') || str_contains($message, 'o firmie') || str_contains($message, 'kontakt') || str_contains($message, 'adres') || str_contains($message, 'telefon')) {
             return [
-                'message' => 'Jesteśmy Custom Labels - polską firmą specjalizującą się w etykietach! Działamy od 2020 roku, mamy tysiące zadowolonych klientów. Kontakt: CustomLabelHelp@gmail.com 🏢📞',
+                'message' => 'Jesteśmy Custom Labels - polską firmą specjalizującą się w etykietach! Działamy od 2020 roku, mamy tysiące zadowolonych klientów. Kontakt: CustomLabelHelps@gmail.com 🏢📞',
                 'actions' => [
                     ['text' => '📞 Kontakt', 'url' => '#'],
                     ['text' => '🏆 Nasze Realizacje', 'action' => 'scroll-to-configs']
@@ -731,7 +727,7 @@ class AiAssistant extends Component
             - Ceny: 100szt=3,50zł/szt, 500szt=2,80zł/szt, 1000szt=2,50zł/szt
             - Realizacja: 3-5 dni + dostawa, ekspres 24h możliwy
             - Jakość: druk CMYK 1200 DPI, wodoodporne
-            - Kontakt: CustomLabelHelp@gmail.com
+            - Kontakt: CustomLabelHelps@gmail.com
             - Kreator online: /creator
             
             ZASADY:
@@ -882,12 +878,7 @@ class AiAssistant extends Component
         try {
             // Groq - DARMOWE i SZYBKIE API
             $apiKey = env('GROQ_API_KEY');
-            if (!$apiKey) {
-                \Log::info('GROQ API Key not found');
-                return null;
-            }
-            
-            \Log::info('GROQ API Key found, making request for: ' . $message);
+            if (!$apiKey) return null;
 
             $systemPrompt = "Jesteś ekspertem od etykiet w firmie Custom Labels. Odpowiadaj po polsku, krótko i konkretnie. Custom Labels to polska firma od 2020 roku specjalizująca się w etykietach. Materiały: papier kraft, biała folia, laminaty. Rozmiary: 15x15mm do 200x300mm. Minimum 50 sztuk. Ceny: 100szt=3,50zł/szt. Realizacja 3-5 dni. Kreator: /creator";
 
@@ -916,22 +907,17 @@ class AiAssistant extends Component
 
             if ($httpCode === 200) {
                 $result = json_decode($response, true);
-                \Log::info('GROQ Response: ' . json_encode($result));
                 if (isset($result['choices'][0]['message']['content'])) {
                     $aiMessage = trim($result['choices'][0]['message']['content']);
                     $actions = $this->generateSmartActions($aiMessage, $message);
                     
-                    \Log::info('GROQ Success: ' . $aiMessage);
                     return [
                         'message' => $aiMessage . ' ⚡',
                         'actions' => $actions
                     ];
                 }
-            } else {
-                \Log::error('GROQ HTTP Error: ' . $httpCode . ' Response: ' . $response);
             }
         } catch (\Exception $e) {
-            \Log::error('GROQ Exception: ' . $e->getMessage());
             return null;
         }
 

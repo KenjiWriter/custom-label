@@ -127,7 +127,7 @@
         <div class="footer">
             <p><strong>Custom Labels</strong></p>
             <p>Twój zaufany partner w tworzeniu etykiet</p>
-            <p>📧 CustomLabelHelp@gmail.com | 🌐 customlabels.com</p>
+            <p>📧 CustomLabelHelps@gmail.com | 🌐 customlabels.com</p>
             <p style="font-size: 12px; color: #999999;">
                 Ta wiadomość została wysłana automatycznie. Prosimy nie odpowiadać na ten email.
             </p>
