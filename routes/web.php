@@ -93,4 +93,16 @@ Route::get('/register', function() {
     return view('login-page');
 })->name('register');
 
+// Newsletter unsubscribe route
+Route::get('/newsletter/unsubscribe/{token}', function($token) {
+    $subscription = \App\Models\NewsletterSubscriber::where('unsubscribe_token', $token)->first();
+    
+    if ($subscription) {
+        $subscription->unsubscribe();
+        return view('newsletter.unsubscribed', ['success' => true]);
+    }
+    
+    return view('newsletter.unsubscribed', ['success' => false]);
+})->name('newsletter.unsubscribe');
+
 require __DIR__.'/auth.php';
