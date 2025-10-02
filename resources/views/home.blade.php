@@ -1179,19 +1179,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
                     </div>
 
                     <div class="max-w-xl mx-auto">
-                        <form class="flex flex-col sm:flex-row gap-4">
-                            <input type="email" placeholder="Twój adres email"
-                                class="flex-1 px-5 py-4 rounded-xl border-2 border-blue-600 focus:outline-none focus:ring-2 focus:ring-yellow-300 text-gray-800">
-                            <button type="submit"
-                                class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-medium px-6 py-4 rounded-xl transition-colors duration-300 transform hover:scale-105">
-                                Zapisz się
-                                <svg class="w-5 h-5 ml-2 inline-block" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </button>
-                        </form>
+                        @livewire('newsletter-subscription')
                         <p class="text-sm text-blue-200 text-center mt-4">Zero spamu. Tylko wartościowe informacje.
                             Możesz zrezygnować w każdej chwili.</p>
                     </div>
