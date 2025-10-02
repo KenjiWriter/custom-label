@@ -9,7 +9,11 @@ use Illuminate\Http\Request;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Główne strony
 Route::get('/creator', LabelCreator::class)->name('label.creator');
+Route::view('/galeria', 'gallery')->name('gallery');
+Route::view('/o-nas', 'about')->name('about');
+Route::view('/kontakt', 'contact')->name('contact');
 
 // POPRAWIONY PATTERN UUID:
 Route::get('/preview/{uuid}', [LabelPreviewController::class, 'show'])

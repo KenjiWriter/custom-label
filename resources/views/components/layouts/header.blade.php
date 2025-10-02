@@ -23,16 +23,16 @@
                    onclick="window.ThemeManager && window.ThemeManager.init()">
                     Kreator
                 </a>
-                <a href="#"
-                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
+                <a href="{{ route('gallery') }}"
+                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('gallery') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
                     Galeria
                 </a>
-                <a href="#"
-                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
+                <a href="{{ route('about') }}"
+                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('about') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
                     O nas
                 </a>
-                <a href="#"
-                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors">
+                <a href="{{ route('contact') }}"
+                   class="text-gray-700 hover:text-orange-600 px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('contact') ? 'text-orange-600 border-b-2 border-orange-600' : '' }}">
                     Kontakt
                 </a>
             </div>
