@@ -69,9 +69,27 @@
 <?php unset($__componentOriginal2851f1e47c9108aacbab05e6d2ec4a68); ?>
 <?php endif; ?>
 
-<?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+        <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
-<?php echo $__env->yieldPushContent('scripts'); ?>
-</body>
+        <?php echo $__env->yieldPushContent('scripts'); ?>
+        
+        <!-- AI Assistant -->
+        <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('ai-assistant');
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-3504653716-0', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+    </body>
 </html>
 <?php /**PATH C:\xampp\htdocs\custom-label\resources\views/components/layouts/app.blade.php ENDPATH**/ ?>

@@ -11,7 +11,10 @@
 
 <x-layouts.footer />
 
-@livewireScripts
-@stack('scripts')
-</body>
+        @livewireScripts
+        @stack('scripts')
+        
+        <!-- AI Assistant -->
+        @livewire('ai-assistant')
+    </body>
 </html>

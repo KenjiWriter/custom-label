@@ -242,7 +242,7 @@
             <!-- Enhanced Templates Section with more visual flair -->
              
             <div class="py-16 px-4 bg-gray-50">
-                <div class="max-w-6xl mx-auto">
+                <div class="max-w-6xl mx-auto" id="gotowe-konfiguracje">
                     <div class="text-center mb-16">
                         <span
                             class="inline-block px-4 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-medium mb-3">GOTOWE KONFIGURACJE</span>
@@ -990,7 +990,7 @@ class="bg-white rounded-xl shadow-lg border border-orange-600 overflow-hidden tr
     <div class="h-1 bg-gradient-to-r from-transparent via-orange-200 to-transparent my-16"></div>
 
             <!-- FAQ Section z animowanymi pytaniami i odpowiedziami -->
-            <div class="py-24 px-4 bg-gray-50">
+            <div class="py-24 px-4 bg-gray-50" id="faq">
                 <div class="max-w-4xl mx-auto">
                     <div class="text-center mb-16">
                         <span
