@@ -38,17 +38,9 @@ class NewsletterWelcomeNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Witamy w newsletterze Custom Labels!')
-            ->greeting('Witaj!')
-            ->line('Dziękujemy za zapisanie się do naszego newslettera!')
-            ->line('Będziesz otrzymywać najnowsze informacje o:')
-            ->line('• Nowych funkcjach kreatora etykiet')
-            ->line('• Promocjach i specjalnych ofertach')
-            ->line('• Poradach dotyczących projektowania etykiet')
-            ->line('• Inspiracjach i trendach w branży')
-            ->action('Rozpocznij projektowanie', url('/'))
-            ->line('Jeśli nie chcesz otrzymywać naszych wiadomości, możesz się wypisać w każdej chwili.')
-            ->line('Dziękujemy za zaufanie!')
-            ->salutation('Zespół Custom Labels');
+            ->view('emails.newsletter-welcome', [
+                'unsubscribeToken' => $this->unsubscribeToken
+            ]);
     }
 
     /**
