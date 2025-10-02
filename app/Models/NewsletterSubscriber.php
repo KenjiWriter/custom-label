@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 
 class NewsletterSubscriber extends Model
 {
+    protected $connection = 'mysql';
     protected $table = 'newsletter_subscriptions';
     
     protected $fillable = [
